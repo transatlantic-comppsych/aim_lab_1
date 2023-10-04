@@ -5,6 +5,8 @@ df_test2 <- list(a = c(1,2,3), b = c(4,5,6))
 
 df_test3 <- list(df_test, df_test2)
 
+df_test4 <- unlist(df_test3)
+
 
 
 # testing
