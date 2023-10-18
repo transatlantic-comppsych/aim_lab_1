@@ -17,7 +17,7 @@ non_id_cols <- setdiff(names(CESD_data_clean), "Random_ID")
 # Convert non-ID variables to numeric
 CESD_data_clean[, non_id_cols] <- lapply(CESD_data_clean[, non_id_cols], as.numeric)
 
-#change numbers to match AUDIT scoring system
+#change numbers to match CES-D scoring system
 excluded_columns <-  c("Random_ID", "Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
                        "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
                        "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
