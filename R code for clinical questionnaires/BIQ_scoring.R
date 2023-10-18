@@ -15,7 +15,6 @@ BIQ_data <- subset(BIQ_data, BIQ_data.Response != "" & BIQ_data.Response != "END
 
 BIQ_data <- reshape(BIQ_data, idvar = "BIQ_data.Random_ID", timevar = "BIQ_data.Object.ID", direction = "wide")
 
-#change numbers to match AUDIT scoring system
 
 #BIQ_data <- BIQ_data %>%
  # rename(Object_5 = `BIQ_data.Response.object-5`, Object_18 = `BIQ_data.Response.object-18`, Object_259 = `BIQ_data.Response.object-259` )
