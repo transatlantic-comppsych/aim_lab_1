@@ -1,0 +1,199 @@
+"Event.Index","UTC.Timestamp","UTC.Date.and.Time","Local.Timestamp","Local.Timezone","Local.Date.and.Time","Experiment.ID","Experiment.Version","Tree.Node.Key","Repeat.Key","Schedule.ID","Participant.Private.ID","Participant.Starting.Group","Participant.Status","Participant.Completion.Code","Participant.External.Session.ID","Participant.Device.Type","Participant.Device","Participant.OS","Participant.Browser","Participant.Monitor.Size","Participant.Viewport.Size","Checkpoint","Room.ID","Room.Order","Task.Name","Task.Version","order.ot79","branch.g31k","branch.5gtn","Page","Page.ID","Page.Counter","Question","Response.Type","Key","Response","Tag","OptionOrder","Object.Name","Object.Number","Object.ID","Store..Score","Store..SPINScore","Random_ID"
+"1",1694198206746,"08/09/2023 18:36:46",1694201806746,1,"08/09/2023 20:36:46",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF02973"
+"2",1694198219558,"08/09/2023 18:36:59",1694201819558,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","1",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"3",1694198219559,"08/09/2023 18:36:59",1694201819559,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","2",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"4",1694198219559,"08/09/2023 18:36:59",1694201819559,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","4",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"5",1694198219559,"08/09/2023 18:36:59",1694201819559,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","5",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"6",1694198219559,"08/09/2023 18:36:59",1694201819559,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"7",1694198219560,"08/09/2023 18:36:59",1694201819560,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,8,"SUPPRF02973"
+"8",1694198219560,"08/09/2023 18:36:59",1694201819560,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"","",NA,"SPINScore","response","score","8",NA,NA,"",NA,"",NA,NA,"SUPPRF02973"
+"9",1694198219560,"08/09/2023 18:36:59",1694201819560,1,"08/09/2023 20:36:59",142855,5,"questionnaire-4h2a",NA,31597556,9342143,NA,"complete",NA,"64fb769e55ec4e2ed9c310fb","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1707x830",NA,NA,0,"Mini-SPIN",2,"ABJCIDHEGF","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF02973"
+"1",1694249436250,"09/09/2023 08:50:36",1694253036250,1,"09/09/2023 10:50:36",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF20908"
+"2",1694249451586,"09/09/2023 08:50:51",1694253051586,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","1",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"3",1694249451587,"09/09/2023 08:50:51",1694253051587,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","2",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"4",1694249451587,"09/09/2023 08:50:51",1694253051587,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"5",1694249451587,"09/09/2023 08:50:51",1694253051587,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"6",1694249451587,"09/09/2023 08:50:51",1694253051587,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","0",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"7",1694249451588,"09/09/2023 08:50:51",1694253051588,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","1",NA,NA,"Rating Scale",2,"object-2",NA,4,"SUPPRF20908"
+"8",1694249451588,"09/09/2023 08:50:51",1694253051588,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"","",NA,"SPINScore","response","score","4",NA,NA,"",NA,"",NA,NA,"SUPPRF20908"
+"9",1694249451588,"09/09/2023 08:50:51",1694253051588,1,"09/09/2023 10:50:51",142855,5,"questionnaire-4h2a",NA,31602746,9343116,NA,"complete",NA,"64fc39bc027c6a69e37600ba","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x758",NA,NA,0,"Mini-SPIN",2,"CDBEAFJGIH","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF20908"
+"1",1694256474442,"09/09/2023 10:47:54",1694260074442,1,"09/09/2023 12:47:54",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF66474"
+"2",1694256484193,"09/09/2023 10:48:04",1694260084193,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"3",1694256484193,"09/09/2023 10:48:04",1694260084193,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"4",1694256484193,"09/09/2023 10:48:04",1694260084193,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"5",1694256484193,"09/09/2023 10:48:04",1694260084193,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"6",1694256484194,"09/09/2023 10:48:04",1694260084194,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"7",1694256484194,"09/09/2023 10:48:04",1694260084194,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,9,"SUPPRF66474"
+"8",1694256484194,"09/09/2023 10:48:04",1694260084194,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"","",NA,"SPINScore","response","score","9",NA,NA,"",NA,"",NA,NA,"SUPPRF66474"
+"9",1694256484195,"09/09/2023 10:48:04",1694260084195,1,"09/09/2023 12:48:04",142855,5,"questionnaire-4h2a",NA,31604388,9343324,NA,"rejected - time limit reached",NA,"64fc55611e1e4bda5151583a","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 115.0.0.0","1440x900","1440x684",NA,NA,0,"Mini-SPIN",2,"DECFBGAHJI","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF66474"
+"1",1694424803864,"11/09/2023 09:33:23",1694428403864,1,"11/09/2023 11:33:23",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF15001"
+"2",1694424814861,"11/09/2023 09:33:34",1694428414861,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","4",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"3",1694424814862,"11/09/2023 09:33:34",1694428414862,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","5",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"4",1694424814862,"11/09/2023 09:33:34",1694428414862,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","4",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"5",1694424814862,"11/09/2023 09:33:34",1694428414862,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","5",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"6",1694424814862,"11/09/2023 09:33:34",1694428414862,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","4",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"7",1694424814863,"11/09/2023 09:33:34",1694428414863,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","5",NA,NA,"Rating Scale",2,"object-2",NA,12,"SUPPRF15001"
+"8",1694424814864,"11/09/2023 09:33:34",1694428414864,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"","",NA,"SPINScore","response","score","12",NA,NA,"",NA,"",NA,NA,"SUPPRF15001"
+"9",1694424814864,"11/09/2023 09:33:34",1694428414864,1,"11/09/2023 11:33:34",142855,5,"questionnaire-4h2a",NA,31623465,9347069,NA,"complete",NA,"64feeaf115d4d65331808a39","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x815",NA,NA,0,"Mini-SPIN",2,"GHFIEJDACB","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF15001"
+"1",1694261692576,"09/09/2023 12:14:52",1694265292576,1,"09/09/2023 14:14:52",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF16300"
+"2",1694261757422,"09/09/2023 12:15:57",1694265357422,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","2",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"3",1694261757422,"09/09/2023 12:15:57",1694265357422,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"4",1694261757423,"09/09/2023 12:15:57",1694265357423,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"5",1694261757424,"09/09/2023 12:15:57",1694265357424,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"6",1694261757424,"09/09/2023 12:15:57",1694265357424,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","2",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"7",1694261757424,"09/09/2023 12:15:57",1694265357424,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF16300"
+"8",1694261757425,"09/09/2023 12:15:57",1694265357425,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"","",NA,"SPINScore","response","score","7",NA,NA,"",NA,"",NA,NA,"SUPPRF16300"
+"9",1694261757425,"09/09/2023 12:15:57",1694265357425,1,"09/09/2023 14:15:57",142855,5,"questionnaire-4h2a",NA,31605202,9343513,NA,"complete",NA,"64fc6d952a2ccb4938c310b9","computer","Desktop or Laptop","Windows 10","Chrome 116.0.0.0","1536x864","1536x707",NA,NA,0,"Mini-SPIN",2,"FGEHDICJBA","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF16300"
+"1",1694256353001,"09/09/2023 10:45:53",1694259953001,1,"09/09/2023 12:45:53",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"","",NA,"","5","","BEGIN",NA,NA,"",NA,"",NA,NA,"SUPPRF63488"
+"2",1694256361576,"09/09/2023 10:46:01",1694259961576,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-value","2",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"3",1694256361576,"09/09/2023 10:46:01",1694259961576,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Fear of embarrassment causes me to avoid doing things or speaking to people.-quantised","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"4",1694256361576,"09/09/2023 10:46:01",1694259961576,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-value","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"5",1694256361576,"09/09/2023 10:46:01",1694259961576,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","I avoid activities in which I am the center of attention.-quantised","4",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"6",1694256361577,"09/09/2023 10:46:01",1694259961577,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-value","2",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"7",1694256361577,"09/09/2023 10:46:01",1694259961577,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"Page 1","m4k4vy",1,"Please indicate how much the following problems have bothered you during the past week. Mark only one box for each problem, and be sure to answer all items.
+
+
+<br>
+<br>","response","Being embarrassed or looking stupid are among my worst fears.-quantised","3",NA,NA,"Rating Scale",2,"object-2",NA,7,"SUPPRF63488"
+"8",1694256361578,"09/09/2023 10:46:01",1694259961578,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"","",NA,"SPINScore","response","score","7",NA,NA,"",NA,"",NA,NA,"SUPPRF63488"
+"9",1694256361578,"09/09/2023 10:46:01",1694259961578,1,"09/09/2023 12:46:01",142855,5,"questionnaire-4h2a",NA,31604348,9343364,NA,"complete",NA,"64fc592debbc7be9153252b0","computer","Desktop or Laptop","Mac OS 10.15.7","Chrome 116.0.0.0","1440x900","1440x716",NA,NA,0,"Mini-SPIN",2,"EFDGCHBIAJ","Passed AC2",NA,"","",NA,"","5","","END",NA,NA,"",NA,"",NA,NA,"SUPPRF63488"
