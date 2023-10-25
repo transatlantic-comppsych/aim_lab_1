@@ -1288,7 +1288,8 @@ print(t_test_result)
 
 \newpage <font size="3"> The following pilot had a non-randomly provided feedback, with one bigger positive feedback per participant to increase the size of positive PE to see how it would influence mood and anxiety, using the following experiment:https://app.gorilla.sc/admin/experiment/147683/design and task: pilot_fdbk_nrand_bigPE_typing_novid </font>
 
-<br> 
+<br> <br> For this study, we did not screen for social anxiety but need to see their social anxiety scores to see how many are bigger than or equal the threshold of 6.
+
 <font size="3"> It may also be interesting to look at the relationship between the correlation between anxiety and PE, with mini-SPIN score to see how the levels of social anxiety may influence this relationship </font>
 <br> <br> 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
