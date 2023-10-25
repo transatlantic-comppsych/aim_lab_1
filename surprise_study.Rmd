@@ -1884,15 +1884,98 @@ ggplot(subset_df, aes(x=Response_H, y=Response_PE)) +
 <br>
 Again, the relationship between SubjPE and mood, and PE and mood are very similar (r = 0.255 vs 0.245), which is great news if for the attention condition, IF we did not want to ask for subjective prediction.<br>
 
+\newpage Since these people were not screened for social anxiety, let's see how many of them had social anxiety scores higher than or equal to 6.
 
-
-\newpage **TODO:** The following pilot had a randomly provided feedback (between 10-100), using the following experiment:https://app.gorilla.sc/admin/experiment/147682/design and task: surprise_Prolific_random_feedback_novideo
-
-
-
-\newpage We now will run an LME (to be added):
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# library(lme4)
+df_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
 
+df_spin <- df_spin %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears." 
+  )
+
+df_spin <- df_spin %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+count <- df_spin %>%
+  summarise(count = sum(mini_SPIN_total >= 6)) %>%
+  pull(count)
+
+print(paste("These people had a mini_SPIN total score lower or equal to 6:", count))
+
+# Calculate correlation by Random_ID for anxiety
+correlations_Ax_excludedoutliers <- subset_df %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# Exclude rows with NA in Random_ID from both data frames
+df_spin <- df_spin[!is.na(df_spin$Random_ID), ]
+merged_df <- merge(correlations_Ax_excludedoutliers, df_spin, by = "Random_ID")
+
+# looking at the correltion between the correlation of subjtPE and anxiety, with mini_SPIN score
+group_correlation <- cor(merged_df$correlation, merged_df$mini_SPIN_total, use = "complete.obs")
+
+# Print the correlation
+print(group_correlation)
+
+p <- ggplot(merged_df, aes(x=correlation, y=mini_SPIN_total)) +
+  geom_point(aes(alpha = 0.5), color = "blue") +
+  geom_smooth(method = "lm", color="blue", aes()) +     
+  labs(color="Legend") +
+  theme_minimal() +
+  xlab("correlation SubjPE and Anxiety") + 
+  ylab("mini_SPIN score") +
+  theme(strip.text = element_text(size = 19),
+        panel.grid.major = element_blank(),  # Remove major grid lines
+        panel.grid.minor = element_blank())  # Remove minor grid lines
+  
+p + annotate("text", x = Inf, y = Inf, 
+             label = paste("Pearson r: ", round(group_correlation, 2)), 
+             hjust = 1, vjust = 1, size = 5, color = "purple")
 
 ```
+<br> <br>
+So for people with a negative correlation between SubjPE and anxiety: the higher the PE, the lower their anxiety which makes sense.
+Now, the negative correlation between the latter correlation and mini-SPIN means: the higher the mini_SPIN, the lower the latter correlation (so more negative), which also makes sense.
+
+
+\newpage Let's merge the mini_SPIN with the longer format dataframe with all 8 variables, so that we can fit a regression to explore how the correlation between two variables is influenced by the mini_SPIN:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df_long_mini_SPIN <- subset_df %>%
+  left_join(df_spin, by = "Random_ID")
+
+model <- lm(Response_Ax ~ Response_SubjPE * mini_SPIN_total, data = df_long_mini_SPIN)
+summary(model)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+model <- lm(Response_H ~ Response_SubjPE * mini_SPIN_total, data = df_long_mini_SPIN)
+summary(model)
+```
+
+
+
+\newpage Please ignore the below for now.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(lme4)
+# Fit a mixed effects model
+# Assuming the fixed effect is 'fixed_var', the random effect is 'random_var', and the grouping variable is 'group_var'
+# Assuming df is your data frame
+model1 <- lmer(Response_H ~ Response_SubjPE + (1 | Random_ID) + (1 | Trial.Number), data = df_long_mini_SPIN)
+summary(model1)
+predictions_H <- predict(model1)
+
+model2 <- lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID) + (1 | Trial.Number), data = df_long_mini_SPIN)
+summary(model2)
+predictions_Ax <- predict(model1)
+
+```
+\newpage **TODO:** The following pilot had a randomly provided feedback (between 10-100), using the following experiment:https://app.gorilla.sc/admin/experiment/147682/design and task: surprise_Prolific_random_feedback_novideo
