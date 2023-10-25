@@ -1962,6 +1962,52 @@ summary(model)
 ```
 
 
+\newpage I will now subset people with high social anxiety score and repeat the correlations
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+subset_df <- subset(df_long_mini_SPIN, mini_SPIN_total >= 6)
+ids_to_exclude <- c("SUPPRF67412")
+
+# Subset the data
+subset_df <- subset_df[!subset_df$Random_ID %in% ids_to_exclude, ]
+
+# remove outliers, we can see from the plots that the outlier value is bigger than 50
+subset_df <- subset_df %>%
+  group_by(Random_ID) %>%
+  filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
+
+# Calculate correlation by Random_ID for anxiety
+correlations_Ax_excludedoutliers <- subset_df %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_PE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_Ax_excludedoutliers$correlation, na.rm = TRUE)
+message_to_print <- paste("average correlation between Anxiety and PE after excluding 1 outlier:", average_correlation)
+print(message_to_print)
+
+
+ggplot(subset_df, aes(x=Response_Ax, y=Response_PE)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
+  labs(color="Legend") +
+  facet_wrap(~ Random_ID, scales = "free") +
+  theme_minimal() +
+  xlab("Anxiety") + 
+  ylab("PE: feedback - hist_m") +
+  # Add the correlation labels
+  geom_text(data=correlations_Ax_excludedoutliers, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    # Adjust the size of the facet labels
+  theme(strip.text = element_text(size = 6)) +  # you can change the size value as needed
+  scale_x_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  scale_y_continuous(breaks = seq(-80, 80, by = 20), limits = c(-80, 80))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+<br> <br>
+So after keeping people with high mini_SPIN scores, the correlation becomes -0.21 from -0.18. <br>
+
 
 \newpage Please ignore the below for now.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
