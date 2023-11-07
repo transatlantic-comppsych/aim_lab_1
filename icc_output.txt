@@ -1,0 +1,6 @@
+Call: ICC(x = reshaped_data[, c("Response_Ax_1", "Response_Ax_48")])
+
+Intraclass correlation coefficients 
+
+ Number of subjects = 43     Number of Judges =  2
+See the help file for a discussion of the other 4 McGraw and Wong estimates,
