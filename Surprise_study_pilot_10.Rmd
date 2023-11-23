@@ -165,11 +165,20 @@ df10_pred_trial_nr <- df10_pred %>%
   mutate(trial_nr = row_number()) %>%
   ungroup()
 
+# df10_long <- df10_pred_trial_nr %>%
+#   pivot_longer(cols = c(Response, m_hist), names_to = "Metric", values_to = "Value") %>%
+#   mutate(Metric = recode(Metric, 
+#                          Response = "Predictions", 
+#                          m_hist = "Histograms"))
+
 df10_long <- df10_pred_trial_nr %>%
   pivot_longer(cols = c(Response, m_hist), names_to = "Metric", values_to = "Value") %>%
-  mutate(Metric = recode(Metric, 
-                         Response = "Predictions", 
-                         m_hist = "Histograms"))
+  mutate(Metric = case_when(
+    Metric == "Response" ~ "Predictions",
+    Metric == "m_hist" ~ "Histograms",
+    TRUE ~ Metric
+  ))
+
 
 # Create the plot with facet_wrap
 ggplot(df10_long, aes(x = Trial.Number, y = Value, color = Metric, group = Metric)) +
@@ -194,15 +203,22 @@ ggplot(df10_long, aes(x = Trial.Number, y = Value, color = Metric, group = Metri
 ggplot(df10_mood, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
   geom_line() +
   theme_minimal() +
-  labs(title = "Mood and anxiety across time",
+  labs(title = "Mood and Anxiety Across Time",
        x = "Trial Number",
-       y = "mood/happiness and anxiety",
+       y = "Mood/Anxiety ratings",
        color = "") +
   facet_wrap(~ Random_ID, ncol = 6) + # Separate plot for each ID, one column layout
-  theme(strip.text = element_text(size = 6)) +  # you can change the size value as needed
+  theme(
+    strip.text = element_text(size = 6),
+    axis.text.x = element_text(size = 4),
+    axis.text.y = element_text(size = 4),
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    # panel.grid.minor = element_blank(),  # Removes minor grid lines
+    # panel.background = element_blank()   # Optional: removes panel background
+  ) +
   scale_x_continuous(breaks = seq(0, 50, by = 10), limits = c(0, 50)) +
-  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
-  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))
+  # + theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
 
 ```
 
@@ -223,7 +239,8 @@ df10 <- df10[!df10$Random_ID %in% ids_to_exclude, ]
 
 df10 <- df10 %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
-  filter(!is.na(Response))
+  dplyr::filter(!is.na(Response))
+
 
 # add the histogram values depending on file name:
 df10$m_hist <- ifelse(df10$Spreadsheet..Histogram == "h1.png", 20,
@@ -238,7 +255,7 @@ df10$m_hist <- ifelse(df10$Spreadsheet..Histogram == "h1.png", 20,
 
 # get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
 df10 <- df10 %>%
-  filter(
+  dplyr::filter(
     (Display == "Trials ") |
     (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
     (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
@@ -278,7 +295,7 @@ df10 <- df10 %>%
 
 # Binding the rows together
 df10 <- bind_rows(df10, long_df10)
-
+df10_longformat <- bind_rows(df10, long_df10)
 ```
 
 
@@ -298,6 +315,7 @@ for (i in seq_along(random_ids)) {
 plot_function <- function(df10, title) {
   p <- ggplot(df10, aes(x = Trial.Number, y = Response, color = Screen, group = Screen)) +
     geom_line() +
+    geom_smooth(method = "lm", se = TRUE, alpha = 0.7) + 
     theme_minimal() +
     labs(title = title,  # Set the title to the Random_ID
          x = "Trial Number",
@@ -347,17 +365,39 @@ for (i in seq_along(random_ids)) {
 We now look at the relationship between PE (feedback - histogram_mean) and SubjPE (feedback - prediction). The correlation between SubjPE and objective PE remain similar to previous pilots.
   
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(purrr)
+
 # looking at the relationship between PE and SubjPE
 df10_PE <- subset(df10, Screen == "PE")
 names(df10_PE)[names(df10_PE) == "Screen"] <- "Screen_PE"
 names(df10_PE)[names(df10_PE) == "Response"] <- "Response_PE"
 
-
 df10_SubjPE <- subset(df10, Screen == "SubjPE")
 names(df10_SubjPE)[names(df10_SubjPE) == "Screen"] <- "Screen_SubjPE"
 names(df10_SubjPE)[names(df10_SubjPE) == "Response"] <- "Response_SubjPE"
 
-merged_df10 <- inner_join(df10_SubjPE, df10_PE, by = c("Random_ID", "Trial.Number"))
+df10_fdbk <- subset(df10, Screen == "fdbk")
+names(df10_fdbk)[names(df10_fdbk) == "Screen"] <- "Screen_fdbk"
+names(df10_fdbk)[names(df10_fdbk) == "Response"] <- "Response_fdbk"
+
+df10_hist <- subset(df10, Screen == "m_hist")
+names(df10_hist)[names(df10_hist) == "Screen"] <- "Screen_m_hist"
+names(df10_hist)[names(df10_hist) == "Response"] <- "Response_m_hist"
+
+df10_predic <- subset(df10, Screen == "Prediction ")
+names(df10_predic)[names(df10_predic) == "Screen"] <- "Screen_pred"
+names(df10_predic)[names(df10_predic) == "Response"] <- "Response_pred"
+
+df10_cert <- subset(df10, Screen == "Certainty rating ")
+names(df10_cert)[names(df10_cert) == "Screen"] <- "Screen_certainty"
+names(df10_cert)[names(df10_cert) == "Response"] <- "Response_certainty"
+
+list_of_dfs_10 <- list(df10_PE, df10_fdbk, df10_hist, df10_predic, df10_cert, df10_SubjPE)
+
+# Using reduce with inner_join
+merged_df10 <- reduce(list_of_dfs_10, inner_join, by = c("Random_ID", "Trial.Number"))
+
+# merged_df10 <- inner_join(df10_SubjPE, df10_PE, by = c("Random_ID", "Trial.Number"))
 
 
 # Calculate correlation by Random_ID
@@ -405,14 +445,14 @@ df10_Happy <- subset(df10, Screen == "Happy")
 names(df10_Happy)[names(df10_Happy) == "Screen"] <- "Screen_H"
 names(df10_Happy)[names(df10_Happy) == "Response"] <- "Response_H"
 
-  final_df10 <- merged_df10 %>%
-  inner_join(df10_Anxious, by = c("Random_ID", "Trial.Number")) %>%
-  inner_join(df10_Happy, by = c("Random_ID", "Trial.Number"))
+final_df10 <- merged_df10 %>%
+inner_join(df10_Anxious, by = c("Random_ID", "Trial.Number")) %>%
+inner_join(df10_Happy, by = c("Random_ID", "Trial.Number"))
 
-ids_to_exclude <- c("114")
-# Subset the data
-final_df10 <- final_df10[!final_df10$Random_ID %in% ids_to_exclude, ]
-# df10_SPIN <- df10_SPIN[!df10_SPIN$Random_ID %in% ids_to_exclude, ]
+final_df10_redundant <- final_df10
+
+# subset only the columns we are interested in
+final_df10 <- final_df10[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_certainty", "Response_m_hist", "Response_pred")]
 
 # Calculate correlation by Random_ID for anxiety
 correlations <- final_df10 %>%
@@ -645,7 +685,7 @@ AIC(model2)
 
 anova(model1, model2)
 
-model3 <- lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df10)
+model3 <- lmer(Response_Ax ~ Response_SubjPE + + (1 | Random_ID), data = final_df10)
 AIC(model3)
 summary(model3)
 
@@ -668,6 +708,23 @@ confint(model1)
 icc <- subject_variance / (subject_variance + residual_variance)
 print("lmer for anxiety with just the intercept")
 print(icc)
+
+```
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# LME with both subj PE and feedback as separate terms
+model1 <- lmer(Response_Ax ~ Response_SubjPE + Response_fdbk + (1 | Random_ID), data = final_df10)
+AIC(model1)
+summary(model1)
+
+model2 <-  lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df10)
+AIC(model2)
+summary(model2)
+anova(model1, model2)
+
+model3 <- lmer(Response_Ax ~ Response_fdbk + (1 | Random_ID), data = final_df10)
+AIC(model3)
+summary(model3)
+anova(model1, model3)
 
 ```
 
@@ -729,10 +786,8 @@ cor.test(final_df10[final_df10$Trial.Number==1, ]$Response_H, final_df10[final_d
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-subset_df10 <- final_df10
-
 # Calculate correlation by Random_ID for anxiety
-correlations_Ax_excludedoutliers <- subset_df10 %>%
+correlations_Ax_excludedoutliers <- final_df10 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_Ax, Response_PE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
@@ -743,11 +798,11 @@ message_to_print <- paste("average correlation between Anxiety and PE:", average
 print(message_to_print)
 
 # Determine the range for the data if we want all plots to have the same limits, to know what limits to choose
-x_range <- range(subset_df10$Response_Ax, na.rm = TRUE)
-y_range <- range(subset_df10$Response_PE, na.rm = TRUE)
+x_range <- range(final_df10$Response_Ax, na.rm = TRUE)
+y_range <- range(final_df10$Response_PE, na.rm = TRUE)
 
 
-ggplot(subset_df10, aes(x=Response_Ax, y=Response_PE)) +
+ggplot(final_df10, aes(x=Response_Ax, y=Response_PE)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
@@ -772,7 +827,7 @@ We will repeat the same thing for the relationship between PE and mood. Same as 
   
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # Calculate correlation by Random_ID for anxiety
-correlations_H_excludedoutliers <- subset_df10 %>%
+correlations_H_excludedoutliers <- final_df10 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_H, Response_PE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
@@ -783,11 +838,11 @@ message_to_print <- paste("average correlation between happiness and objective P
 print(message_to_print)
 
 # Determine the range for the data if we want all plots to have the same limits, to know what limits to choose
-x_range <- range(subset_df10$Response_H, na.rm = TRUE)
-y_range <- range(subset_df10$Response_PE, na.rm = TRUE)
+x_range <- range(final_df10$Response_H, na.rm = TRUE)
+y_range <- range(final_df10$Response_PE, na.rm = TRUE)
 
 
-ggplot(subset_df10, aes(x=Response_H, y=Response_PE)) +
+ggplot(final_df10, aes(x=Response_H, y=Response_PE)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
@@ -834,7 +889,7 @@ count <- df10_spin %>%
 print(paste("Out of 38 people, these people had a mini_SPIN total score higher or equal to 6:", count))
 
 # Calculate correlation by Random_ID for anxiety
-correlations_Ax_excludedoutliers <- subset_df10 %>%
+correlations_Ax_excludedoutliers <- final_df10 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_Ax, Response_SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
@@ -873,28 +928,10 @@ We will now look at the relationship between feedback and anxiety (so without ta
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # looking at the relationship between feedback, anxiety and mood
-df10_fdbk <- subset(df10, Screen == "fdbk")
-names(df10_fdbk)[names(df10_PE) == "Screen"] <- "Screen_fdbk"
-names(df10_fdbk)[names(df10_PE) == "Response"] <- "Response_fdbk"
-
-df10_Anxious <- subset(df10, Screen == "Anxious")
-names(df10_Anxious)[names(df10_Anxious) == "Screen"] <- "Screen_Ax"
-names(df10_Anxious)[names(df10_Anxious) == "Response"] <- "Response_Ax"
-
-df10_Happy <- subset(df10, Screen == "Happy")
-names(df10_Happy)[names(df10_Happy) == "Screen"] <- "Screen_H"
-names(df10_Happy)[names(df10_Happy) == "Response"] <- "Response_H"
-
-df10_fdbk_Ax_H <- df10_fdbk %>%
-  inner_join(df10_Anxious,  by = c("Random_ID", "Trial.Number")) %>%
-  inner_join(df10_Happy,  by = c("Random_ID", "Trial.Number"))
-
-# merged_df10 <- inner_join(df10_SubjPE, df10_PE, by = c("Random_ID", "Trial.Number"))
-
 # Calculate correlation by Random_ID
-correlations <- df10_fdbk_Ax_H %>%
+correlations <- final_df10 %>%
   group_by(Random_ID) %>%
-  summarise(correlation = cor(Response, Response_Ax, use = "complete.obs")) %>%
+  summarise(correlation = cor(Response_fdbk, Response_Ax, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
 
 # calculate the average correlation across all individuals and print it 
@@ -902,7 +939,7 @@ average_correlation <- mean(correlations$correlation, na.rm = TRUE)
 message_to_print <- paste("average correlation between feedback and anxiety:", average_correlation)
 print(message_to_print)
 
-ggplot(df10_fdbk_Ax_H, aes(x=Response, y=Response_Ax)) +
+ggplot(final_df10, aes(x=Response_fdbk, y=Response_Ax)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
@@ -928,9 +965,9 @@ The relationship between feedback and happiness: this relationship is stronger t
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # looking at the relationship between feedback and mood
 # Calculate correlation by Random_ID
-correlations <- df10_fdbk_Ax_H %>%
+correlations <- final_df10 %>%
   group_by(Random_ID) %>%
-  summarise(correlation = cor(Response, Response_H, use = "complete.obs")) %>%
+  summarise(correlation = cor(Response_fdbk, Response_H, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
 
 # calculate the average correlation across all individuals and print it 
@@ -938,7 +975,7 @@ average_correlation <- mean(correlations$correlation, na.rm = TRUE)
 message_to_print <- paste("average correlation between feedback and happiness:", average_correlation)
 print(message_to_print)
 
-ggplot(df10_fdbk_Ax_H, aes(x=Response, y=Response_H)) +
+ggplot(final_df10, aes(x=Response_fdbk, y=Response_H)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
@@ -959,7 +996,362 @@ ggplot(df10_fdbk_Ax_H, aes(x=Response, y=Response_H)) +
 
 \newpage What would be the best next step? We had 14 people with social anxiety, maybe 1) looking these people separately, 2) looking at correlations with mini-SPIN, 3) shall we collect more data? 4) shall we collect data in people with high social anxiety (although we also don't want to use our participants for piloting considering it will be hard to recruit people for the video pilot, we may want to maybe increase the sample to 30/40, so only 15/25 more people to combine with this current pilot data?), 5) would introducing attention shift, or algorithm to produce the feedback change anything, as we do not have any effects of the PE at the moment, it seems?
 
+\newpage # LME's taking subjective PE and feedback into account
+<br>
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(car)
+model1 <- lmer(Response_Ax ~ Response_SubjPE  + (1 | Random_ID), data = final_df10)
+# AIC(model1)
+# BIC(model1)
+summary(model1)
+
+model2 <- lmer(Response_Ax ~ Response_fdbk  + (1 | Random_ID), data = final_df10)
+# AIC(model2)
+# BIC(model2)
+summary(model2)
+
+model3 <- lmer(Response_Ax ~ Response_SubjPE + Response_fdbk  + (1 | Random_ID), data = final_df10)
+# AIC(model3)
+# BIC(model3)
+summary(model3)
+
+# model1 <- lmer(Response_Ax ~ Response_SubjPE + Response_fdbk + Response_PE + Response_m_hist + (1 | Random_ID), data = final_df10)
+# AIC(model1)
+# BIC(model1)
+# 
+# 
+# model1 <- lmer(Response_Ax ~ Response_SubjPE + Response_fdbk + Response_PE + Response_m_hist + (1 | Random_ID), data = final_df10)
+# AIC(model1)
+# BIC(model1)
+# summary(model1)
+
+# vif_values <- vif(model1)
+# print(vif_values)
+# 
+# 
+# model2 <- lmer(Response_Ax ~ Response_SubjPE + Response_fdbk + Response_PE + (1 | Random_ID), data = final_df10)
+# AIC(model2)
+# summary(model2)
+# 
+# vif_values <- vif(model2)
+# print(vif_values)
+
+```
+
+
+\newpage # Anxiety plots + mini_SPIN + average ratings from Eleanor's study
+
+In the plot below we have anxiety ratings during pilots 9 (no video, more people with high social anxiety) and 10 (video re-introduced, less people with high social anxiety).\
+
+- The dots represent the average anxiety ratings  per subject with SD as vertical lines.<br />
+
+- The red and blue dots represent people who had mini-SPIN scores that were above or below threshold of 6. <br />
+ 
+- The blue dashed line is the average anxiety after the externally focused attention in Eleanor's study and the dotted lines are ± SD. The red ones are for the self-focused attention.  
+- Pilot 9 was without video where we had 21/37 subjects with high social anxiety and people had to type their answers, and pilot 10 was with the video where we had only 14/38 people with high social anxiety and people had to verbally share their answers.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(purrr)
+
+# let's create a df for pilot 9 with all relevant variables similar to final_df10
+df9_raw <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
+df9_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
+  
+df9_spin <- df9_spin %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+df9_spin <- df9_spin %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
 
 
 
+# create a new df9 that only keeps the columns we need
+df9 <- df9_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+                     "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
+# exclude this person who has not done all the trials:
+ids_to_exclude <- c("SUPPRF66080")
+# Subset the data
+df9 <- df9[!df9$Random_ID %in% ids_to_exclude, ]
 
+df9 <- df9 %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  filter(!is.na(Response))
+
+# add the histogram values depending on file name:
+df9$m_hist <- ifelse(df9$Spreadsheet..Histogram == "h1.png", 20,
+                      ifelse(df9$Spreadsheet..Histogram == "h2.png", 29,
+                             ifelse(df9$Spreadsheet..Histogram == "h3.png", 37,
+                                    ifelse(df9$Spreadsheet..Histogram == "h4.png", 46,
+                                           ifelse(df9$Spreadsheet..Histogram == "h5.png", 54,
+                                                  ifelse(df9$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df9$Spreadsheet..Histogram == "h7.png", 71,
+                                                                ifelse(df9$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
+
+
+# get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
+df9 <- df9 %>%
+  filter(
+    (Display == "Trials ") |
+      (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
+      (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
+  )
+
+# setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
+df9$Trial.Number <- ifelse(df9$Display == 'Mood ' | df9$Display == 'Anxiety ', df9$Trial.Number - 2, df9$Trial.Number)
+df9$Display <- ifelse(df9$Display == 'Mood ' | df9$Display == 'Anxiety ', "Trials", df9$Display)
+
+# renaming the feedback column to fdbk
+names(df9)[names(df9) == 'Spreadsheet..Feedback'] <- 'fdbk'
+
+# Now let's create columns for PE (fdbk-hist) and Subj_PE (fdbk_Prediction)
+
+df9$SubjPE <- ifelse(df9$Screen == "Prediction ", df9$fdbk - df9$Response, NA)
+df9$PE <- ifelse(df9$Screen == "Prediction ", df9$fdbk - df9$m_hist, NA)
+# to keep just one repetition of feedback and mean histogram per trial per subject 
+# and replace the rest with NA so that when we want to convert to long format we won't have duplicates
+df9$fdbk <- ifelse(df9$Screen == "Prediction ", df9$fdbk, NA)
+df9$m_hist <- ifelse(df9$Screen == "Prediction ", df9$m_hist, NA)
+
+
+long_df9 <- df9 %>%
+  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
+               names_to = "Screen",
+               values_to = "Response")
+
+
+# This will keep only the rows where 'Response' is not NA
+long_df9 <- long_df9[!is.na(long_df9$Response), ]
+
+
+# Selecting relevant columns from the original df9
+df9 <- df9 %>%
+  select(-c(fdbk, m_hist, PE, SubjPE))
+
+# Binding the rows together
+df9 <- bind_rows(df9, long_df9)
+
+df9$Response <- as.numeric(df9$Response)
+
+
+
+# looking at the relationship between PE and SubjPE
+df9_PE <- subset(df9, Screen == "PE")
+names(df9_PE)[names(df9_PE) == "Screen"] <- "Screen_PE"
+names(df9_PE)[names(df9_PE) == "Response"] <- "Response_PE"
+
+df9_SubjPE <- subset(df9, Screen == "SubjPE")
+names(df9_SubjPE)[names(df9_SubjPE) == "Screen"] <- "Screen_SubjPE"
+names(df9_SubjPE)[names(df9_SubjPE) == "Response"] <- "Response_SubjPE"
+
+df9_fdbk <- subset(df9, Screen == "fdbk")
+names(df9_fdbk)[names(df9_fdbk) == "Screen"] <- "Screen_fdbk"
+names(df9_fdbk)[names(df9_fdbk) == "Response"] <- "Response_fdbk"
+
+df9_hist <- subset(df9, Screen == "m_hist")
+names(df9_hist)[names(df9_hist) == "Screen"] <- "Screen_m_hist"
+names(df9_hist)[names(df9_hist) == "Response"] <- "Response_m_hist"
+
+df9_predic <- subset(df9, Screen == "Prediction ")
+names(df9_predic)[names(df9_predic) == "Screen"] <- "Screen_pred"
+names(df9_predic)[names(df9_predic) == "Response"] <- "Response_pred"
+
+df9_cert <- subset(df9, Screen == "Certainty rating ")
+names(df9_cert)[names(df9_cert) == "Screen"] <- "Screen_certainty"
+names(df9_cert)[names(df9_cert) == "Response"] <- "Response_certainty"
+
+list_of_dfs_9 <- list(df9_PE, df9_fdbk, df9_hist, df9_predic, df9_cert, df9_SubjPE)
+
+# Using reduce with inner_join
+merged_df9 <- reduce(list_of_dfs_9, inner_join, by = c("Random_ID", "Trial.Number"))
+
+df9_Anxious <- subset(df9, Screen == "Anxious")
+names(df9_Anxious)[names(df9_Anxious) == "Screen"] <- "Screen_Ax"
+names(df9_Anxious)[names(df9_Anxious) == "Response"] <- "Response_Ax"
+
+df9_Happy <- subset(df9, Screen == "Happy")
+# df9_fdbk <- subset(df9, Screen == "Prediction")
+names(df9_Happy)[names(df9_Happy) == "Screen"] <- "Screen_H"
+names(df9_Happy)[names(df9_Happy) == "Response"] <- "Response_H"
+
+final_df9 <- merged_df9 %>%
+  inner_join(df9_Anxious, by = c("Random_ID", "Trial.Number")) %>%
+  inner_join(df9_Happy, by = c("Random_ID", "Trial.Number"))
+
+
+# subset only the columns we are interested in
+final_df9 <- final_df9[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_certainty", "Response_m_hist", "Response_pred")]
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# look at a plot with one point as average point per subject and around the point the SE,
+# add Eleanor's WITH average +- SE , and WITHOUT +- SE
+
+# Let's first merge mini_spin total scores, with final_df10 where we have the rest of the data
+df10_all <- final_df10 %>%
+  left_join(df10_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+df10_all$Pilot_Number <- 10
+
+
+df9_all <- final_df9 %>%
+  left_join(df9_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+df9_all$Pilot_Number <- 9
+
+dfs_9_10 <-  rbind(df9_all, df10_all)
+
+dfs_9_10$Social_Anxiety <- ifelse(dfs_9_10$mini_SPIN_total >= 6, "high", "low")
+
+write.csv(dfs_9_10, "pilots_9_10_variables.csv", row.names = FALSE)
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# reading Eleanor's data to get the mean and SD of anxiety ratings in WITH (self-focused) and WITHOUT (externally focused) conditions
+
+
+dfs_9_10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/pilots_9_10_variables.csv")
+df_Eleanor <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/Aim1.Database Stage 2_11.2019.csv")
+
+# calculate mean and sd for the WITH condition
+mean_value_WITH <- mean(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)
+sd_value_WITH <- sd(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)
+
+# calculate mean and sd for the WITHOUT condition
+mean_value_WITHOUT <- mean(df_Eleanor$Anxiety_WithOUT_Study2, na.rm = TRUE)
+sd_value_WITHOUT <- sd(df_Eleanor$Anxiety_WithOUT_Study2, na.rm = TRUE)
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+
+summarized_dfs_9_10 <- dfs_9_10 %>%
+  group_by(Pilot_Number, Social_Anxiety, Random_ID) %>%
+  summarize(
+    Average_Response = mean(Response_Ax, na.rm = TRUE),
+    SD_Response = sd(Response_Ax, na.rm = TRUE),
+    .groups = "drop" # This drops the grouping structure after summarization
+  )
+
+# set.seed(123)  # for reproducibility
+# summarized_dfs_9_10$Pilot_Number_Jittered <- as.numeric(as.character(summarized_dfs_9_10$Pilot_Number)) + runif(nrow(summarized_dfs_9_10), -0.1, 0.1)
+# summarized_dfs_9_10$Pilot_Number <- as.factor(summarized_dfs_9_10$Pilot_Number)
+
+summarized_dfs_9_10$jitter <- runif(nrow(summarized_dfs_9_10), min = 1, max = 10)
+
+summarized_dfs_9_10$Pilot_Number[summarized_dfs_9_10$Pilot_Number == 9] <- "Pilot 9"
+summarized_dfs_9_10$Pilot_Number[summarized_dfs_9_10$Pilot_Number == 10] <- "Pilot 10"
+
+
+  p <- ggplot(summarized_dfs_9_10, aes(x = jitter, y = Average_Response, color = Social_Anxiety)) +
+  # geom_point() +
+  # geom_jitter(width = 0.2, height = 0) +
+  # geom_errorbar(aes(ymin = Average_Response - SD_Response, ymax = Average_Response + SD_Response), width = 0.2) +
+  geom_pointrange(aes(ymin= (Average_Response - SD_Response), ymax=(Average_Response + SD_Response)), fatten = 6,
+                  position = position_dodge(width = .5))+
+  labs(y = "Average Anxiety Ratings", x = "Pilot Number", color = "Social Anxiety") +
+  facet_wrap(~ Pilot_Number, scales = "free") +
+  theme(
+    strip.text.x = element_text(size = 14, face = "bold"),  # For horizontal facets
+    strip.text.y = element_text(size = 14, face = "bold")   # For vertical facets
+  ) + 
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  xlim(c(0, 5)) + 
+  scale_x_continuous(breaks = seq(0, 10, by = 10), limits = c(0, 10))+
+  theme_minimal()+
+  geom_hline(yintercept = mean_value_WITH, color = "red", linetype = "dashed") +
+  geom_hline(yintercept = mean_value_WITH + sd_value_WITH, color = "red", linetype = "dotted") +
+  geom_hline(yintercept = mean_value_WITH - sd_value_WITH, color = "red", linetype = "dotted") +
+  geom_hline(yintercept = mean_value_WITHOUT, color = "blue", linetype = "dashed") +
+  geom_hline(yintercept = mean_value_WITHOUT + sd_value_WITHOUT, color = "blue", linetype = "dotted") +
+  geom_hline(yintercept = mean_value_WITHOUT - sd_value_WITHOUT, color = "blue", linetype = "dotted")+
+  theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank()) +
+    scale_color_manual(values = c("Red", "Blue"))
+  
+  
+print(p)
+
+  
+
+```
+
+\newpage # Anxiety and Mood over time within subjects + regression line
+
+I will now repeat the same plot we had within subjects and fit a regression line for mood/anxiety ratings\
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+# create a new df10 that only keeps the columns we need
+list_of_df_si_AxHs <- list()
+
+df_si_AxH <- df10_longformat %>%
+  dplyr::filter(Screen == "Happy" | Screen == "Anxious")
+
+for (i in seq_along(random_ids)) {
+  x <- random_ids[i]  # Get the current value from random_ids
+  df10_AH <- subset(df_si_AxH, Random_ID == x)  # Create the subset
+  list_of_df_si_AxHs[[paste0("df10_s", i)]] <- df10_AH  # Add the subset to list_of_df10s
+}
+
+
+plot_function <- function(df_si_AxH, title) {
+  p <- ggplot(df_si_AxH, aes(x = Trial.Number, y = Response, color = Screen, group = Screen)) +
+    geom_line() +
+    geom_smooth(method = "lm", se = TRUE, alpha = 0.7) + 
+    theme_minimal() +
+    labs(title = title,  # Set the title to the Random_ID
+         x = "Trial Number",
+         y = "Mood/Anxiety Ratings",
+         color = "") +
+    facet_wrap(~ Screen, ncol = 2) +
+    geom_hline(yintercept = 0)
+  
+  return(p)
+}
+
+# Use Map or mapply to apply the plot_function to each data frame and title in the list
+list_of_plots <- Map(plot_function, list_of_df_si_AxHs, random_ids)
+
+
+for (i in seq_along(list_of_plots)) {
+  print(list_of_plots[[i]])
+}
+```
+
+\newpage # Anxiety and Mood over time- group plot<br>
+I will now repeat the same plot but for all subjects
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df_si_AxH, aes(x = Trial.Number, y = Response, color = Screen, group = Screen)) +
+    # geom_line() +
+    geom_smooth(method = "lm", se = TRUE, alpha = 0.7) + 
+    theme_minimal() +
+    labs(title = "",  
+         x = "Trial Number",
+         y = "Mood/Anxiety Ratings",
+         color = "") +
+    # facet_wrap(~ Screen, ncol = 2) +
+    geom_hline(yintercept = 0)
+```

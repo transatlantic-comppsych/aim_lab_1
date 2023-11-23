@@ -136,11 +136,20 @@ df9_pred_trial_nr <- df9_pred %>%
   mutate(trial_nr = row_number()) %>%
   ungroup()
 
+# df9_long <- df9_pred_trial_nr %>%
+#   pivot_longer(cols = c(Response, m_hist), names_to = "Metric", values_to = "Value") %>%
+#   mutate(Metric = recode(Metric, 
+#                          Response = "Predictions", 
+#                          m_hist = "Histograms"))
+
 df9_long <- df9_pred_trial_nr %>%
   pivot_longer(cols = c(Response, m_hist), names_to = "Metric", values_to = "Value") %>%
-  mutate(Metric = recode(Metric, 
-                         Response = "Predictions", 
-                         m_hist = "Histograms"))
+  mutate(Metric = case_when(
+    Metric == "Response" ~ "Predictions",
+    Metric == "m_hist" ~ "Histograms",
+    TRUE ~ Metric
+  ))
+
 
 # Create the plot with facet_wrap
 ggplot(df9_long, aes(x = Trial.Number, y = Value, color = Metric, group = Metric)) +
