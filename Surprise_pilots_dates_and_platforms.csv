@@ -1,0 +1,18 @@
+tasks,start_dates,duration,platforms ,participants,task_description 
+AMT1,2023-09-08,10,Amazon MTurk ,4,Pilot of surprise task with participant video
+AMT2,2023-09-11,10,Amazon MTurk ,3,"Pilot of surprise task with participant video, no picture"
+AMT3,2023-09-12,10,Amazon MTurk ,4,"Pilot of surprise task with participant audio, no video, no picture"
+AMT4,2023-09-13,10,Amazon MTurk ,3,"Pilot of surprise task with participant video, no picture, shorter questionnaires "
+AMT5,2023-09-25,10,Amazon MTurk ,109,"Pilot of surprise task with random feedback, typed responses, no video, no audio"
+AMT6,2023-09-27,10,Amazon MTurk ,112,"Pilot of surprise task with non-random feedback, typed responses, no video, no audio"
+PRF1,2023-08-14,10,Prolific ,47,Participants ranked feedback statements 
+PRF2,2023-09-09,10,Prolific ,41,"Pilot of surprise task with participant video, no picture"
+PRF3,2023-09-13,10,Prolific ,1,"Pilot of surprise task with participant audio, no video, no picture"
+PRF4,2023-10-10,10,Prolific ,20,"Pilot of surprise task with non-random feedback, typed responses, no video, no audio"
+PRF5,2023-10-17,10,Prolific ,16,"Pilot of surprise task with random feedback, typed responses, no video, no audio"
+PRF6 ,2023-10-18,10,Prolific ,36,"Pilot of surprise task with non-random feedback (bigger PE), typed responses, no video, no audio"
+PRF7,2023-10-27,10,Prolific ,34,"Pilot of surprise task with non-random feedback (even bigger PE), typed responses, no video, no audio"
+PRF8,2023-11-06,10,Prolific ,37,"Pilot of surprise task with non-random feedback (bigger PE), typed responses, no video, no audio (incorporated YPAG suggestions) "
+PRF9,2023-11-10,10,Prolific ,39,"Pilot of surprise task with non-random feedback (bigger PE), with pariticpant video (incorporated YPAG suggestions) "
+TM1,2023-07-10,10,Testable Minds ,13,Participants rated the valence of judge faces
+TM2 ,2023-08-01,10,Testable Minds ,14,Participants rated the valence of judge faces and ranked feedback statements 
