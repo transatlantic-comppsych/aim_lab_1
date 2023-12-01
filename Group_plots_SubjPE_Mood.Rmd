@@ -1,0 +1,412 @@
+---
+title: "Group_plots_SubjPE_Mood"
+author: "Marjan Biria"
+date: "2023-11-27"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+```
+
+\newpage
+# Figure description
+The figure below shows the relationship between subjective prediction error (feedback - prediction) and the average histogram values. Each subplot represents one pilot study. I am not plotting the MTurk data here due to the very low quality. \
+
+Pilot 6 (n = ; socially anxious): feedback + text/no video (Prolific)\
+Pilot 7 (n = ; socially anxious): bigger feedback (1/judge) + text/no video (Prolific)\
+Pilot 8 (n = ; general population): max feedback (1/judge) + text/no video (Prolific)\
+Pilot 9 (n = ; general population): bigger feedback (1/judge) + text/no video (Prolific)\
+Pilot 10 (n = ; general population): feedback + video + incorporating feedback from YPAG (Prolific)\
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Let's read all these pilot data, add a column about their pilot number
+
+df6 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_nrand_typing_novid_v3_task_main.csv")  
+df7 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_task_main.csv")
+df8 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_task_main.csv")
+df9 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
+df10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise//SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
+
+# Let's add a column that we may want to use as their pilot description
+df6$pilot_nr <- "Pilot 6"
+df6$pilot_details <- "Pilot 6: feedback + text"
+
+df7$pilot_nr <- "Pilot 7"
+df7$pilot_details <- "Pilot 7: bigger feedback + text"
+
+df8$pilot_nr <- "Pilot 8"
+df8$pilot_details <- "Pilot 8: max feedback + text"
+
+df9$pilot_nr <- "Pilot 9"
+df9$pilot_details <- "Pilot 9: bigger feedback + text"
+
+df10$pilot_nr <- "Pilot 10"
+df10$pilot_details <- "Pilot 10: bigger feedback + video"
+
+# Let's select the columns we want, because some pilots have some additional columns we may not need so we need to first make sure we have the same headers
+# before bindings the df's
+
+df6 <- df6[, c("Event.Index", "Trial.Number", "Random_ID", "pilot_details", "pilot_nr", "Spreadsheet..Feedback", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type" )]
+
+df7 <- df7[, c("Event.Index", "Trial.Number", "Random_ID", "pilot_details", "pilot_nr", "Spreadsheet..Feedback", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type" )]
+
+df8 <- df8[, c("Event.Index", "Trial.Number", "Random_ID", "pilot_details", "pilot_nr", "Spreadsheet..Feedback", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type" )]
+
+df9 <- df9[, c("Event.Index", "Trial.Number", "Random_ID", "pilot_details", "pilot_nr", "Spreadsheet..Feedback", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type" )]
+
+df10 <- df10[, c("Event.Index", "Trial.Number", "Random_ID", "pilot_details", "pilot_nr", "Spreadsheet..Feedback", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type" )]
+
+
+# Let's concatenate them, so that we can use the pilot_nr column in a facet_wrap
+all_pilots <- rbind(df6, df7, df8, df9, df10)
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Let's add the histogram mean values in a column
+
+# defining histogram means
+all_pilots$m_hist <- ifelse(all_pilots$Spreadsheet..Histogram == "h1.png", 20,
+                       ifelse(all_pilots$Spreadsheet..Histogram == "h2.png", 29,
+                              ifelse(all_pilots$Spreadsheet..Histogram == "h3.png", 37,
+                                     ifelse(all_pilots$Spreadsheet..Histogram == "h4.png", 46,
+                                            ifelse(all_pilots$Spreadsheet..Histogram == "h5.png", 54,
+                                                   ifelse(all_pilots$Spreadsheet..Histogram == "h6.png", 63,
+                                                          ifelse(all_pilots$Spreadsheet..Histogram == "h7.png", 71,
+                                                                 ifelse(all_pilots$Spreadsheet..Histogram == "h8.png", 80, NA))))))))
+
+
+# get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
+all_pilots <- all_pilots %>%
+  dplyr::filter(
+    (Display == "Trials ") |
+      (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
+      (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
+  )
+
+# setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
+all_pilots$Trial.Number <- ifelse(all_pilots$Display == 'Mood ' | all_pilots$Display == 'Anxiety ', all_pilots$Trial.Number - 2, all_pilots$Trial.Number)
+all_pilots$Display <- ifelse(all_pilots$Display == 'Mood ' | all_pilots$Display == 'Anxiety ', "Trials", all_pilots$Display)
+
+# renaming the feedback column to fdbk
+names(all_pilots)[names(all_pilots) == 'Spreadsheet..Feedback'] <- 'fdbk'
+
+# Now let's create columns for PE (fdbk-hist) and Subj_PE (fdbk_Prediction)
+
+all_pilots <- all_pilots %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  dplyr::filter(!is.na(Response))
+
+
+all_pilots$SubjPE <- ifelse(all_pilots$Screen == "Prediction ", all_pilots$fdbk - all_pilots$Response, NA)
+all_pilots$PE <- ifelse(all_pilots$Screen == "Prediction ", all_pilots$fdbk - all_pilots$m_hist, NA)
+# to keep just one repetition of feedback and mean histogram per trial per subject 
+# and replace the rest with NA so that when we want to convert to long format we won't have duplicates
+all_pilots$fdbk <- ifelse(all_pilots$Screen == "Prediction ", all_pilots$fdbk, NA)
+all_pilots$m_hist <- ifelse(all_pilots$Screen == "Prediction ", all_pilots$m_hist, NA)
+
+
+long_all_pilots <- all_pilots %>%
+  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
+               names_to = "Screen",
+               values_to = "Response")
+
+
+# This will keep only the rows where 'Response' is not NA
+long_all_pilots <- long_all_pilots[!is.na(long_all_pilots$Response), ]
+
+
+# Selecting relevant columns from the original all_pilots
+all_pilots <- all_pilots %>%
+  dplyr::select(-c(fdbk, m_hist, PE, SubjPE))
+
+# Binding the rows together
+all_pilots <- bind_rows(all_pilots, long_all_pilots)
+
+all_pilots$Response <- as.numeric(all_pilots$Response)
+
+
+# looking at the relationship between PE and SubjPE
+all_pilots_PE <- subset(all_pilots, Screen == "PE")
+names(all_pilots_PE)[names(all_pilots_PE) == "Screen"] <- "Screen_PE"
+names(all_pilots_PE)[names(all_pilots_PE) == "Response"] <- "PE"
+
+all_pilots_SubjPE <- subset(all_pilots, Screen == "SubjPE")
+names(all_pilots_SubjPE)[names(all_pilots_SubjPE) == "Screen"] <- "Screen_SubjPE"
+names(all_pilots_SubjPE)[names(all_pilots_SubjPE) == "Response"] <- "SubjPE"
+
+all_pilots_fdbk <- subset(all_pilots, Screen == "fdbk")
+names(all_pilots_fdbk)[names(all_pilots_fdbk) == "Screen"] <- "Screen_fdbk"
+names(all_pilots_fdbk)[names(all_pilots_fdbk) == "Response"] <- "fdbk"
+
+all_pilots_hist <- subset(all_pilots, Screen == "m_hist")
+names(all_pilots_hist)[names(all_pilots_hist) == "Screen"] <- "Screen_m_hist"
+names(all_pilots_hist)[names(all_pilots_hist) == "Response"] <- "m_hist"
+
+all_pilots_predic <- subset(all_pilots, Screen == "Prediction ")
+names(all_pilots_predic)[names(all_pilots_predic) == "Screen"] <- "Screen_pred"
+names(all_pilots_predic)[names(all_pilots_predic) == "Response"] <- "Prediction"
+
+all_pilots_cert <- subset(all_pilots, Screen == "Certainty rating ")
+names(all_pilots_cert)[names(all_pilots_cert) == "Screen"] <- "Screen_certainty"
+names(all_pilots_cert)[names(all_pilots_cert) == "Response"] <- "Certainty_Rating"
+
+all_pilots_Anxious <- subset(all_pilots, Screen == "Anxious")
+names(all_pilots_Anxious)[names(all_pilots_Anxious) == "Screen"] <- "Screen_Ax"
+names(all_pilots_Anxious)[names(all_pilots_Anxious) == "Response"] <- "Anxiety"
+
+all_pilots_Happy <- subset(all_pilots, Screen == "Happy")
+names(all_pilots_Happy)[names(all_pilots_Happy) == "Screen"] <- "Screen_H"
+names(all_pilots_Happy)[names(all_pilots_Happy) == "Response"] <- "Mood"
+
+list_of_all_dfs <- list(all_pilots_PE, all_pilots_fdbk, all_pilots_hist, all_pilots_predic, all_pilots_cert, all_pilots_SubjPE, all_pilots_Anxious, all_pilots_Happy)
+
+# Using reduce with inner_join
+all_pilots_wide_8var <- reduce(list_of_all_dfs, inner_join, by = c("Random_ID", "Trial.Number"))
+
+
+# subset only the columns we are interested in
+all_pilots_wide_8var <- all_pilots_wide_8var[c("Trial.Number", "Random_ID", "Mood", "Anxiety", "fdbk", "SubjPE", "PE", "Certainty_Rating", "m_hist", "Prediction", "pilot_nr.x.x.x", "pilot_details.x.x.x")]
+
+names(all_pilots_wide_8var)[names(all_pilots_wide_8var) == "pilot_details.x.x.x"] <- "pilot_details"
+names(all_pilots_wide_8var)[names(all_pilots_wide_8var) == "pilot_nr.x.x.x"] <- "pilot_nr"
+
+
+write.csv(all_pilots_wide_8var, file = "all_pilots_wide_8var.csv", row.names = FALSE)
+```
+
+
+
+\newpage For Argyris:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# standardise before model fitting?
+all_pilots_wide_8var$SubjPE <- scale(all_pilots_wide_8var$SubjPE)
+
+
+model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = all_pilots_wide_8var, control=lmerControl(optimizer="bobyqa"))                        
+# optCtrl=list(maxfun=2e5)
+
+coef_fixed <- fixef(model2)
+intercept <- coef_fixed[1]
+slope <- coef_fixed[2]
+
+# Calculate correlations for each subject
+subject_correlations <- all_pilots_wide_8var %>%
+  group_by(Random_ID) %>%
+  summarize(correlation = cor(Mood, SubjPE, use = "complete.obs")) %>%
+  na.omit()  # Remove NA values
+
+average_correlation <- mean(subject_correlations$correlation, na.rm = TRUE)
+# ###############################################################################
+#       how can we standardise the intercept and slope before plotting?        #           
+# standardize_parameters(model2, method = "pseudo", ci_method = "satterthwaite")
+
+
+ggplot(all_pilots_wide_8var, aes(x=Mood, y=SubjPE)) +
+  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+  geom_abline(intercept = intercept, slope = slope, color="red", linetype="dashed") +
+  xlab("Mood") + 
+  ylab("SubjPE: feedback - prediction") +
+  theme_minimal() +
+  # scale_x_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  scale_y_continuous(breaks = seq(-100, 100, by = 20), limits = c(-100, 100)) +
+  theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+
+```
+
+
+
+
+
+\newpage Simpson Paradox: 
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+
+all_pilots_wide_8var$pilot_nr <- factor(all_pilots_wide_8var$pilot_nr, levels = c("Pilot 6", "Pilot 7", "Pilot 8","Pilot 9", "Pilot 10"))
+all_pilots_wide_8var$pilot_details <- factor(all_pilots_wide_8var$pilot_details, levels = c("Pilot 6: feedback + text", "Pilot 7: bigger feedback + text", "Pilot 8: max feedback + text","Pilot 9: bigger feedback + text", "Pilot 10: bigger feedback + video"))
+
+
+model1 <- lme4::lmer(Mood ~ SubjPE + (1 | Random_ID) , data = all_pilots_wide_8var)
+AIC(model1)
+summary(model1)
+
+# better than model 3, use this for the moment, also more parsimonious
+model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID) , data = all_pilots_wide_8var)
+AIC(model2)
+summary(model2)
+
+# standardize_parameters scales the model's coefficients (fixed effects) relative to the variability in our data, making them more interpretable and comparable across different people
+standardize_parameters(model2, method = "pseudo", ci_method = "satterthwaite")
+
+anova(model1, model2)
+
+indiv_slopes <- nlme::ranef(model2)
+indiv_slopes_df <- indiv_slopes$Random_ID
+# df_rane <- data.frame(nlme::ranef(model2))
+
+library(lattice)
+dotplot(nlme::ranef(model2))
+mean(indiv_slopes_df$SubjPE)
+
+# take into account that subjects have been from possibly different samples/different experiments
+# so taking Random_ID and pilot_nr as nested effects
+model3 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID/pilot_nr) , data = all_pilots_wide_8var)
+AIC(model3)
+summary(model3)
+
+model2 <- lme4::lmer(Mood ~ SubjPE +  (SubjPE | Random_ID), data = all_pilots_wide_8var) #(1 | pilot_nr) +
+standardize_parameters(model2, method = "pseudo", ci_method = "satterthwaite")
+
+model <- lme4::lmer(Mood ~ SubjPE +  (1 | Random_ID), data = all_pilots_wide_8var) #(1 | pilot_nr) +
+
+# calculating correlations within subjects, averaged per pilot
+correlations <- all_pilots_wide_8var %>%
+  group_by(Random_ID) %>%
+  summarize(correlation = cor(SubjPE, Mood, use = "complete.obs")) %>%
+  na.omit()  # Remove NA values that might result from insufficient data per group
+
+average_correlations <- all_pilots_wide_8var %>%
+  select(Random_ID, pilot_details) %>%
+  distinct() %>%
+  inner_join(correlations, by = "Random_ID") %>%
+  group_by(pilot_details) %>%
+  summarize(average_correlation = mean(correlation))
+
+# average_correlations <- average_correlations %>%
+#   mutate(label = sprintf("%.2f", average_correlation))  # Formats the correlation value to a string with 2 decimal places
+
+# paste(nlme::ranef(model2)), replace with the whole LME model
+average_correlations <- average_correlations %>%
+  mutate(label = paste("r =", sprintf("%.2f", average_correlation)))  # Adds "r =" before the correlation value
+
+# average_correlations <- average_correlations %>%
+#   mutate(label = paste(nlme::ranef(model2)))  # to replace average correlation with the LME output
+
+
+# model2 was the best model, so we want to use it to overlay on the plot:
+lme_model <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = all_pilots_wide_8var)
+all_pilots_wide_8var$Mood_Predicted <- predict(lme_model, newdata = all_pilots_wide_8var, re.form = NULL)
+summary_df <- all_pilots_wide_8var %>%
+  group_by(SubjPE) %>%
+  summarize(Mean_Mood_Predicted = mean(Mood_Predicted))
+
+
+ggplot(all_pilots_wide_8var, aes(x=Mood, y=SubjPE)) +
+  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+  geom_line(data = summary_df, aes(x = Mean_Mood_Predicted, y = SubjPE), color = "red", size = 0.4) +
+  theme_minimal() +
+  xlab("Mood") + 
+  ylab("SubjPE: feedback - prediction") +
+  # Add the correlation labels
+  # geom_text(data=average_correlations, aes(x=Inf, y=Inf, label=label, group=pilot_details), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+  geom_text(data = average_correlations, aes(x = Inf, y = Inf, label = label, group = pilot_details), hjust = 2.1, vjust = 2.7, size = 2.7,    
+  fontface = "bold", inherit.aes = FALSE) +
+     # Adjust the size of the facet labels
+  theme(strip.text = element_text(size = 9)) +  # you can change the size value as needed
+  scale_x_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  scale_y_continuous(breaks = seq(-40, 40, by = 20), limits = c(-40, 40))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+  
+
+
+# our best model
+model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = all_pilots_wide_8var)
+
+
+df6_spin <- read.csv("/Users/marjan/Documents/GitHub/aim_lab_1/SUP_PRF_pilot_fdbk_nrand_typing_novid/SUP_PRF_pilot_fdbk_nrand_typing_novid_v3/SUP_PRF_pilot_fdbk_nrand_typing_novid_v3_mini_spin.csv")  
+
+df7_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   
+
+df8_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_mini_spin.csv")
+
+df9_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
+
+df10_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_mini_spin.csv")
+
+all_pilots_wide_8var <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_wide_8var.csv")
+
+
+# Let's merge these, and then select Random_ID and the total scores
+all_spins <- rbind(df6_spin, df7_spin, df8_spin, df9_spin, df10_spin)
+
+
+all_spins <- all_spins %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+all_spins <- all_spins %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+
+all_pilots_wide_8var <- merge(correlations_Ax_excludedoutliers, df7_spin, by = "Random_ID")
+
+all_pilots_with_mini_spin <- merge(all_pilots_wide_8var, all_spins[, c("Random_ID", "mini_SPIN_total")], by = "Random_ID", all.x = TRUE)
+
+all_pilots_with_mini_spin$Social_Anxiety <- ifelse(all_pilots_with_mini_spin$mini_SPIN_total >= 6, "high", "low")
+
+
+write.csv(all_pilots_with_mini_spin, file = "all_pilots_with_mini_spin.csv", row.names = FALSE)
+
+
+correlations_per_subject <- all_pilots_with_mini_spin %>%
+  group_by(Random_ID) %>%
+  summarize(correlation = cor(Mood, SubjPE, use = "complete.obs"))
+
+average_correlations <- all_pilots_with_mini_spin %>%
+  left_join(correlations_per_subject, by = "Random_ID") %>%
+  group_by(Social_Anxiety) %>%
+  summarize(average_correlation = mean(correlation, na.rm = TRUE))
+
+average_low <- average_correlations$average_correlation[average_correlations$Social_Anxiety == "low"]
+average_high <- average_correlations$average_correlation[average_correlations$Social_Anxiety == "high"]
+
+
+ggplot(all_pilots_with_mini_spin, aes(x = Mood, y = SubjPE, color = Social_Anxiety)) +
+  geom_point(aes(color= Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="yellow") +     
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Happiness/Mood") + 
+  ylab("SubjPE: feedback - prediction") +
+    # facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 6))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+     # Adjust the size of the facet labels
+  # Add the correlation labels
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank()) +
+    scale_color_manual(values = c("Red", "Blue"))
+
+
+
+```
+
+
+
+
+

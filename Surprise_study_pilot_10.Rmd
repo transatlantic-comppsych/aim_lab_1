@@ -10,7 +10,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(root.dir = "/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise", echo = TRUE)
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
 ```
 
 
@@ -40,7 +40,9 @@ video. The task can be found here: https://app.gorilla.sc/admin/task/698788/edit
 There were three people that ignored the histogram values and always chose similar values for prediction: "SUBPRF34408", "SUBPRF70880", "SUBPRF89542". I will do the analysis with and without them to see how they influenced the group correlations with anxiety and mood.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
+# df10 <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
+df10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise//SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
+
 df10_raw <- df10
 ```
 
@@ -279,7 +281,7 @@ df10$m_hist <- ifelse(df10$Screen == "Prediction ", df10$m_hist, NA)
 
 
 long_df10 <- df10 %>%
-  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
+  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
   pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
                names_to = "Screen",
                values_to = "Response")
@@ -291,7 +293,7 @@ long_df10 <- long_df10[!is.na(long_df10$Response), ]
   
 # Selecting relevant columns from the original df10
 df10 <- df10 %>%
-  select(-c(fdbk, m_hist, PE, SubjPE))
+  dplyr::select(-c(fdbk, m_hist, PE, SubjPE))
 
 # Binding the rows together
 df10 <- bind_rows(df10, long_df10)
@@ -539,6 +541,8 @@ average_correlation <- mean(correlations_H_SubPE$correlation, na.rm = TRUE)
 message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
 print(message_to_print)
 
+
+
 ggplot(final_df10, aes(x=Response_H, y=Response_SubjPE)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
@@ -555,6 +559,38 @@ ggplot(final_df10, aes(x=Response_H, y=Response_SubjPE)) +
   scale_y_continuous(breaks = seq(-80, 80, by = 20), limits = c(-80, 80))+
   theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
 ```
+
+```{r}
+ggplot(final_df10, aes(x=Response_H, y=Response_SubjPE)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue") +     
+  labs(color="Legend") +
+  # facet_wrap(~ Random_ID, scales = "free") +
+  theme_minimal() +
+  xlab("Mood") + 
+  ylab("SubjPE: feedback - prediction") +
+  # Add the correlation labels
+  # geom_text(data=correlations_H_SubPE, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+     # Adjust the size of the facet labels
+  theme(strip.text = element_text(size = 6)) +  # you can change the size value as needed
+  scale_x_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  scale_y_continuous(breaks = seq(-80, 80, by = 20), limits = c(-80, 80))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+```
+```{r}
+correlations_H_SubPE <- final_df10 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_H, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_H_SubPE$correlation, na.rm = TRUE)
+message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
+print(message_to_print)
+
+```
+
+
 \newpage I will remove subjects "SUPPRF34408" and "SUPPRF53463" who again rated 0 or 100. Let's look at the same relationship for mood and subjPE without these people. The correlation increases to 0.21 from 0.18.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -662,7 +698,7 @@ library(lme4)
 library(psych)
 
 # change name to model null (same for all others)
-model <- lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df10)
+model <- lme4::lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df10)
 # Extract variance components
 var_components <- VarCorr(model)
 subject_variance <- as.numeric(var_components[1])
@@ -730,7 +766,7 @@ anova(model1, model3)
 
 \newpage The ICC outcome for mood: <br> The ICC is moderate according to guidelines by Koo and Li (2016). <br>
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model <- lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df10)
+model <- lme4::lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df10)
 
 # Extract variance components
 var_components <- VarCorr(model)
@@ -745,11 +781,21 @@ print(icc)
 confint(model)
 ```
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model0 <- lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df10)
+model0 <- lme4::lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df10)
 AIC(model0)
 
-model1 <- lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df10)
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df10)
 AIC(model1)
+summary(model1)
+
+library(parameters)
+standardize_parameters(model1, method = "pseudo", ci_method = "satterthwaite")
+
+
+
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df10)
+AIC(model2)
+summary(model2)
 
 anova(model0, model1)
 
@@ -761,6 +807,8 @@ AIC(model_crossrandom)
 # TO DO:
 # model_crossrandom <- lmer(Response_H ~ Response_SubjPE + (1 | Random_ID) + (1 | pics), data = final_df10) #add image names here
 # AIC(model_crossrandom)
+
+
 
 ```
   
@@ -868,7 +916,7 @@ Since these people were not screened for social anxiety, let's see how many of t
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df10_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_mini_spin.csv")
+df10_spin <- read.csv("~/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_mini_spin.csv")
   
 df10_spin <- df10_spin %>%
   rename(
@@ -1055,8 +1103,8 @@ In the plot below we have anxiety ratings during pilots 9 (no video, more people
 library(purrr)
 
 # let's create a df for pilot 9 with all relevant variables similar to final_df10
-df9_raw <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
-df9_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
+df9_raw <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
+df9_spin <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
   
 df9_spin <- df9_spin %>%
   rename(
@@ -1222,8 +1270,8 @@ write.csv(dfs_9_10, "pilots_9_10_variables.csv", row.names = FALSE)
 # reading Eleanor's data to get the mean and SD of anxiety ratings in WITH (self-focused) and WITHOUT (externally focused) conditions
 
 
-dfs_9_10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/pilots_9_10_variables.csv")
-df_Eleanor <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/Aim1.Database Stage 2_11.2019.csv")
+dfs_9_10 <- read.csv("aim_lab_1/pilots_9_10_variables.csv")
+df_Eleanor <- read.csv("aim_lab_1/Aim1.Database Stage 2_11.2019.csv")
 
 # calculate mean and sd for the WITH condition
 mean_value_WITH <- mean(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)

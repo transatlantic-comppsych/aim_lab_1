@@ -1551,7 +1551,7 @@ df7_pred_trial_nr <- df7_pred %>%
 
 df7_long <- df7_pred_trial_nr %>%
   pivot_longer(cols = c(Response, m_hist), names_to = "Metric", values_to = "Value") %>%
-  mutate(Metric = recode(Metric, 
+  mutate(Metric = dplyr::recode(Metric, 
                          Response = "Predictions", 
                          m_hist = "Histograms"))
 
@@ -1631,7 +1631,7 @@ df7 <- df7_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Respon
 
 df7 <- df7 %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
-  filter(!is.na(Response))
+  dplyr::filter(!is.na(Response))
 
 # add the histogram values depending on file name:
 df7$m_hist <- ifelse(df7$Spreadsheet..Histogram == "h1.png", 20,
@@ -1646,7 +1646,7 @@ df7$m_hist <- ifelse(df7$Spreadsheet..Histogram == "h1.png", 20,
 
 # get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
 df7 <- df7 %>%
-  filter(
+  dplyr::filter(
     (Display == "Trials ") |
     (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
     (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
@@ -1669,7 +1669,7 @@ df7$m_hist <- ifelse(df7$Screen == "Prediction ", df7$m_hist, NA)
 
 
 long_df7 <- df7 %>%
-  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
+  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
   pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
                names_to = "Screen",
                values_to = "Response")
@@ -1681,7 +1681,7 @@ long_df7 <- long_df7[!is.na(long_df7$Response), ]
   
 # Selecting relevant columns from the original df7
 df7 <- df7 %>%
-  select(-c(fdbk, m_hist, PE, SubjPE))
+  dplyr::select(-c(fdbk, m_hist, PE, SubjPE))
 
 # Binding the rows together
 df7 <- bind_rows(df7, long_df7)
@@ -2112,7 +2112,7 @@ I will now also remove the one data point for subjects "SUPPRF56321", "SUPPRF930
 # remove outliers, we can see from the plots that the outlier values are smaller than 20
 subset_df7 <- subset_df7 %>%
   group_by(Random_ID) %>%
-  filter(!(Random_ID %in% c("SUPPRF56321", "SUPPRF93027", "SUPPRF10753") & Response_H < 20))
+  dplyr::filter(!(Random_ID %in% c("SUPPRF56321", "SUPPRF93027", "SUPPRF10753") & Response_H < 20))
 
 # Calculate correlation by Random_ID for anxiety
 correlations_H_excludedoutliers <- subset_df7 %>%
@@ -2254,7 +2254,7 @@ I will remove one data point for subject "SUPPRL44350" who may have given a diff
 # remove outliers, we can see from the plots that the outlier value is bigger than 50
 subset_df7 <- subset_df7 %>%
   group_by(Random_ID) %>%
-  filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
+  dplyr::filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
 
 # Calculate correlation by Random_ID for anxiety
 correlations_Ax_excludedoutliers <- subset_df7 %>%
@@ -2390,19 +2390,115 @@ Now, the negative correlation between the latter correlation and mini-SPIN means
 
 \newpage Let's merge the mini_SPIN with the longer format dataframe with all 8 variables, so that we can fit a regression to explore how the correlation between two variables is influenced by the mini_SPIN:
 
+
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+# reading Eleanor's data to get the mean and SD of anxiety ratings in WITH (self-focused) and WITHOUT (externally focused) conditions
 
-df7_long_mini_SPIN <- subset_df7 %>%
-  left_join(df7_spin, by = "Random_ID")
+df_Eleanor <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/Aim1.Database Stage 2_11.2019.csv")
 
-model <- lm(Response_Ax ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
-summary(model)
+# calculate mean and sd for the WITH condition
+mean_value_WITH <- mean(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)
+sd_value_WITH <- sd(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)
+
+# calculate mean and sd for the WITHOUT condition
+mean_value_WITHOUT <- mean(df_Eleanor$Anxiety_WithOUT_Study2, na.rm = TRUE)
+sd_value_WITHOUT <- sd(df_Eleanor$Anxiety_WithOUT_Study2, na.rm = TRUE)
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+dfall <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_wide_8var.csv") 
+
+df7_all_8_var <- subset(dfall, pilot_nr == "Pilot 7") 
+
+# Let's first merge mini_spin total scores, with final_df10 where we have the rest of the data
+df7_all_8_var <- df7_all_8_var %>%
+  left_join(df7_spin %>% dplyr::select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+df7_all_8_var$Social_Anxiety <- ifelse(df7_all_8_var$mini_SPIN_total >= 6, "high", "low")
+
+summarized_df7 <- df7_all_8_var %>%
+  group_by(Social_Anxiety, Random_ID) %>%
+  summarize(
+    Average_Response = mean(Anxiety, na.rm = TRUE),
+    SD_Response = sd(Anxiety, na.rm = TRUE),
+    .groups = "drop" # This drops the grouping structure after summarization
+  )
+
+summarized_df7$jitter <- runif(nrow(summarized_df7), min = 1, max = 10)
+
+# summarized_df7$Pilot_Number[summarized_df7$Pilot_Number == 9] <- "Pilot 9"
+# summarized_df7$Pilot_Number[summarized_df7$Pilot_Number == 10] <- "Pilot 10"
+
+# Create a vector of IDs to exclude
+ids_to_exclude <- c("SUPPRF67412", "SUPPRF37610")
+
+# Subset the data
+subset_df7_all_8_var <- df7_all_8_var[!df7_all_8_var$Random_ID %in% ids_to_exclude, ]
+
+correlations <- subset_df7_all_8_var %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Mood, SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("r = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print <- paste("average correlation between feedback and happiness:", average_correlation)
+print(message_to_print)
+
+  ggplot(subset_df7_all_8_var, aes(x = Mood, y = SubjPE, color = Social_Anxiety)) +
+  geom_point(aes(color= Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="yellow") +     
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Happiness/Mood") + 
+  ylab("SubjPE: feedback - prediction") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 6))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+     # Adjust the size of the facet labels
+  # Add the correlation labels
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank()) +
+    scale_color_manual(values = c("Red", "Blue"))
+  
+  
+# let's get the average per low and high social anxiety
+# concatenate the pilots, with the social anxiety scores and save as a CSV file to send to Argyris
+# placing the up to date files on Github with the correct paths
+# 
+  
+filtered_data <- subset_df7_all_8_var %>%
+  dplyr::filter(pilot_nr == "Pilot 7")
+
+correlations_per_subject <- filtered_data %>%
+  group_by(Random_ID) %>%
+  summarize(correlation = cor(Mood, SubjPE, use = "complete.obs"))
+
+average_correlations <- filtered_data %>%
+  left_join(correlations_per_subject, by = "Random_ID") %>%
+  group_by(Social_Anxiety) %>%
+  summarize(average_correlation = mean(correlation, na.rm = TRUE))
+
+average_low <- average_correlations$average_correlation[average_correlations$Social_Anxiety == "low"]
+average_high <- average_correlations$average_correlation[average_correlations$Social_Anxiety == "high"]
+
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-model <- lm(Response_H ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
-summary(model)
+
+modelAx <- lm(Response_Ax ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
+summary(modelAx)
+
+
+modelH <- lm(Response_H ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
+summary(modelH)
 ```
 
 
@@ -3106,7 +3202,7 @@ Again, the relationship between SubjPE and mood is similar to SubjPE and much lo
 \newpage Since these people were not screened for social anxiety, let's see how many of them had social anxiety scores higher than or equal to 6.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df8_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
+df8_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with biggest PE, once per judge
 
 df8_spin <- df8_spin %>%
   rename(
