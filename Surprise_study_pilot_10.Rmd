@@ -1296,10 +1296,6 @@ summarized_dfs_9_10 <- dfs_9_10 %>%
     .groups = "drop" # This drops the grouping structure after summarization
   )
 
-# set.seed(123)  # for reproducibility
-# summarized_dfs_9_10$Pilot_Number_Jittered <- as.numeric(as.character(summarized_dfs_9_10$Pilot_Number)) + runif(nrow(summarized_dfs_9_10), -0.1, 0.1)
-# summarized_dfs_9_10$Pilot_Number <- as.factor(summarized_dfs_9_10$Pilot_Number)
-
 summarized_dfs_9_10$jitter <- runif(nrow(summarized_dfs_9_10), min = 1, max = 10)
 
 summarized_dfs_9_10$Pilot_Number[summarized_dfs_9_10$Pilot_Number == 9] <- "Pilot 9"

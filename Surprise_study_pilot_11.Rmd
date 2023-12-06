@@ -1,0 +1,245 @@
+---
+title: "Surprise study pilot 11"
+author: "Marjan Biria"
+date: "2023-12-05"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+```
+
+\newpage
+# Study description
+In this pilot we screened people for high social anxiety. The task itself, is the same as pilot 10 (re-introducing the video). During the screening, we selected people scoring 6 or higher for mini in pilot 11, but when we collected this information again during the testing session, some people scored lower than 6 (5 or 6 people out of 28). We will also add 14 people from pilot 10 who scored high on mini-spin reaching a total sample of 42. This is the task version used for this pilot: https://app.gorilla.sc/admin/task/698788/editor?version=6  
+
+**QUESTION**: which mini-spin score shall we use in the analysis for people who scored lower than 6 the second time?
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+all_pilots_with_mini_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_with_mini_spin.csv")
+
+# let's select pilot 11 only, and merge them with socially anxious people from pilot 10 which was exactly the same
+df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 11")
+df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 10")
+
+df10_anxious <- subset(df10_data, mini_SPIN_total >= 6)
+
+pilot_11 <- rbind(df11_data, df10_anxious)
+
+```
+
+
+\newpage 
+# Relationship Mood and SubjPE
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+correlations <- pilot_11 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Mood, SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
+
+print(message_to_print)
+
+ggplot(pilot_11, aes(x = SubjPE, y = Mood)) +
+  geom_point(aes(color="Data Points", alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Happiness/Mood") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 5))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank())
+```
+
+\newpage 
+# Relationship Anxiety and SubjPE
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+correlations <- pilot_11 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Anxiety, SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
+
+print(message_to_print)
+
+ggplot(pilot_11, aes(x = SubjPE, y = Anxiety)) +
+  geom_point(aes(color="Data Points", alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Anxiety") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 5))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank())
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+list_of_df11s <- split(pilot_11, pilot_11$Random_ID)
+random_ids <- unique(pilot_11$Random_ID)
+
+# making the data long format
+long_df11 <- pilot_11 %>%
+  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, Mood, Anxiety, Certainty_Rating, Prediction) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE,Mood, Anxiety, Certainty_Rating, Prediction),
+               names_to = "Screen",
+               values_to = "Response")
+
+
+# This will keep only the rows where 'Response' is not NA
+long_df11 <- long_df11[!is.na(long_df11$Response), ]
+
+  
+# Selecting relevant columns from the original df10
+# df10 <- df10 %>%
+#   dplyr::select(-c(fdbk, m_hist, PE, SubjPE))
+# 
+# # # Binding the rows together
+# df10 <- bind_rows(df10, long_df10)
+# df10_longformat <- bind_rows(df10, long_df10)
+
+
+# make individual plots
+# plot_function <- function(long_df11, title) {
+#   p <- ggplot(long_df11, aes(x = Trial.Number, y = Response, color = Screen, group = Screen)) +
+#     geom_line() +
+#     geom_smooth(method = "lm", se = TRUE, alpha = 0.7) + 
+#     theme_minimal() +
+#     labs(title = title,  # Set the title to the Random_ID
+#          x = "Trial Number",
+#          y = "Mood Ratings/Expectations/ PE",
+#          color = "") +
+#     facet_wrap(~ Screen, ncol = 2) +
+#     geom_hline(yintercept = 0)
+#   
+#   return(p)
+# }
+# 
+# # Use Map or mapply to apply the plot_function to each data frame and title in the list
+# list_of_plots <- Map(plot_function, list_of_df11s, random_ids)
+# 
+# for (i in seq_along(list_of_plots)) {
+#   print(list_of_plots[[i]])
+# }
+```
+
+\newpage 
+# LME models for Mood and SubjPE
+This is the best model: Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Mood ~ SubjPE + (1 | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+anova(model1, model2)
+# summary(model1)
+# summary(model2)
+# AIC(model1)
+# AIC(model2)
+
+
+model3 <- lme4::lmer(Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+
+anova(model2, model3)
+
+summary(model3)
+# AIC(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+
+model3 %>% broom.mixed::tidy("fixed") 
+```
+
+\newpage 
+# Individual plots with LME for Mood
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(pilot_11, aes(x=SubjPE, y=Mood)) +
+  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="red", linetype="dashed") +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Mood") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+```
+
+
+
+\newpage 
+# LME models for Anxiety and SubjPE
+This is the best model: Anxiety ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Anxiety ~ SubjPE + (1 | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Anxiety ~ SubjPE + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+anova(model1, model2)
+# summary(model1)
+# summary(model2)
+# AIC(model1)
+# AIC(model2)
+
+
+model3 <- lme4::lmer(Anxiety ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+
+anova(model2, model3)
+
+summary(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Ax <- coef_fixed[1]
+slope_Ax <- coef_fixed[2]
+model3 %>% broom.mixed::tidy("fixed") 
+```
+
+\newpage 
+# Individual plots with LME for Anxiety
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(pilot_11, aes(x=SubjPE, y=Anxiety)) +
+  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="red", linetype="dashed") +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Anxiety") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+```
