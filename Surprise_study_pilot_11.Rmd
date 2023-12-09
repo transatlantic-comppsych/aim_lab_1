@@ -33,35 +33,39 @@ In this pilot we screened people for high social anxiety. The task itself, is th
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 all_pilots_with_mini_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_with_mini_spin.csv")
 
-# let's select pilot 11 only, and merge them with socially anxious people from pilot 10 which was exactly the same
+
 df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 11")
 df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 10")
 
-df10_anxious <- subset(df10_data, mini_SPIN_total >= 6)
+# Let's merge pilots that used the same task version (video re-introduced and colour code the anxiety levels)
+df_all_vid <- rbind(df11_data, df10_data)
 
-pilot_11 <- rbind(df11_data, df10_anxious)
-
+# let's select pilot 11 only, and merge them with socially anxious people from pilot 10 which was exactly the same
+# df10_anxious <- subset(df10_data, mini_SPIN_total >= 6)
+# pilot_11 <- rbind(df11_data, df10_anxious)
 ```
 
 
 \newpage 
 # Relationship Mood and SubjPE
 
+When looking at pilot 11 alone (people with high social anxiety) the correlation is 0.32 (n = 28), when adding the 14 people with high social anxiety from pilot 10, the correlation becomes 0.28 (n = 42). When adding the remaining people from pilot 10 with low social anxiety, the group correlation becomes 0.24 (n = 67). 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+df_all_vid   |> summarise(length(unique(Random_ID)), .by = pilot_nr)
 
-correlations <- pilot_11 %>%
+correlations <- df_all_vid %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Mood, SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
 
 # calculate the average correlation across all individuals and print it 
 average_correlation <- mean(correlations$correlation, na.rm = TRUE)
-message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
+message_to_print_Mood <- paste("average correlation between Mood and SubjPE:", average_correlation)
+print(message_to_print_Mood)
 
-print(message_to_print)
 
-ggplot(pilot_11, aes(x = SubjPE, y = Mood)) +
-  geom_point(aes(color="Data Points", alpha = 0.3)) +
+ggplot(df_all_vid, aes(x = SubjPE, y = Mood, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
   theme_minimal() +
@@ -83,19 +87,19 @@ ggplot(pilot_11, aes(x = SubjPE, y = Mood)) +
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-correlations <- pilot_11 %>%
+correlations <- df_all_vid %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Anxiety, SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
 
 # calculate the average correlation across all individuals and print it 
 average_correlation <- mean(correlations$correlation, na.rm = TRUE)
-message_to_print <- paste("average correlation between Mood and SubjPE:", average_correlation)
+message_to_print_Ax <- paste("average correlation between Mood and SubjPE:", average_correlation)
 
-print(message_to_print)
+print(message_to_print_Ax)
 
-ggplot(pilot_11, aes(x = SubjPE, y = Anxiety)) +
-  geom_point(aes(color="Data Points", alpha = 0.3)) +
+ggplot(df_all_vid, aes(x = SubjPE, y = Anxiety, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
   theme_minimal() +
@@ -114,19 +118,19 @@ ggplot(pilot_11, aes(x = SubjPE, y = Anxiety)) +
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-list_of_df11s <- split(pilot_11, pilot_11$Random_ID)
-random_ids <- unique(pilot_11$Random_ID)
-
-# making the data long format
-long_df11 <- pilot_11 %>%
-  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, Mood, Anxiety, Certainty_Rating, Prediction) %>%
-  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE,Mood, Anxiety, Certainty_Rating, Prediction),
-               names_to = "Screen",
-               values_to = "Response")
-
-
-# This will keep only the rows where 'Response' is not NA
-long_df11 <- long_df11[!is.na(long_df11$Response), ]
+# list_of_df11s <- split(pilot_11, pilot_11$Random_ID)
+# random_ids <- unique(pilot_11$Random_ID)
+# 
+# # making the data long format
+# long_df11 <- pilot_11 %>%
+#   dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, Mood, Anxiety, Certainty_Rating, Prediction) %>%
+#   pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE,Mood, Anxiety, Certainty_Rating, Prediction),
+#                names_to = "Screen",
+#                values_to = "Response")
+# 
+# 
+# # This will keep only the rows where 'Response' is not NA
+# long_df11 <- long_df11[!is.na(long_df11$Response), ]
 
   
 # Selecting relevant columns from the original df10
@@ -167,21 +171,25 @@ long_df11 <- long_df11[!is.na(long_df11$Response), ]
 This is the best model: Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model1 <- lme4::lmer(Mood ~ SubjPE + (1 | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
-model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model1 <- lme4::lmer(Mood ~ SubjPE + (1 | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Mood ~ SubjPE + (SubjPE | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
+
+# model2_p11 <- lme4::lmer(Mood ~ PE + (PE | Random_ID), data = df11_data, control=lmerControl(optimizer="bobyqa"))
+# summary(model2_p11)
+
 anova(model1, model2)
-# summary(model1)
-# summary(model2)
-# AIC(model1)
-# AIC(model2)
+summary(model1)
+summary(model2)
+AIC(model1)
+AIC(model2)
 
 
-model3 <- lme4::lmer(Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
 
 anova(model2, model3)
 
-summary(model3)
-# AIC(model3)
+# summary(model3)
+AIC(model3)
 
 coef_fixed <- fixef(model3)
 intercept_Mood <- coef_fixed[1]
@@ -194,13 +202,31 @@ model3 %>% broom.mixed::tidy("fixed")
 # Individual plots with LME for Mood
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(pilot_11, aes(x=SubjPE, y=Mood)) +
-  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
-  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="red", linetype="dashed") +
-  xlab("SubjPE: feedback - prediction") + 
+# ggplot(df_all_vid, aes(x=SubjPE, y=Mood)) +
+#   geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+#   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="red", linetype="dashed") +
+#   xlab("SubjPE: feedback - prediction") + 
+#   ylab("Mood") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+
+ggplot(df_all_vid, aes(x=SubjPE, y=Mood)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective Prediction Error: feedback - prediction") + 
   ylab("Mood") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+  # theme_minimal() +
+  # theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9)) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope without social anxiety =", 100*round(perc_pos_slop[1,2],2), "%"), hjust = 1.1, vjust = 90, color = "black", size = 3.7) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope with social anxiety =", 100*round(perc_pos_slop[2,2],2), "%"), hjust = 1.1, vjust = 92, color = "black", size = 3.7)+
+   # annotate("text", x = Inf, y = Inf, label = paste("positive slope with social anxiety =", 100*round(perc_pos_slop[2,2],2), "%"), hjust = 1.1, vjust = 92, color = "black", size = 3.7)+
+  ggtitle("Relationship between Mood and Surprises",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(df_all_vid$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))
 ```
 
 
@@ -210,8 +236,8 @@ ggplot(pilot_11, aes(x=SubjPE, y=Mood)) +
 This is the best model: Anxiety ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model1 <- lme4::lmer(Anxiety ~ SubjPE + (1 | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
-model2 <- lme4::lmer(Anxiety ~ SubjPE + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model1 <- lme4::lmer(Anxiety ~ SubjPE + (1 | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Anxiety ~ SubjPE + (SubjPE | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
 anova(model1, model2)
 # summary(model1)
 # summary(model2)
@@ -219,7 +245,7 @@ anova(model1, model2)
 # AIC(model2)
 
 
-model3 <- lme4::lmer(Anxiety ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = pilot_11, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Anxiety ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID), data = df_all_vid, control=lmerControl(optimizer="bobyqa"))
 
 anova(model2, model3)
 
@@ -235,11 +261,53 @@ model3 %>% broom.mixed::tidy("fixed")
 # Individual plots with LME for Anxiety
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(pilot_11, aes(x=SubjPE, y=Anxiety)) +
-  geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
-  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="red", linetype="dashed") +
-  xlab("SubjPE: feedback - prediction") + 
-  ylab("Anxiety") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+# ggplot(df_all_vid, aes(x=SubjPE, y=Anxiety)) +
+#   geom_smooth(method = "lm", color = "#0000FF44", size = 0.4, se = FALSE, aes(group=Random_ID)) +
+#   geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="red", linetype="dashed") +
+#   xlab("SubjPE: feedback - prediction") + 
+#   ylab("Anxiety") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(size = 5), axis.text.y = element_text(size = 5))
+
+
+
+ggplot(df_all_vid, aes(x=SubjPE, y=Anxiety)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective Prediction Error: feedback - prediction") + 
+  ylab("Mood") +
+  # theme_minimal() +
+  # theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9)) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope without social anxiety =", 100*round(perc_pos_slop[1,2],2), "%"), hjust = 1.1, vjust = 90, color = "black", size = 3.7) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope with social anxiety =", 100*round(perc_pos_slop[2,2],2), "%"), hjust = 1.1, vjust = 92, color = "black", size = 3.7)+
+  ggtitle("Relationship between Anxiety and Surprises",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(df_all_vid$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10)) 
+  # + annotate("label", x = 0, y = 55, label = paste("beta = ", round(standard_beta$Std_Coefficient[2],2), ", 95%CI = ",
+  #                                                round(standard_beta$CI_low[2],2), "-", 
+  #                                                round(standard_beta$CI_high[2],2))) 
+
+```
+```{r}
+ggplot(df_all_vid, aes(x=SubjPE, y=Anxiety)) +
+  geom_smooth(method = "lm", se = TRUE, alpha = 0.7, aes(group=Social_Anxiety)) + 
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective Prediction Error: feedback - prediction") + 
+  ylab("Mood") +
+  # theme_minimal() +
+  # theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9)) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope without social anxiety =", 100*round(perc_pos_slop[1,2],2), "%"), hjust = 1.1, vjust = 90, color = "black", size = 3.7) +
+  # annotate("text", x = Inf, y = Inf, label = paste("positive slope with social anxiety =", 100*round(perc_pos_slop[2,2],2), "%"), hjust = 1.1, vjust = 92, color = "black", size = 3.7)+
+  ggtitle("Relationship between Anxiety and Surprises",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(df_all_vid$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10)) 
 ```
