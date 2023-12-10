@@ -284,7 +284,7 @@ ggplot(df_ax, aes(x = Display, y = Response, color = Screens)) +
     labs(x = "Display", y = "Response", fill = "Social Anxiety") +
     # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
     scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
-    ggtitle(paste("Average mood ratings in IN and OUT attention conditions")) +
+    ggtitle(paste("Average anxiety ratings in IN and OUT attention conditions")) +
     xlab("") + 
     ylab("Average Anxiety Ratings") +
     facet_wrap(~Screens, scales = "free")
@@ -311,4 +311,41 @@ ggplot(df_M, aes(x = Display, y = Response, color = Screens)) +
     ylab("Average Mood Ratings") +
     facet_wrap(~Screens, scales = "free")
 
+```
+
+\newpage 
+# Repeating the group plots after excluding outliers
+
+I have excluded the following subjects to see how the group plots change:"SUPPRF09833", "SUPPRF54499", "SUPPRF50800". They all had rated the same scores for anxiety and mood throughout the task (their histograms above are flat).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ids_to_exclude <- c("SUPPRF09833", "SUPPRF54499", "SUPPRF50800" )
+df_ax_ex <- df_ax[!df_ax$Random_ID %in% ids_to_exclude, ]
+df_M_ex <- df_M[!df_M$Random_ID %in% ids_to_exclude, ]
+
+ggplot(df_ax_ex, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average anxiety ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Anxiety Ratings") +
+    facet_wrap(~Screens, scales = "free")
+
+ggplot(df_M_ex, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average mood ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Mood Ratings") +
+    facet_wrap(~Screens, scales = "free")
 ```
