@@ -46,6 +46,19 @@ BIQ_data<- BIQ_data %>%
     TRUE ~ .
   )))
 
+BIQ_data <- BIQ_data %>%
+  rename(
+    Q1 = "BIQ_data.Response.object-5",
+    Q2 = "BIQ_data.Response.object-18",
+    Q3 =  "BIQ_data.Response.object-80",
+    Q4 =  "BIQ_data.Response.object-259",
+    Q5 = "BIQ_data.Response.object-36",
+    Q6 = "BIQ_data.Response.object-86",
+    Q7 = "BIQ_data.Response.object-53",
+    Q8 = "BIQ_data.Response.object-60",
+    Q9 = "BIQ_data.Response.object-67",
+  )
+
 #scoring----
 BIQ_scores <-  numeric(length(BIQ_data$BIQ_data.Random_ID))
 BIQ_scores <- 0
