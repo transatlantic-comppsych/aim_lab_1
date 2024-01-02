@@ -1,0 +1,862 @@
+---
+title: "Attention pilots"
+author: "Marjan Biria"
+date: "2023-12-09"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+library(lmerTest)
+```
+
+\newpage
+# Attention pilot 1: study description
+In this pilot we tested people on the attention pilot, where no feedback was provided and no prediction was collected. We have m_hist, anxiety, mood and certainty ratings for this pilot. This is the experiment on Gorilla: https://app.gorilla.sc/admin/project/115369
+This is the task version used: https://app.gorilla.sc/admin/task/712861/editor?version=3  
+The Externally focused attention condition was presented first, followed by the internally focused attention. Each condition had 24 trials. I will keep the mood and anxiety ratings before they start the task to look at baseline anxiety and mood in the following analysis.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+df_att <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_no_fdbk_attention_vid/SUP_PRF_pilot_no_fdbk_attention_vid_v3/SUP_PRF_pilot_no_fdbk_attention_vid_v3_task_main.csv")
+df_att_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_no_fdbk_attention_vid/SUP_PRF_pilot_no_fdbk_attention_vid_v3/SUP_PRF_pilot_no_fdbk_attention_vid_v3_mini_spin.csv")
+
+df_att <- df_att[, c("Event.Index", "Trial.Number", "Random_ID", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type", "Object.ID" )]
+df_att <- df_att %>% dplyr::filter(Random_ID != "SUPPRF17915")
+df_att_spin <- df_att_spin %>% dplyr::filter(Random_ID != "SUPPRF17915")
+
+# let's also exclude the mood and anxiety ratings during practice
+df_att <- df_att %>% dplyr::filter(!Event.Index %in% c(15, 17))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df_att$m_hist <- case_when(
+  df_att$Spreadsheet..Histogram == "h1.png" ~ 20,
+  df_att$Spreadsheet..Histogram == "h2.png" ~ 29,
+  df_att$Spreadsheet..Histogram == "h3.png" ~ 37,
+  df_att$Spreadsheet..Histogram == "h4.png" ~ 46,
+  df_att$Spreadsheet..Histogram == "h5.png" ~ 54,
+  df_att$Spreadsheet..Histogram == "h6.png" ~ 63,
+  df_att$Spreadsheet..Histogram == "h7.png" ~ 71,
+  df_att$Spreadsheet..Histogram == "h8.png" ~ 80,
+  TRUE ~ NA_real_
+)
+
+df_att <- df_att %>%
+  dplyr::filter(
+    (Display == "Trials - Externally Focused Attention") |
+    (Display == "Trials - Self Focused Attention") |
+    (Display == "Anxiety ") |
+    (Display == "Mood ") 
+  )
+
+df_hist <- df_att %>%
+  filter(Screen == "Introducing judge") %>%
+  select(Event.Index, Response.Type, Object.ID, Random_ID, Trial.Number, Screen, Display, m_hist, Spreadsheet..Histogram)
+
+df_hist <- df_hist %>%
+  mutate(Screen = ifelse(Screen == "Introducing judge", "m_hist", Screen))
+
+df_hist_modified <- df_hist %>%
+  select(Event.Index, Random_ID, Spreadsheet..Histogram, Trial.Number, m_hist, Screen, Display, Response.Type, Object.ID) %>%
+  dplyr::rename(Response = m_hist)
+
+df_hist_modified <- df_hist_modified %>%
+  mutate(Response = as.character(Response))
+
+df_attention <- bind_rows(df_att, df_hist_modified)
+
+
+# setting Mood and Anxiety trial numbers to start from 0 for baseline, and 1 for task, also making sure we match the anxiety and mood trials with the experiment trials
+# experiment trials run from 1-24 per condition whereas for mood and anxiety rating this goes continuously from 1-50; we will change this in the next version of the task
+df_attention$Trial.Number <- ifelse(df_attention$Display == 'Mood ' | df_attention$Display == 'Anxiety ', df_attention$Trial.Number - 2, df_attention$Trial.Number)
+
+df_attention <- df_attention %>%
+  mutate(Display = case_when(
+    Screen == "m_hist" ~ "m_hist",
+    Display == 'Mood ' & Trial.Number <= 26 ~ 'Mood_OUT',
+    Display == 'Anxiety ' & Trial.Number <= 26 ~ 'Anxiety_OUT',
+    Display == 'Mood ' & Trial.Number > 26 ~ 'Mood_IN',
+    Display == 'Anxiety ' & Trial.Number > 26 ~ 'Anxiety_IN',
+    TRUE ~ Display  
+  ))
+
+df_attention <- df_attention %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  dplyr::filter(!is.na(Response))
+
+df_attention <- df_attention %>% filter(Trial.Number != -1)
+
+df_attention <- df_attention %>%
+  select(-Event.Index, -Object.ID, -m_hist, -Response.Type, -Spreadsheet..Histogram)
+
+# Let's score mini-spin and add its total score to df_attention per subject
+df_att_spin <- df_att_spin %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+df_att_spin_test <- df_att_spin %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE))
+
+df_att_spin <- df_att_spin %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+
+df_attention_spin <- merge(df_attention, df_att_spin[, c("Random_ID", "mini_SPIN_total")], by = "Random_ID", all.x = TRUE)
+
+df_attention_spin$Social_Anxiety <- ifelse(df_attention_spin$mini_SPIN_total >= 6, "high", "low")
+
+# write.csv(df_attention_spin, file = "df_attention_pilots_with_spin", row.names = FALSE)
+```
+
+
+\newpage 
+# Anxiety and Mood ratings within subjects
+There were 3 people that had given the same rating across all trials. Some people show the pattern we expect (lower anxiety, higher mood from IN to OUT conditions) but not everyone.
+
+**QUESTION**: How can we best plot the group plot? We cannot plot the individual points anymore, as they would become hard to read; we could average within subjects but again not sure if this is the best approach? I also wonder maybe the fact that there was no feedback (per trial, only at the end) was not stressful enough. It would be interesting to pilot it with the feedback and prediction.  
+**Let's also think how to have the feedback across both conditions: we do want to keep feedback constant to be comparable between conditions, right? If so, we would need to have 2 x 48 trials?**
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# df_attention_spin <- read.csv("df_attention_pilots_with_spin.csv")
+
+df_attention_spin_f1 <- df_attention_spin %>% filter(Display != "m_hist")
+random_ids <- unique(df_attention$Random_ID)
+
+unique_high_anxiety_ids <- df_attention_spin_f1 %>%
+  filter(Social_Anxiety == "high") %>%
+  distinct(Random_ID) %>%
+  nrow()
+
+total_n <- length(unique(df_attention_spin_f1$Random_ID))
+message_to_print <- paste(unique_high_anxiety_ids, "subjects out of", total_n,"had high social anxiety")
+print(message_to_print)
+
+
+list_of_dfs <- list()
+
+for (i in seq_along(random_ids)) {
+  x <- random_ids[i]  # Get the current value from random_ids
+  df_si <- subset(df_attention_spin_f1, Random_ID == x)  # Create the subset
+  list_of_dfs[[paste0("df_s", i)]] <- df_si  # Add the subset to list_of_df10s
+}
+
+plot_function <- function(df_attention_spin_f1, title) {
+  p <- ggplot(df_attention_spin_f1, aes(x = Display, y = Response, fill = Social_Anxiety, color = Screen)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Anxiety and Mood ratings for subject:", title)) +
+    xlab("") + 
+    ylab("Mood/Anxiety ratings") +
+    facet_wrap(~Display, scales = "free")
+
+  return(p)
+}
+
+list_of_plots <- Map(plot_function, list_of_dfs, random_ids)
+
+for (i in seq_along(list_of_plots)) {
+  print(list_of_plots[[i]])
+}
+
+```
+
+
+
+\newpage
+# Relationship between mini_SPIN and momentary anxiety ratings 
+
+The plot below show the relationship between the (average) anxiety ratings on the task and total mini_SPIN scores.  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+avg_response <- df_attention_spin_f1 %>%
+  group_by(Random_ID, Display) %>%
+  summarise(avg_Response = mean(Response, na.rm = TRUE)) %>%
+  ungroup()
+
+wide_avg_response <- avg_response %>%
+  pivot_wider(names_from = Display, values_from = avg_Response)
+
+final_df <- df_attention_spin_f1 %>%
+  select(Random_ID, mini_SPIN_total, Social_Anxiety) %>%
+  distinct(Random_ID, .keep_all = TRUE) %>%
+  left_join(wide_avg_response, by = "Random_ID") %>%
+  pivot_longer(
+    cols = c(Anxiety_IN, Anxiety_OUT, Mood_IN, Mood_OUT),
+    names_to = "Screens",
+    values_to = "Response"
+  )
+
+final_df <- final_df %>%
+  mutate(Display = sapply(strsplit(Screens, "_"), `[`, 1))
+
+
+df_ax <- final_df %>% dplyr::filter(Screens == "Anxiety_IN" | Screens == "Anxiety_OUT")
+df_M <-  final_df %>% dplyr::filter(Screens == "Mood_IN" | Screens == "Mood_OUT")
+
+
+correlations_ax <- df_ax %>%
+  group_by(Screens) %>%
+  summarise(correlation = cor(mini_SPIN_total, Response, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  
+
+average_correlation_ax <- mean(correlations_ax$correlation, na.rm = TRUE)
+message_to_print <- paste("correlation between mini_SPIN_total and average anxiety ratings:", average_correlation_ax)
+print(message_to_print)
+
+
+ggplot(df_ax, aes(x=mini_SPIN_total, y=Response)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue") +     
+  labs(color="Legend") +
+  facet_wrap(~ Screens, scales = "free") +
+  theme_minimal() +
+  xlab("mini_SPIN_total") + 
+  ylab("Average Momentary Anxiety Ratings") +
+  geom_text(data=correlations_ax, aes(x=Inf, y=Inf, label=label, group=Screens), hjust=1.5, vjust=4.1, size=2.7, fontface = "bold", inherit.aes=FALSE) 
+
+```
+
+
+
+\newpage
+# Relationship between mini_SPIN and momentary mood ratings 
+
+The plot below show the relationship between (average) mood ratings on the task and the total mini_SPIN scores.  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_M <- df_M %>%
+  group_by(Screens) %>%
+  summarise(correlation = cor(mini_SPIN_total, Response, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  
+
+average_correlation_M <- mean(correlations_M$correlation, na.rm = TRUE)
+message_to_print <- paste("correlation between mini_SPIN_total and average anxiety ratings:", average_correlation_M)
+print(message_to_print)
+
+
+ggplot(df_M, aes(x=mini_SPIN_total, y=Response)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue") +     
+  labs(color="Legend") +
+  facet_wrap(~ Screens, scales = "free") +
+  theme_minimal() +
+  xlab("mini_SPIN_total") + 
+  ylab("Average Momentary Mood Ratings") +
+  geom_text(data=correlations_M, aes(x=Inf, y=Inf, label=label, group=Screens), hjust=1.5, vjust=4.1, size=2.7, fontface = "bold", inherit.aes=FALSE) 
+```
+
+
+\newpage
+# Average Anxiety in IN and OUT attention conditions
+The plot below show the average anxiety ratings in IN and OUT attention conditions where people paid internal and external attention respectively. I think without the outlier (black dot), the difference becomes bigger, will test it later.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df_ax, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average anxiety ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Anxiety Ratings") +
+    facet_wrap(~Screens, scales = "free")
+
+```
+
+\newpage
+# Average Mood in IN and OUT attention conditions
+
+The plot below show the average mood ratings in IN and OUT attention conditions where people paid internal and external attention respectively.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df_M, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average mood ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Mood Ratings") +
+    facet_wrap(~Screens, scales = "free")
+
+```
+
+\newpage 
+# Repeating the group plots after excluding outliers
+
+I have excluded the following subjects to see how the group plots change:"SUPPRF09833", "SUPPRF54499", "SUPPRF50800". They all had rated the same scores for anxiety and mood throughout the task (their histograms above are flat).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ids_to_exclude <- c("SUPPRF09833", "SUPPRF54499", "SUPPRF50800" )
+df_ax_ex <- df_ax[!df_ax$Random_ID %in% ids_to_exclude, ]
+df_M_ex <- df_M[!df_M$Random_ID %in% ids_to_exclude, ]
+
+ggplot(df_ax_ex, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average anxiety ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Anxiety Ratings") +
+    facet_wrap(~Screens, scales = "free")
+
+ggplot(df_M_ex, aes(x = Display, y = Response, color = Screens)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average mood ratings in IN and OUT attention conditions")) +
+    xlab("") + 
+    ylab("Average Mood Ratings") +
+    facet_wrap(~Screens, scales = "free")
+```
+
+
+\newpage 
+# Between condition tests
+
+Since in this version we only had the mood and anxiety ratings without feedback and prediction, let's have a look at between condition differences per emotion rating (Mood and Anxiety) using two paired t-tests. We could look at the slopes for both attention conditions using a model with only the intercept? 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+final_df$condition <- final_df$Screens %>% 
+                      str_extract(pattern = "IN|OUT")
+
+
+Mood <- subset(final_df, Display == "Mood")
+Anxiety <- subset(final_df, Display == "Anxiety")
+
+# Paired t-test for Mood
+Mood_IN <- Mood$Response[Mood$condition == "IN"]
+Mood_OUT <- Mood$Response[Mood$condition == "OUT"]
+t_test_Mood <- t.test(Mood_IN, Mood_OUT, paired = TRUE)
+print(t_test_Mood)
+
+# Paired t-test for Anxiety
+Anxiety_IN <- Anxiety$Response[Anxiety$condition == "IN"]
+Anxiety_OUT <- Anxiety$Response[Anxiety$condition == "OUT"]
+t_test_Anxiety <- t.test(Anxiety_IN, Anxiety_OUT, paired = TRUE)
+print(t_test_Anxiety)
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# df_attentions <- cbind(df_M, df_ax)
+# dim(final_df)
+# 
+# 
+# pe_mood_plots <- list()
+# 
+# my_splits <- (split(df_surprises, df_surprises$pilot_nr))
+# my_splits <- my_splits[pilots] # make sure to re-arrange the order to be from 6-10 
+# 
+# for(i in 1:length(my_splits)){
+#   
+#   plot <- my_splits[[i]] %>% 
+#     ggplot(aes(x = SubjPE, y = Mood)) +
+#     geom_smooth(method = "lm", colour = "red") +
+#     geom_point(alpha = 0.2) +
+#     facet_wrap(~Random_ID)+
+#     ggtitle(paste(pilots[i], "overall r = ", round(correlations_df[i,2], 2)))
+#   
+#   # Store the plot in the list
+#   pe_mood_plots[[i]] <- plot
+# }
+# 
+# # Print  plots
+# for (i in 1: length(my_splits)) {
+#   print(pe_mood_plots[[i]])
+# }
+# dev.off()
+# 
+# 
+# 
+# # now run lme models for random interecept only and rint + random slope and choose between them
+# 
+# # first lmes with random intercept models
+# rint_models <- list()
+# for(i in 1:length(my_splits)){
+#   rint_models[[i]] <- lmer(Mood ~ SubjPE + (1| Random_ID), data = 
+#                              df_surprises[df_surprises$pilot_nr==pilots[i],], 
+#                            REML = FALSE, 
+#                            control = lmerControl(optimizer = "bobyqa"))
+# }
+# rint_models
+# 
+# # now  lmes with random slopes
+# rslope_models <- list()
+# for(i in 1:length(my_splits)){
+#   rslope_models[[i]] <- lmer(Mood ~ SubjPE + (SubjPE| Random_ID), data = 
+#                                df_surprises[df_surprises$pilot_nr==pilots[i],], 
+#                              REML = FALSE, 
+#                              control = lmerControl(optimizer = "bobyqa"))
+# }
+# rslope_models
+# 
+# # now compare between them
+# p_vals <- 0
+# for(i in 1: length(my_splits)){
+#   p_vals[i] <-  (anova(rint_models[[i]], rslope_models[[i]]))$`Pr(>Chisq)`[2]
+# }
+# 
+# format(p_vals, scientific = F) # the p-values show that there is always a significant difference
+# 
+# 
+# 
+# mix_models_per_pilot <- list() # the lme objects for each pilot
+# mix_models_coefficients <- list() # the coefficients for each pilot
+# std_param_mix_models_per_pilot <- list() # the standardised coefficients for each lme object
+# dfs_RE_raw_pe_mood <- list() # the dataframes that contain raw values and coefficeints (may not need this)
+# for(i in 1: length(my_splits)){
+#   
+#   mix_models_per_pilot[[i]] <-  lmer(Mood ~ SubjPE + (SubjPE| Random_ID), data = 
+#                                        df_surprises[df_surprises$pilot_nr==pilots[i],], 
+#                                      REML = FALSE, 
+#                                      control = lmerControl(optimizer = "bobyqa"))
+#   std_param_mix_models_per_pilot[[i]] <- parameters:: standardise_parameters( mix_models_per_pilot[[i]])
+#   
+#   mix_models_coefficients[[i]] <-  coef(mix_models_per_pilot[[i]])
+#   mix_models_coefficients[[i]] <- data.frame(mix_models_coefficients[[i]]$Random_ID)
+#   mix_models_coefficients[[i]]$Random_ID <- rownames(mix_models_coefficients[[i]])
+#   colnames(mix_models_coefficients[[i]]) <-c( "intercept", "slope", "Random_ID")
+#   
+#   #now merge these datasets with the raw values 
+#   dfs_RE_raw_pe_mood[[i]] <- left_join(my_splits[[i]], mix_models_coefficients[[i]], by = "Random_ID" )
+#   
+# }
+# names(std_param_mix_models_per_pilot) <- pilots
+# std_param_mix_models_per_pilot$`Pilot 7`$Std_Coefficient[1] # to get intercept for example
+# 
+# # display coefficients
+# df_std_coefficients <- data.frame(do.call(rbind,std_param_mix_models_per_pilot))
+# df_std_coefficients <- df_std_coefficients %>% 
+#    filter(Parameter != "(Intercept)") %>% 
+#  # mutate(experiment = names(std_param_mix_models_per_pilot))
+#    mutate(experiment = paste0("experiment ", 1:6)) %>% 
+#    relocate(experiment, .before = Std_Coefficient) %>% 
+#   dplyr::select(!c(Parameter, CI)) %>% 
+#   remove_rownames()
+#   
+# knitr:: kable(df_std_coefficients)
+# 
+# # Put all datasets together now 
+# df_all_surprise_experiments <- do.call(rbind,dfs_RE_raw_pe_mood)
+# 
+# 
+# # test the ICC, i.e. variance explained by random effects.
+# # first for IDs
+# 
+# test_icc_id <- lmer(Mood ~  (1| Random_ID), data = 
+#                       df_all_surprise_experiments, 
+#                     REML = FALSE, 
+#                     control = lmerControl(optimizer = "bobyqa")) 
+# icc_results_id <- performance::icc(test_icc_id)
+# 
+# icc_results_id
+# 
+# 
+# #  nesting by pilot (i.e. number of experiment)
+# 
+# 
+# test_icc_pilot <- lmer(Mood ~  (1| pilot_nr) , data = 
+#                          df_all_surprise_experiments, 
+#                        REML = FALSE, 
+#                        control = lmerControl(optimizer = "bobyqa")) 
+# icc_results_pilot <- performance::icc(test_icc_pilot)
+# icc_results_pilot
+# 
+# # it seems that pilot number explains very little of the variance
+# 
+# 
+# # now test whether adding slope improves fit
+# 
+# big_model_1 <- lmer (Mood ~ SubjPE + (1| Random_ID) ,
+#                      data = df_all_surprise_experiments, 
+#                      REML = FALSE, 
+#                      control = lmerControl(optimizer = "bobyqa"))
+# 
+# 
+# big_model_2 <- lmer (Mood ~ SubjPE + (SubjPE| Random_ID) ,
+#                      data = df_all_surprise_experiments, 
+#                      REML = FALSE, 
+#                      control = lmerControl(optimizer = "bobyqa"))
+# summary(big_model_2)
+# standard_beta <- parameters:: standardise_parameters (big_model_2)
+# AIC(big_model_1, big_model_2)
+# 
+# big_model_3 <- lmer (Mood ~ SubjPE*Social_Anxiety + (SubjPE| Random_ID) ,
+#                      data = df_all_surprise_experiments, 
+#                      REML = FALSE, 
+#                      control = lmerControl(optimizer = "bobyqa"))
+# summary(big_model_3)
+# anova(big_model_2, big_model_3)
+# 
+# 
+# # example of how to get positive slopes per dataframe here. Will g --------
+# 
+# 
+# df_all_surprise_experiments_with_anxiety_status <-df_all_surprise_experiments %>% 
+#   group_by(Random_ID) %>% 
+#   filter(row_number()==1) %>% 
+#   mutate(positve_mood_slopes = case_when(slope>0~1, slope <=0 ~0)) %>% 
+#   mutate(high_social_anxiety = case_when(Social_Anxiety=="high"~1, Social_Anxiety=="low"~0))
+# 
+# glimpse(df_all_surprise_experiments_with_anxiety_status)
+# 
+# only_first_row_df_all_surprise_experiments_with_anxiety_status <- df_all_surprise_experiments_with_anxiety_status %>% 
+#   distinct(Random_ID, .keep_all = TRUE)
+# 
+# only_first_row_df_all_surprise_experiments_with_anxiety_status %>% 
+#   count(high_social_anxiety, positve_mood_slopes)
+# 
+# table(only_first_row_df_all_surprise_experiments_with_anxiety_status$Social_Anxiety)
+# table(table(only_first_row_df_all_surprise_experiments_with_anxiety_status$positve_mood_slopes, 
+#             only_first_row_df_all_surprise_experiments_with_anxiety_status$high_social_anxiety))
+# perc_pos_slop <- prop.table(table( 
+#   only_first_row_df_all_surprise_experiments_with_anxiety_status$high_social_anxiety,
+#   only_first_row_df_all_surprise_experiments_with_anxiety_status$positve_mood_slopes))
+# 
+# chisq.test(table(only_first_row_df_all_surprise_experiments_with_anxiety_status$positve_mood_slopes, 
+#                  only_first_row_df_all_surprise_experiments_with_anxiety_status$high_social_anxiety))
+# 
+# # creating a new dataframe with people with high social anxiety from pilot 11, and pilot 10
+# df_SA <- subset(df_all_surprise_experiments, (pilot_nr == "Pilot 11") | ((pilot_nr == "Pilot 10") & (Social_Anxiety == "high")))
+# 
+# # intercept <- mean(df_all_surprise_experiments$intercept)
+# # slope <- mean(df_all_surprise_experiments$slope)
+# 
+# intercept <- mean(df_SA$intercept)
+# slope <- mean(df_SA$slope)
+```
+
+\newpage
+# Attention pilot 2: study description
+
+This pilot was the same as before but we had 59 people counterbalancing the order of conditions between them. Another difference with previous attention pilot is that around 51% of people had high social anxiety scores, and this was 72% in attention pilot 1.  
+
+This was the Gorilla experiment:https://app.gorilla.sc/admin/experiment/157047/design
+This was the task used: https://app.gorilla.sc/admin/task/725729/editor?version=10
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df_att_2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_no_fdbk_attention_vid_cbal/SUP_PRF_pilot_no_fdbk_attention_vid_cbal_v5/SUP_PRF_pilot_no_fdbk_attention_vid_cbal_v5_task_main.csv")
+df_att_spin_2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_no_fdbk_attention_vid_cbal/SUP_PRF_pilot_no_fdbk_attention_vid_cbal_v5/SUP_PRF_pilot_no_fdbk_attention_vid_cbal_v5_mini_spin.csv")
+
+df_att_2 <- df_att_2[, c("Event.Index", "Trial.Number", "Random_ID", "Spreadsheet..Histogram", "Screen", "Display", "Response", "Response.Type", "Object.ID", "counterbalance.af8t" )]
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df_att_2$m_hist <- case_when(
+  df_att_2$Spreadsheet..Histogram == "h1.png" ~ 20,
+  df_att_2$Spreadsheet..Histogram == "h2.png" ~ 29,
+  df_att_2$Spreadsheet..Histogram == "h3.png" ~ 37,
+  df_att_2$Spreadsheet..Histogram == "h4.png" ~ 46,
+  df_att_2$Spreadsheet..Histogram == "h5.png" ~ 54,
+  df_att_2$Spreadsheet..Histogram == "h6.png" ~ 63,
+  df_att_2$Spreadsheet..Histogram == "h7.png" ~ 71,
+  df_att_2$Spreadsheet..Histogram == "h8.png" ~ 80,
+  TRUE ~ NA_real_
+)
+
+df_att_2<- df_att_2%>%
+  dplyr::filter(
+    (Display == "Trials - Externally Focused Attention") |
+    (Display == "Trials - Self Focused Attention") |
+    (Display == "Anxiety (Self-focused attention) ") |
+    (Display == "Mood (Self-focused attention)") |
+    (Display == "Anxiety (External attention) ") |
+    (Display == "Mood (External attention)"
+     ) 
+  )
+
+df_hist <- df_att_2%>%
+  dplyr::filter(Screen == "Introducing judge") %>%
+  select(Event.Index, Response.Type, Object.ID, Random_ID, Trial.Number, Screen, Display, m_hist, Spreadsheet..Histogram, counterbalance.af8t)
+
+df_hist <- df_hist %>%
+  mutate(Screen = ifelse(Screen == "Introducing judge", "m_hist", Screen))
+
+df_hist_modified <- df_hist %>%
+  select(Event.Index, Random_ID, Spreadsheet..Histogram, Trial.Number, m_hist, Screen, Display, Response.Type, Object.ID, counterbalance.af8t) %>% dplyr::rename(Response = m_hist)
+
+df_hist_modified <- df_hist_modified %>%
+  mutate(Response = as.character(Response))
+
+df_attention <- bind_rows(df_att_2, df_hist_modified)
+
+
+df_attention <- df_attention %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  dplyr::filter(!is.na(Response))
+
+df_attention <- df_attention %>%
+  select(-Event.Index, -Object.ID, -m_hist, -Response.Type, -Spreadsheet..Histogram)
+
+
+# Let's score mini-spin and add its total score to df_attention per subject
+df_att_spin_2 <- df_att_spin_2 %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+df_att_spin_2 <- df_att_spin_2 %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+
+df_attention_spin <- merge(df_attention, df_att_spin_2[, c("Random_ID", "mini_SPIN_total")], by = "Random_ID", all.x = TRUE)
+
+df_attention_spin$Social_Anxiety <- ifelse(df_attention_spin$mini_SPIN_total >= 6, "high", "low")
+
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df_attention_spin_f1 <- df_attention_spin %>% dplyr::filter(Display != "m_hist")
+random_ids <- unique(df_attention_spin$Random_ID)
+
+unique_high_anxiety_ids <- df_attention_spin_f1 %>%
+  dplyr::filter(Social_Anxiety == "high") %>%
+  distinct(Random_ID) %>%
+  nrow()
+
+total_n <- length(unique(df_attention_spin_f1$Random_ID))
+message_to_print <- paste(unique_high_anxiety_ids, "subjects out of", total_n,"had high social anxiety")
+print(message_to_print)
+
+df_attention_spin_notrials <- subset(df_attention_spin_f1, Display != "Trials - Externally Focused Attention")
+
+df_attention_spin_notrials <- df_attention_spin_notrials %>%
+  mutate(Display = case_when(
+    Display == "Anxiety (Self-focused attention) " ~ "Anxiety_IN",
+    Display == "Anxiety (External attention) " ~ "Anxiety_OUT",
+    Display == "Mood (Self-focused attention)" ~ "Mood_IN",
+    Display == "Mood (External attention)" ~ "Mood_OUT",
+    TRUE ~ Display  
+  ))
+
+list_of_dfs <- list()
+
+for (i in seq_along(random_ids)) {
+  x <- random_ids[i]  # Get the current value from random_ids
+  df_si <- subset(df_attention_spin_notrials, Random_ID == x)  # Create the subset
+  list_of_dfs[[paste0("df_s", i)]] <- df_si  # Add the subset to list_of_df10s
+}
+
+plot_function <- function(df_attention_spin_notrials, title) {
+  p <- ggplot(df_attention_spin_notrials, aes(x = Display, y = Response, fill = Social_Anxiety, color = counterbalance.af8t)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Anxiety and Mood ratings for subject:", title)) +
+    xlab("") + 
+    ylab("Mood/Anxiety ratings") +
+    facet_wrap(~Display, scales = "free")
+
+  return(p)
+}
+
+list_of_plots <- Map(plot_function, list_of_dfs, random_ids)
+
+for (i in seq_along(list_of_plots)) {
+  print(list_of_plots[[i]])
+}
+
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+avg_response <- df_attention_spin_notrials %>%
+  group_by(Random_ID, Display) %>%
+  summarise(avg_Response = mean(Response, na.rm = TRUE)) %>%
+  ungroup()
+
+wide_avg_response <- avg_response %>%
+  pivot_wider(names_from = Display, values_from = avg_Response)
+
+df_attention_spin_notrials <- df_attention_spin_notrials %>%
+  select(Random_ID, mini_SPIN_total, Social_Anxiety, counterbalance.af8t) %>%
+  distinct(Random_ID, .keep_all = TRUE) %>%
+  left_join(wide_avg_response, by = "Random_ID") %>%
+  pivot_longer(
+    cols = c("Anxiety_IN", "Anxiety_OUT", "Mood_IN", "Mood_OUT"),
+    names_to = "Display",
+    values_to = "Response"
+  )
+
+df_ax <- df_attention_spin_notrials %>% dplyr::filter(Display == "Anxiety_IN" | Display == "Anxiety_OUT")
+df_M <-  df_attention_spin_notrials %>% dplyr::filter(Display == "Mood_IN" | Display == "Mood_OUT")
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df_ax, aes(x = Display, y = Response, color = counterbalance.af8t)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average anxiety ratings in IN (internal) & OUT (external) attention conditions")) +
+    xlab("") + 
+    ylab("Average Anxiety Ratings") +
+    facet_wrap(~counterbalance.af8t, scales = "free")
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+result <- df_ax %>%
+  group_by(counterbalance.af8t, Display) %>%
+  summarize(
+    mean_response = mean(Response, na.rm = TRUE),
+    sd_response = sd(Response, na.rm = TRUE)
+  )
+print(result)
+# 
+# 
+# lmer_results <- lmer(Response ~ counterbalance.af8t * Display + (1 | Random_ID), data = df_ax)
+# summary(lmer_results)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df_M, aes(x = Display, y = Response, color = counterbalance.af8t)) +
+    geom_boxplot(outlier.colour = "black", outlier.shape = 16, 
+                 outlier.size = 2, notch = TRUE) +
+    geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+    theme_minimal() +
+    labs(x = "Display", y = "Response", fill = "Social Anxiety") +
+    # scale_fill_manual(values = c("low" = "blue", "high" = "red")) +
+    scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+    ggtitle(paste("Average mood ratings in IN (internal) & OUT (external) attention conditions")) +
+    xlab("") + 
+    ylab("Average Mood Ratings") +
+    facet_wrap(~counterbalance.af8t, scales = "free")
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+result <- df_M %>%
+  group_by(counterbalance.af8t, Display) %>%
+  summarize(
+    mean_response = mean(Response, na.rm = TRUE),
+    sd_response = sd(Response, na.rm = TRUE)
+  )
+print(result)
+# 
+# 
+# lmer_results <- lmer(Response ~ counterbalance.af8t * Display + (1 | Random_ID), data = df_ax)
+# summary(lmer_results)
+```
+
+
+\newpage
+# Relationship between mini_SPIN and momentary mood ratings 
+The plot below show the relationship between (average) mood ratings on the task and the total mini_SPIN scores.  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_M <- df_M %>%
+  group_by(Display) %>%
+  summarise(correlation = cor(mini_SPIN_total, Response, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  
+
+average_correlation_M <- mean(correlations_M$correlation, na.rm = TRUE)
+message_to_print <- paste("correlation between mini_SPIN_total and average mood ratings:", average_correlation_M)
+print(message_to_print)
+
+
+ggplot(df_M, aes(x=mini_SPIN_total, y=Response)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue") +     
+  labs(color="Legend") +
+  facet_wrap(~ Display, scales = "free") +
+  theme_minimal() +
+  xlab("mini_SPIN_total") + 
+  ylab("Average Momentary Mood Ratings") +
+  geom_text(data=correlations_M, aes(x=Inf, y=Inf, label=label, group=Display), hjust=1.5, vjust=4.1, size=2.7, fontface = "bold", inherit.aes=FALSE) 
+```
+
+
+\newpage
+# Relationship between mini_SPIN and momentary mood ratings 
+The plot below show the relationship between (average) anxiety ratings on the task and the total mini_SPIN scores.  
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_ax <- df_ax %>%
+  group_by(Display) %>%
+  summarise(correlation = cor(mini_SPIN_total, Response, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  
+
+average_correlation_ax <- mean(correlations_ax$correlation, na.rm = TRUE)
+message_to_print <- paste("correlation between mini_SPIN_total and average anxiety ratings:", average_correlation_ax)
+print(message_to_print)
+
+
+ggplot(df_ax, aes(x=mini_SPIN_total, y=Response)) +
+  geom_point(aes(color="Data Points", alpha = 0.5)) +
+  geom_smooth(method = "lm", color="blue") +     
+  labs(color="Legend") +
+  facet_wrap(~ Display, scales = "free") +
+  theme_minimal() +
+  xlab("mini_SPIN_total") + 
+  ylab("Average Momentary Anxiety Ratings") +
+  geom_text(data=correlations_ax, aes(x=Inf, y=Inf, label=label, group=Display), hjust=1.5, vjust=4.1, size=2.7, fontface = "bold", inherit.aes=FALSE) 
+
+```
