@@ -1,0 +1,353 @@
+---
+title: "Surprise study pilot 12"
+author: "Marjan Biria"
+date: "2024-01-02"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+library(purrr)
+```
+
+
+\newpage
+# Pilot 12: changing "nervous/uncomfortable" to "relaxed"
+
+We changed the question about anxiety in this pilot, other than that everything is the same as pilot 11. After our last meeting we discussed 3 possible hypotheses:  
+1) Anxiety/discomfort may require a different cognitive process from happiness/mood  
+2) Starting point for anxiety is lower than it should be for us to see a change? (==> it does not seem to be the case)  
+3) Just a valence difference: “how relaxed do you feel?” Or “how unhappy do you feel?”; how relax someone feels may be easier to measure/observe/change on a momentary basis compared to how anxious someone feels which may require more time to change.  
+The Gorilla experiment is the following: https://app.gorilla.sc/admin/experiment/157680/design  
+The task is the following: https://app.gorilla.sc/admin/task/728998/editor?version=3
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# all_pilots_with_mini_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_with_mini_spin.csv")
+# df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 11")
+# df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 10")
+# # Let's merge pilots that used the same task version (video re-introduced and colour code the anxiety levels)
+# df_10_11 <- rbind(df11_data, df10_data)
+
+df12_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2_task_main.csv")
+
+df12_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2_mini_spin.csv")
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df12_spin <- df12_spin %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+df12_spin <- df12_spin %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+
+# create a new df12 that only keeps the columns we need
+df12 <- df12_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+                     "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
+
+
+df12 <- df12 %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  filter(!is.na(Response))
+
+df12$m_hist <- ifelse(df12$Spreadsheet..Histogram == "h1.png", 20,
+                      ifelse(df12$Spreadsheet..Histogram == "h2.png", 212,
+                             ifelse(df12$Spreadsheet..Histogram == "h3.png", 37,
+                                    ifelse(df12$Spreadsheet..Histogram == "h4.png", 46,
+                                           ifelse(df12$Spreadsheet..Histogram == "h5.png", 54,
+                                                  ifelse(df12$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df12$Spreadsheet..Histogram == "h7.png", 71,
+                                                                ifelse(df12$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
+
+
+# get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
+df12 <- df12 %>%
+  filter(
+    (Display == "Trials ") |
+      (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
+      (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
+  )
+
+# setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
+df12$Trial.Number <- ifelse(df12$Display == 'Mood ' | df12$Display == 'Anxiety ', df12$Trial.Number - 2, df12$Trial.Number)
+df12$Display <- ifelse(df12$Display == 'Mood ' | df12$Display == 'Anxiety ', "Trials", df12$Display)
+
+# renaming the feedback column to fdbk
+names(df12)[names(df12) == 'Spreadsheet..Feedback'] <- 'fdbk'
+
+# Now let's create columns for PE (fdbk-hist) and Subj_PE (fdbk_Prediction)
+
+df12$SubjPE <- ifelse(df12$Screen == "Prediction ", df12$fdbk - df12$Response, NA)
+df12$PE <- ifelse(df12$Screen == "Prediction ", df12$fdbk - df12$m_hist, NA)
+# to keep just one repetition of feedback and mean histogram per trial per subject 
+# and replace the rest with NA so that when we want to convert to long format we won't have duplicates
+df12$fdbk <- ifelse(df12$Screen == "Prediction ", df12$fdbk, NA)
+df12$m_hist <- ifelse(df12$Screen == "Prediction ", df12$m_hist, NA)
+
+
+long_df12 <- df12 %>%
+  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
+               names_to = "Screen",
+               values_to = "Response")
+
+
+# This will keep only the rows where 'Response' is not NA
+long_df12 <- long_df12[!is.na(long_df12$Response), ]
+
+
+# Selecting relevant columns from the original df12
+df12 <- df12 %>%
+  select(-c(fdbk, m_hist, PE, SubjPE))
+
+# Binding the rows together
+df12 <- bind_rows(df12, long_df12)
+
+df12$Response <- as.numeric(df12$Response)
+
+
+
+# looking at the relationship between PE and SubjPE
+df12_PE <- subset(df12, Screen == "PE")
+names(df12_PE)[names(df12_PE) == "Screen"] <- "Screen_PE"
+names(df12_PE)[names(df12_PE) == "Response"] <- "Response_PE"
+
+df12_SubjPE <- subset(df12, Screen == "SubjPE")
+names(df12_SubjPE)[names(df12_SubjPE) == "Screen"] <- "Screen_SubjPE"
+names(df12_SubjPE)[names(df12_SubjPE) == "Response"] <- "Response_SubjPE"
+
+df12_fdbk <- subset(df12, Screen == "fdbk")
+names(df12_fdbk)[names(df12_fdbk) == "Screen"] <- "Screen_fdbk"
+names(df12_fdbk)[names(df12_fdbk) == "Response"] <- "Response_fdbk"
+
+df12_hist <- subset(df12, Screen == "m_hist")
+names(df12_hist)[names(df12_hist) == "Screen"] <- "Screen_m_hist"
+names(df12_hist)[names(df12_hist) == "Response"] <- "Response_m_hist"
+
+df12_predic <- subset(df12, Screen == "Prediction ")
+names(df12_predic)[names(df12_predic) == "Screen"] <- "Screen_pred"
+names(df12_predic)[names(df12_predic) == "Response"] <- "Response_pred"
+
+df12_cert <- subset(df12, Screen == "Certainty rating ")
+names(df12_cert)[names(df12_cert) == "Screen"] <- "Screen_certainty"
+names(df12_cert)[names(df12_cert) == "Response"] <- "Response_certainty"
+
+list_of_dfs_12 <- list(df12_PE, df12_fdbk, df12_hist, df12_predic, df12_cert, df12_SubjPE)
+
+# Using reduce with inner_join
+merged_df12 <- reduce(list_of_dfs_12, inner_join, by = c("Random_ID", "Trial.Number"))
+
+df12_Anxious <- subset(df12, Screen == "Anxious")
+names(df12_Anxious)[names(df12_Anxious) == "Screen"] <- "Screen_Ax"
+names(df12_Anxious)[names(df12_Anxious) == "Response"] <- "Response_Ax"
+
+df12_Happy <- subset(df12, Screen == "Happy")
+# df12_fdbk <- subset(df12, Screen == "Prediction")
+names(df12_Happy)[names(df12_Happy) == "Screen"] <- "Screen_H"
+names(df12_Happy)[names(df12_Happy) == "Response"] <- "Response_H"
+
+final_df12 <- merged_df12 %>%
+  inner_join(df12_Anxious, by = c("Random_ID", "Trial.Number")) %>%
+  inner_join(df12_Happy, by = c("Random_ID", "Trial.Number"))
+
+
+# subset only the columns we are interested in
+final_df12 <- final_df12[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_certainty", "Response_m_hist", "Response_pred")]
+
+final_df12 <- final_df12 %>%
+  left_join(df12_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+final_df12$Social_Anxiety <- ifelse(final_df12$mini_SPIN_total >= 6, "high", "low")
+write.csv(final_df12, "pilot_12_variables.csv", row.names = FALSE)
+
+print("It seems everyone has done all the 48 trials:") 
+final_df12 %>%
+  group_by(Random_ID) %>%
+  summarise(Trial_Count = n())
+```
+
+
+\newpage 
+# Relationship between "relaxed feeling" and SubjPE
+
+We replaced the anxiety question with how relaxed someone feels in the moment (right now). The findings are very similar to before, when we asked "How anxious are you right now?", except in the opposite direction. It may be best to go back to the anxiety question then, since there won't be any doubt about whether or not we are measuring anxiety with the new question. Unless, in younger kids, the word "anxiety" would be more difficult, so maybe keeping how "nervous/uncomfortable" you feel?
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+correlations <- final_df12 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_Ax <- paste("average correlation between anxiety and SubjPE:", average_correlation)
+
+print(message_to_print_Ax)
+
+ggplot(final_df12, aes(x = Response_SubjPE, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Anxiety") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 5))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank())
+```
+\newpage 
+# Relationship between mood and SubjPE
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+correlations <- final_df12 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_H, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mood and SubjPE:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df12, aes(x = Response_SubjPE, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Mood") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme(strip.text = element_text(size = 5))+
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(
+    strip.text.x = element_text(face = "bold"),  # For horizontal facet titles
+    strip.text.y = element_text(face = "bold"),  # For vertical facet titles
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank())
+```
+
+
+\newpage 
+# LME models for Mood and SubjPE
+This is the best model: Mood ~ SubjPE + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+
+anova(model1, model2)
+summary(model1)
+summary(model2)
+
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+
+anova(model2, model3)
+
+coef_fixed <- fixef(model2)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta <- parameters:: standardise_parameters (model2)
+model2 %>% broom.mixed::tidy("fixed") 
+```
+
+\newpage 
+# Individual plots with LME for Mood
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(final_df12, aes(x=Response_SubjPE, y=Response_H)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective Prediction Error: feedback - prediction") + 
+  ylab("Mood") +
+  ggtitle("Relationship between Mood and Surprises",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df12$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 0, y = 55, label = paste("beta = ", round(standard_beta$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta$CI_low[2],2), "-", 
+                                                 round(standard_beta$CI_high[2],2))) 
+```
+
+
+
+
+\newpage 
+# LME models for  Anxiety (~relaxed) and SubjPE
+This is the best model: Anxiety ~ SubjPE + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+
+anova(model1, model2)
+summary(model1)
+summary(model2)
+
+model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+
+anova(model2, model3)
+
+coef_fixed <- fixef(model2)
+intercept_Ax <- coef_fixed[1]
+slope_Ax <- coef_fixed[2]
+standard_beta <- parameters:: standardise_parameters (model2)
+model2 %>% broom.mixed::tidy("fixed") 
+```
+\newpage 
+# Individual plots with LME for Anxiety
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(final_df12, aes(x=Response_SubjPE, y=Response_Ax)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective Prediction Error: feedback - prediction") + 
+  ylab("How relaxed do you feel right now (0-100)?") +
+  ggtitle("Relationship between Anxiety (~relaxed) and Surprises",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df12$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 0, y = 55, label = paste("beta = ", round(standard_beta$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta$CI_low[2],2), "-", 
+                                                 round(standard_beta$CI_high[2],2))) 
+```
+

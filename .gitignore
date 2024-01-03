@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
+.DS_Store
+SUP_PRF_pilot_pred_nopic_vid/.DS_Store
+SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/.DS_Store
+SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG/.DS_Store
+Group_plots_SubjPE_Mood.Rmd
+Attention_pilot_1.Rmd
+Attention_pilot_1.pdf
+all_pilots_wide_8var.csv
