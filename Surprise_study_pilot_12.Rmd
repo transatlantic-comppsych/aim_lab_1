@@ -193,7 +193,7 @@ final_df12 %>%
 \newpage 
 # Relationship between "relaxed feeling" and SubjPE
 
-We replaced the anxiety question with how relaxed someone feels in the moment (right now). The findings are very similar to before, when we asked "How anxious are you right now?", except in the opposite direction. It may be best to go back to the anxiety question then, since there won't be any doubt about whether or not we are measuring anxiety with the new question. Unless, in younger kids, the word "anxiety" would be more difficult, so maybe keeping how "nervous/uncomfortable" you feel?
+We replaced the anxiety question with how relaxed someone feels in the moment (right now). The findings are very similar to before (similar effect sizes), when we asked "How anxious are you right now?", except in the opposite direction. It may be best to go back to the anxiety question then, since there won't be any doubt about whether or not we are measuring anxiety with the new question. Unless, in younger kids, the word "anxiety" would be more difficult, so maybe keeping how "nervous/uncomfortable" you feel?
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
