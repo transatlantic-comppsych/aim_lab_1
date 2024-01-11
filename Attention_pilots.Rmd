@@ -575,7 +575,7 @@ print(t_test_Anxiety)
 \newpage
 # Attention pilot 2: study description
 
-This pilot was the same as before but we had 59 people counterbalancing the order of conditions between them. Another difference with previous attention pilot is that around 51% of people had high social anxiety scores, and this was 72% in attention pilot 1.  
+This pilot was the same as before but we had 59 people counterbalancing the order of conditions between them. Another difference with previous attention pilot is that around 51% of people had high social anxiety scores, and this was 72% in attention pilot 1. In pilot 1, the picture was presented for 4 seconds before they have to describe it and then would disappear. In pilot 2, we re-introduced the picture to have the same design as the surprise task if ultimately we wanted to combine both. However, we need to keep in mind for the next attention pilots, to present the picture separately for 4s, and remove it from the performance trial to see whether it improves the results.  
 
 This was the Gorilla experiment:https://app.gorilla.sc/admin/experiment/157047/design
 This was the task used: https://app.gorilla.sc/admin/task/725729/editor?version=10
