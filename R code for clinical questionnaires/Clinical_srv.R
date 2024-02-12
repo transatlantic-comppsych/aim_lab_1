@@ -1,8 +1,6 @@
 #load packages -----------------------------------------------------------
 library(tidyverse)
-library(conflicted)
 library(dplyr)
-library(stringr)
 library(readxl)
 # Set your working directory to the folder in which all your CSV files are located
 setwd("/Users/Elena/Downloads")
