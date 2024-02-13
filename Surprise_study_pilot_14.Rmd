@@ -504,49 +504,6 @@ ggplot(final_df14, aes(x = Response_fdbk, y = Response_Ax, color = Social_Anxiet
 ```
 
 
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-# \newpage 
-# # Relationship between mean histogram and prediction
-# 
-# It seems the relationship between prediction and histogram is also weaker than before. 
-
-# corr_test <- final_df14 %>%
-#   group_by(Random_ID) %>%
-#   summarise(correlation = cor(Response_m_hist, Response_pred, use = "complete.obs")) %>%
-#   mutate(label = paste("R = ", round(correlation, digits = 2)))
-# 
-# # calculate the average correlation across all individuals and print it
-# average_correlation <- mean(corr_test$correlation, na.rm = TRUE)
-# message_to_print_H <- paste("average correlation between histogram mean and prediction:", average_correlation)
-# 
-# print(message_to_print_H)
-# 
-# ggplot(final_df14, aes(x = Response_pred, y = Response_m_hist, color = Social_Anxiety, group= Social_Anxiety)) +
-#   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
-#   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
-#   # labs(color="Legend") +
-#   theme_minimal() +
-#   xlab("Prediction") + 
-#   ylab("Histogram mean") +
-#     facet_wrap(~ Random_ID, scales = "free") +
-#     geom_text(data=corr_test, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
-#     theme(strip.text = element_text(size = 6),
-#         axis.text.x = element_text(size = 5.5),  
-#         axis.text.y = element_text(size = 5.5),  
-#         strip.text.x = element_text(face = "bold"),  
-#         strip.text.y = element_text(face = "bold"),  
-#         panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank(),
-#         panel.background = element_blank()) +
-#   ylim(c(0, 100)) + 
-#   scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
-#   xlim(c(-100, 100)) + 
-#   scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
-  
-```
-
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # trying to keep the BL_1 and BL_2 mood and anxiety ratings
 df14_with_BL <- df14_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
@@ -651,47 +608,236 @@ But since in this new pilot we have had several changes at once, shall we repeat
 # Anxiety- SubjPE correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
 correlations_Ax_merged <- merge(correlations_Ax, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
 
 correlations_Ax_summary <- correlations_Ax_merged %>%
 group_by(Thought_avatars_real) %>%
 summarize(mean_correlation = mean(correlation,na.rm = TRUE),
             sample_size = n())
+
+print(correlations_Ax_summary)
 ```
 
 \newpage 
 # Anxiety- Feedback correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
 correlations_merged <- merge(correlations, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
 
 correlations_summary <- correlations_merged %>%
 group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE))
+summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+            sample_size = n())
+
+print(correlations_summary)
 ```
 
 \newpage 
 # Mood - SubjPE correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
 correlations_M_merged <- merge(correlations_M, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
 
 correlations_M_summary <- correlations_M_merged %>%
 group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE))
+summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+            sample_size = n())
+
+print(correlations_M_summary)
 ```
 
 \newpage 
 # Mood-Feedback correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
 correlations_Mfd_merged <- merge(correlations_Mfd, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
 
 correlations_Mfd_summary <- correlations_Mfd_merged %>%
 group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE))
+summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+            sample_size = n())
+
+print(correlations_Mfd_summary)
+```
+
+\newpage
+# LME models for Mood and SubjPE
+I will now look at the best LME models including feedback as well. But since subjective PE does include feedback, I will either only include feedback or SubjPE.
+
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16192.33
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 16014.14
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+
+model4 <- lme4::lmer(Response_H ~ Response_fdbk + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model5 <- lme4::lmer(Response_H ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model6 <- lme4::lmer(Response_H ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+
+summary(model1)
+summary(model2)
+summary(model3)
+summary(model4)
+summary(model5)
+summary(model6)
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+AIC(model5)
+AIC(model6)
+
+# anova(model2, model5)
+
+coef_fixed <- fixef(model5)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model5)
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
+# test <- model5 %>% broom.mixed::tidy("fixed") 
+```
+
+\newpage 
+# Individual plots with LME for Mood with SubjPE
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16192.33
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Feedback") + 
+  ylab("Mood") +
+  ggtitle("Relationship between Mood and subjective PE",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df14$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_subjPE$CI_low[2],2), "-", 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+  
+```
+
+
+\newpage 
+# Individual plots with LME for Mood with feedback instead of SubjPE
+
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 16014.14
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Feedback") + 
+  ylab("Mood") +
+  ggtitle("Relationship between Mood and Feedback",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df14$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_fdbk$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_fdbk$CI_low[2],2), "-", 
+                                                 round(standard_beta_fdbk$CI_high[2],2))) 
+  
+```
+
+\newpage
+# LME models for Anxiety and SubjPE
+
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16097.78
+When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 16084.09
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+
+model4 <- lme4::lmer(Response_Ax ~ Response_fdbk + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model5 <- lme4::lmer(Response_Ax ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model6 <- lme4::lmer(Response_Ax ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+
+summary(model1)
+summary(model2)
+summary(model3)
+summary(model4)
+summary(model5)
+summary(model6)
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+AIC(model5)
+AIC(model6)
+
+# anova(model2, model5)
+
+coef_fixed <- fixef(model4)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model4)
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
+```
+
+
+\newpage 
+# Individual plots with LME for Anxiety with SubjPE
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16097.78
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Feedback") + 
+  ylab("Mood") +
+  ggtitle("Relationship between Anxiety and subjective PE",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df14$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_subjPE$CI_low[2],2), "-", 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+  
+```
+
+
+\newpage 
+# Individual plots with LME for Anxiety with feedback instead of SubjPE
+
+When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 16084.09
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Feedback") + 
+  ylab("Mood") +
+  ggtitle("Relationship between Anxiety and Feedback",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df14$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_fdbk$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_fdbk$CI_low[2],2), "-", 
+                                                 round(standard_beta_fdbk$CI_high[2],2))) 
+  
 ```
