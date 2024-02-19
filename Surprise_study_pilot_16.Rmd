@@ -294,6 +294,58 @@ ggplot(final_df16, aes(x = Response_m_hist, y = Response_pred, color = Social_An
   
 ```
 
+\newpage 
+# Relationship between prediction and mean histogram across trials
+
+I suspect to see a weaker correlation between prediction and mean of the histogram from first to last trial.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df16 %>%
+  group_by(Trial.Number) %>%
+  summarise(correlation = cor(Response_m_hist, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mean_hist and prediction per trial:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df16, aes(x = Response_m_hist, y = Response_pred)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Trial.Number)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("prediction") + 
+  ylab("mean_histogram") +
+    facet_wrap(~ Trial.Number, scales = "free",ncol = 8) +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Trial.Number), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) 
+
+
+
+correlations_with_groups <- final_df16 %>%
+  mutate(Trial_Group = ifelse(Trial.Number >= 1 & Trial.Number <= 24, '1-24', 
+                              ifelse(Trial.Number >= 25 & Trial.Number <= 48, '25-48', NA))) %>%
+  group_by(Trial_Group) %>%
+  summarise(correlation = cor(Response_m_hist, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))
+
+average_correlations <- correlations_with_groups %>%
+  group_by(Trial_Group) %>%
+  summarise(average_correlation = mean(correlation, na.rm = TRUE))
+
+# Printing the result
+print(average_correlations)
+  
+```
 
 
 \newpage 
