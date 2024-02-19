@@ -1,5 +1,5 @@
 ---
-title: "Surprise study pilot 14"
+title: "Surprise study pilot 15"
 author: "Marjan Biria"
 date: "2024-02-07"
 output: 
@@ -31,30 +31,23 @@ library(readxl)
 \newpage
 # Study description
 
-This study has the same version of PE's as pilots 10 and 11, also having video and audio only. In this pilot we 1) replaced the judge pictures with cartoon images to see whether it becomes more believable as many people believed those images were AI generated, 2) we allow participants to also choose their own avatar, again to make it more believable that the others are also real, 3) we have created a new narrative around public speaking and what is the goal of this task and added criteria they will be judged open to make them more nervous but also make it more believable if they get a rating that they cannot guess what they were judged upon at each trial (they are told the judges will receive a new criterion per trial), 4) lastly, we changed two feedback questions to inquire about believability, one of them being a scale asking "How stressful was this as a social situation?"
+This study is the same as pilot 14, but we brought the old judge pictures back, and changed the narrative around public speaking. Instead we say "getting better at speaking to others". There have been few other changes such as saying the judge will rate "you" rather than "your description" as we have made the task more social by sharing some criteria they will be rated on that are not just about the description. There have been other minor edits to make the instructions read better and change font sizes etc.
 
-The Gorilla experiment is the following: https://app.gorilla.sc/admin/project/120255
-The task is the following: https://app.gorilla.sc/admin/task/741126/editor?version=13
+The Gorilla experiment is the following: https://app.gorilla.sc/admin/project/125338
+The task is the following: https://app.gorilla.sc/admin/task/768786/editor
 
-I will write this here as well for us to have, if we forget again:  
-**Positive PE:** we selected numbers from a normal distribution ranging from 12-20, added this number to the mean of the histogram.  
-**Negative PE:** we selected numbers from a normal distribution ranging from 12-20, subtracted this number to the mean of the histogram.  
-**Big positive PE:** Per judge, we added 10 to the biggest positive feedback we had generated before.  
-**Neutral PE: ** we added -1, 0, 1 to the mean of the histograms  
-
-In this sample, only 17 people out of 41 had high social anxiety.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df14_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_task_main.csv")
-df14_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_mini_spin.csv")
-df14_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_ces_d.csv")
+df15_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_task_main.csv")
+df15_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_mini_spin.csv")
+df15_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_ces_d.csv")
 ```
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # extract CES-D scores
-CESD_data_clean <- df14_cesd[, c(32, 34, 36, 38, 40, 42, 44, 46,48,50,
+CESD_data_clean <- df15_cesd[, c(32, 34, 36, 38, 40, 42, 44, 46,48,50,
                                  52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 71 )]
 # Identify non-ID variable columns
 non_id_cols <- setdiff(names(CESD_data_clean), "Random_ID")
@@ -119,43 +112,43 @@ for (i in 1:nrow(CESD_data_clean)) {
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df14_spin <- df14_spin %>%
+df15_spin <- df15_spin %>%
   rename(
    "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
    "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
    "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
   )
 
-df14_spin <- df14_spin %>%
+df15_spin <- df15_spin %>%
   rowwise() %>%
   mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
   ungroup()
 
 
-# create a new df14 that only keeps the columns we need
-df14 <- df14_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+# create a new df15 that only keeps the columns we need
+df15 <- df15_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
                      "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
 
-df14 <- df14 %>%
+df15 <- df15 %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
   dplyr::filter(!is.na(Response))
 
-df14$Screen <- ifelse(df14$Trial.Number == 1 & (df14$Display == "Mood " | df14$Display == "Anxiety "), "BL_1",
-                      ifelse(df14$Trial.Number == 2 & (df14$Display == "Mood " | df14$Display == "Anxiety "), "BL_2", 
-                             df14$Screen))
+df15$Screen <- ifelse(df15$Trial.Number == 1 & (df15$Display == "Mood " | df15$Display == "Anxiety "), "BL_1",
+                      ifelse(df15$Trial.Number == 2 & (df15$Display == "Mood " | df15$Display == "Anxiety "), "BL_2", 
+                             df15$Screen))
 
-df14$m_hist <- ifelse(df14$Spreadsheet..Histogram == "h1.png", 20,
-                      ifelse(df14$Spreadsheet..Histogram == "h2.png", 29,
-                             ifelse(df14$Spreadsheet..Histogram == "h3.png", 37,
-                                    ifelse(df14$Spreadsheet..Histogram == "h4.png", 46,
-                                           ifelse(df14$Spreadsheet..Histogram == "h5.png", 54,
-                                                  ifelse(df14$Spreadsheet..Histogram == "h6.png", 63,
-                                                         ifelse(df14$Spreadsheet..Histogram == "h7.png", 71,
-                                                                ifelse(df14$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
+df15$m_hist <- ifelse(df15$Spreadsheet..Histogram == "h1.png", 20,
+                      ifelse(df15$Spreadsheet..Histogram == "h2.png", 29,
+                             ifelse(df15$Spreadsheet..Histogram == "h3.png", 37,
+                                    ifelse(df15$Spreadsheet..Histogram == "h4.png", 46,
+                                           ifelse(df15$Spreadsheet..Histogram == "h5.png", 54,
+                                                  ifelse(df15$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df15$Spreadsheet..Histogram == "h7.png", 71,
+                                                                ifelse(df15$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
 
 
 # get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
-df14 <- df14 %>%
+df15 <- df15 %>%
   dplyr::filter(
     (Display == "Trials ") |
       (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
@@ -163,23 +156,23 @@ df14 <- df14 %>%
   )
 
 # # setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
-df14$Trial.Number <- ifelse(df14$Display == 'Mood ' | df14$Display == 'Anxiety ', df14$Trial.Number - 2, df14$Trial.Number)
-df14$Display <- ifelse(df14$Display == 'Mood ' | df14$Display == 'Anxiety ', "Trials", df14$Display)
+df15$Trial.Number <- ifelse(df15$Display == 'Mood ' | df15$Display == 'Anxiety ', df15$Trial.Number - 2, df15$Trial.Number)
+df15$Display <- ifelse(df15$Display == 'Mood ' | df15$Display == 'Anxiety ', "Trials", df15$Display)
 
 # renaming the feedback column to fdbk
-names(df14)[names(df14) == 'Spreadsheet..Feedback'] <- 'fdbk'
+names(df15)[names(df15) == 'Spreadsheet..Feedback'] <- 'fdbk'
 
 # Now let's create columns for PE (fdbk-hist) and Subj_PE (fdbk_Prediction)
 
-df14$SubjPE <- ifelse(df14$Screen == "Prediction ", df14$fdbk - df14$Response, NA)
-df14$PE <- ifelse(df14$Screen == "Prediction ", df14$fdbk - df14$m_hist, NA)
+df15$SubjPE <- ifelse(df15$Screen == "Prediction ", df15$fdbk - df15$Response, NA)
+df15$PE <- ifelse(df15$Screen == "Prediction ", df15$fdbk - df15$m_hist, NA)
 # to keep just one repetition of feedback and mean histogram per trial per subject 
 # and replace the rest with NA so that when we want to convert to long format we won't have duplicates
-df14$fdbk <- ifelse(df14$Screen == "Prediction ", df14$fdbk, NA)
-df14$m_hist <- ifelse(df14$Screen == "Prediction ", df14$m_hist, NA)
+df15$fdbk <- ifelse(df15$Screen == "Prediction ", df15$fdbk, NA)
+df15$m_hist <- ifelse(df15$Screen == "Prediction ", df15$m_hist, NA)
 
 
-long_df14 <- df14 %>%
+long_df15 <- df15 %>%
   select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
   pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
                names_to = "Screen",
@@ -187,85 +180,126 @@ long_df14 <- df14 %>%
 
 
 # This will keep only the rows where 'Response' is not NA
-long_df14 <- long_df14[!is.na(long_df14$Response), ]
+long_df15 <- long_df15[!is.na(long_df15$Response), ]
 
-# Selecting relevant columns from the original df14
-df14 <- df14 %>%
+# Selecting relevant columns from the original df15
+df15 <- df15 %>%
   select(-c(fdbk, m_hist, PE, SubjPE))
 
 # Binding the rows together
-df14 <- bind_rows(df14, long_df14)
+df15 <- bind_rows(df15, long_df15)
 
-df14$Response <- as.numeric(df14$Response)
+df15$Response <- as.numeric(df15$Response)
 
 # looking at the relationship between PE and SubjPE
-df14_PE <- subset(df14, Screen == "PE")
-names(df14_PE)[names(df14_PE) == "Screen"] <- "Screen_PE"
-names(df14_PE)[names(df14_PE) == "Response"] <- "Response_PE"
+df15_PE <- subset(df15, Screen == "PE")
+names(df15_PE)[names(df15_PE) == "Screen"] <- "Screen_PE"
+names(df15_PE)[names(df15_PE) == "Response"] <- "Response_PE"
 
-df14_SubjPE <- subset(df14, Screen == "SubjPE")
-names(df14_SubjPE)[names(df14_SubjPE) == "Screen"] <- "Screen_SubjPE"
-names(df14_SubjPE)[names(df14_SubjPE) == "Response"] <- "Response_SubjPE"
+df15_SubjPE <- subset(df15, Screen == "SubjPE")
+names(df15_SubjPE)[names(df15_SubjPE) == "Screen"] <- "Screen_SubjPE"
+names(df15_SubjPE)[names(df15_SubjPE) == "Response"] <- "Response_SubjPE"
 
-df14_fdbk <- subset(df14, Screen == "fdbk")
-names(df14_fdbk)[names(df14_fdbk) == "Screen"] <- "Screen_fdbk"
-names(df14_fdbk)[names(df14_fdbk) == "Response"] <- "Response_fdbk"
+df15_fdbk <- subset(df15, Screen == "fdbk")
+names(df15_fdbk)[names(df15_fdbk) == "Screen"] <- "Screen_fdbk"
+names(df15_fdbk)[names(df15_fdbk) == "Response"] <- "Response_fdbk"
 
-df14_hist <- subset(df14, Screen == "m_hist")
-names(df14_hist)[names(df14_hist) == "Screen"] <- "Screen_m_hist"
-names(df14_hist)[names(df14_hist) == "Response"] <- "Response_m_hist"
+df15_hist <- subset(df15, Screen == "m_hist")
+names(df15_hist)[names(df15_hist) == "Screen"] <- "Screen_m_hist"
+names(df15_hist)[names(df15_hist) == "Response"] <- "Response_m_hist"
 
-df14_predic <- subset(df14, Screen == "Prediction ")
-names(df14_predic)[names(df14_predic) == "Screen"] <- "Screen_pred"
-names(df14_predic)[names(df14_predic) == "Response"] <- "Response_pred"
+df15_predic <- subset(df15, Screen == "Prediction ")
+names(df15_predic)[names(df15_predic) == "Screen"] <- "Screen_pred"
+names(df15_predic)[names(df15_predic) == "Response"] <- "Response_pred"
 
-df14_cert <- subset(df14, Screen == "Certainty rating ")
-names(df14_cert)[names(df14_cert) == "Screen"] <- "Screen_certainty"
-names(df14_cert)[names(df14_cert) == "Response"] <- "Response_certainty"
+df15_cert <- subset(df15, Screen == "Certainty rating ")
+names(df15_cert)[names(df15_cert) == "Screen"] <- "Screen_certainty"
+names(df15_cert)[names(df15_cert) == "Response"] <- "Response_certainty"
 
-list_of_dfs_14 <- list(df14_PE, df14_fdbk, df14_hist, df14_predic, df14_cert, df14_SubjPE)
+list_of_dfs_15 <- list(df15_PE, df15_fdbk, df15_hist, df15_predic, df15_cert, df15_SubjPE)
 
 # Using reduce with inner_join
-merged_df14 <- reduce(list_of_dfs_14, inner_join, by = c("Random_ID", "Trial.Number"))
+merged_df15 <- reduce(list_of_dfs_15, inner_join, by = c("Random_ID", "Trial.Number"))
 
-df14_Anxious <- subset(df14, Screen == "Anxious")
-names(df14_Anxious)[names(df14_Anxious) == "Screen"] <- "Screen_Ax"
-names(df14_Anxious)[names(df14_Anxious) == "Response"] <- "Response_Ax"
+df15_Anxious <- subset(df15, Screen == "Anxious")
+names(df15_Anxious)[names(df15_Anxious) == "Screen"] <- "Screen_Ax"
+names(df15_Anxious)[names(df15_Anxious) == "Response"] <- "Response_Ax"
 
-df14_Happy <- subset(df14, Screen == "Happy")
-# df14_fdbk <- subset(df14, Screen == "Prediction")
-names(df14_Happy)[names(df14_Happy) == "Screen"] <- "Screen_H"
-names(df14_Happy)[names(df14_Happy) == "Response"] <- "Response_H"
+df15_Happy <- subset(df15, Screen == "Happy")
+# df15_fdbk <- subset(df15, Screen == "Prediction")
+names(df15_Happy)[names(df15_Happy) == "Screen"] <- "Screen_H"
+names(df15_Happy)[names(df15_Happy) == "Response"] <- "Response_H"
 
-final_df14 <- merged_df14 %>%
-  inner_join(df14_Anxious, by = c("Random_ID", "Trial.Number")) %>%
-  inner_join(df14_Happy, by = c("Random_ID", "Trial.Number"))
+final_df15 <- merged_df15 %>%
+  inner_join(df15_Anxious, by = c("Random_ID", "Trial.Number")) %>%
+  inner_join(df15_Happy, by = c("Random_ID", "Trial.Number"))
 
 
 # subset only the columns we are interested in
-final_df14 <- final_df14[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_certainty", "Response_m_hist", "Response_pred")]
+final_df15 <- final_df15[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_certainty", "Response_m_hist", "Response_pred")]
 
-final_df14 <- final_df14 %>%
-  left_join(df14_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
+final_df15 <- final_df15 %>%
+  left_join(df15_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
 
-final_df14 <- final_df14 %>%
+final_df15 <- final_df15 %>%
   left_join(CESD_data_clean %>% select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
 
-final_df14$Social_Anxiety <- ifelse(final_df14$mini_SPIN_total >= 6, "high", "low")
+final_df15$Social_Anxiety <- ifelse(final_df15$mini_SPIN_total >= 6, "high", "low")
 
-write.csv(final_df14, "pilot_14_variables.csv", row.names = FALSE)
+write.csv(final_df15, "pilot_15_variables.csv", row.names = FALSE)
 
 # print("It seems everyone has done all the 48 trials, except subjects SUPPRF05583 (trial_nr = 26), SUPPRF08160 (trial_nr = 39),  SUPPRF68822 (47), SUPPRF80696 (51??! how?? this person was stuck on trial 13, their answer and PE were repeated so I wonder whether for some reason this happened once but saved 3 times when writing the output file? we should ask Gorilla what happened there!):") 
-final_df14 %>%
+final_df15 %>%
   group_by(Random_ID) %>%
   summarise(Trial.Number = n())
 ```
+
+\newpage 
+# Relationship between prediction and mean histogram
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df15 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_m_hist, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mean_hist and prediction:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df15, aes(x = Response_m_hist, y = Response_pred, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("prediction") + 
+  ylab("mean_histogram") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) 
+# +
+  # ylim(c(0, 100)) + 
+  # scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  # xlim(c(-100, 100)) + 
+  # scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+
 \newpage 
 # Relationship between Anxiety and SubjPE
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-correlations_Ax <- final_df14 %>%
+correlations_Ax <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_Ax, Response_SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -276,7 +310,7 @@ message_to_print_Ax <- paste("average correlation between anxiety and SubjPE:", 
 
 print(message_to_print_Ax)
 
-ggplot(final_df14, aes(x = Response_SubjPE, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_SubjPE, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -305,7 +339,7 @@ scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-correlations_M <- final_df14 %>%
+correlations_M <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_H, Response_SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -316,7 +350,7 @@ message_to_print_H <- paste("average correlation between mood and SubjPE:", aver
 
 print(message_to_print_H)
 
-ggplot(final_df14, aes(x = Response_SubjPE, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_SubjPE, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -348,7 +382,7 @@ The relationship between mood and feedback seems to be stronger than mood and su
 To be sure, I wonder if we want to repeat the pilot and just replace the images?
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-correlations_Mfd <- final_df14 %>%
+correlations_Mfd <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_H, Response_fdbk, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -359,7 +393,7 @@ message_to_print_H <- paste("average correlation between mood and feedback:", av
 
 print(message_to_print_H)
 
-ggplot(final_df14, aes(x = Response_fdbk, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_fdbk, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -389,7 +423,7 @@ ggplot(final_df14, aes(x = Response_fdbk, y = Response_H, color = Social_Anxiety
 # Relationship between Mood and prediction
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-correlations <- final_df14 %>%
+correlations <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_H, Response_pred, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -400,7 +434,7 @@ message_to_print_H <- paste("average correlation between mood and prediction:", 
 
 print(message_to_print_H)
 
-ggplot(final_df14, aes(x = Response_pred, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_pred, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -429,7 +463,7 @@ ggplot(final_df14, aes(x = Response_pred, y = Response_H, color = Social_Anxiety
 # Relationship between Anxiety and prediction
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-correlations <- final_df14 %>%
+correlations <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_Ax, Response_pred, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -440,7 +474,7 @@ message_to_print_H <- paste("average correlation between anxiety and prediction:
 
 print(message_to_print_H)
 
-ggplot(final_df14, aes(x = Response_pred, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_pred, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -468,7 +502,7 @@ ggplot(final_df14, aes(x = Response_pred, y = Response_Ax, color = Social_Anxiet
 # Relationship between Anxiety and feedback
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-correlations <- final_df14 %>%
+correlations <- final_df15 %>%
   group_by(Random_ID) %>%
   summarise(correlation = cor(Response_Ax, Response_fdbk, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2))) 
@@ -479,7 +513,7 @@ message_to_print_H <- paste("average correlation between anxiety and feedback:",
 
 print(message_to_print_H)
 
-ggplot(final_df14, aes(x = Response_fdbk, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+ggplot(final_df15, aes(x = Response_fdbk, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
   geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
   # labs(color="Legend") +
@@ -506,29 +540,29 @@ ggplot(final_df14, aes(x = Response_fdbk, y = Response_Ax, color = Social_Anxiet
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # trying to keep the BL_1 and BL_2 mood and anxiety ratings
-df14_with_BL <- df14_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+df15_with_BL <- df15_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
                      "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
 
-df14_with_BL <- df14_with_BL %>%
+df15_with_BL <- df15_with_BL %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
   dplyr::filter(!is.na(Response))
 
-df14_with_BL$Screen <- ifelse(df14_with_BL$Trial.Number == 1 & (df14_with_BL$Display == "Mood " | df14_with_BL$Display == "Anxiety "), "BL_1",
-                      ifelse(df14_with_BL$Trial.Number == 2 & (df14_with_BL$Display == "Mood " | df14_with_BL$Display == "Anxiety "), "BL_2", 
-                             df14_with_BL$Screen))
+df15_with_BL$Screen <- ifelse(df15_with_BL$Trial.Number == 1 & (df15_with_BL$Display == "Mood " | df15_with_BL$Display == "Anxiety "), "BL_1",
+                      ifelse(df15_with_BL$Trial.Number == 2 & (df15_with_BL$Display == "Mood " | df15_with_BL$Display == "Anxiety "), "BL_2", 
+                             df15_with_BL$Screen))
 
-df14_with_BL$m_hist <- ifelse(df14_with_BL$Spreadsheet..Histogram == "h1.png", 20,
-                      ifelse(df14_with_BL$Spreadsheet..Histogram == "h2.png", 212,
-                             ifelse(df14_with_BL$Spreadsheet..Histogram == "h3.png", 37,
-                                    ifelse(df14_with_BL$Spreadsheet..Histogram == "h4.png", 46,
-                                           ifelse(df14_with_BL$Spreadsheet..Histogram == "h5.png", 54,
-                                                  ifelse(df14_with_BL$Spreadsheet..Histogram == "h6.png", 63,
-                                                         ifelse(df14_with_BL$Spreadsheet..Histogram == "h7.png", 71,
-                                                                ifelse(df14_with_BL$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
+df15_with_BL$m_hist <- ifelse(df15_with_BL$Spreadsheet..Histogram == "h1.png", 20,
+                      ifelse(df15_with_BL$Spreadsheet..Histogram == "h2.png", 29,
+                             ifelse(df15_with_BL$Spreadsheet..Histogram == "h3.png", 37,
+                                    ifelse(df15_with_BL$Spreadsheet..Histogram == "h4.png", 46,
+                                           ifelse(df15_with_BL$Spreadsheet..Histogram == "h5.png", 54,
+                                                  ifelse(df15_with_BL$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df15_with_BL$Spreadsheet..Histogram == "h7.png", 71,
+                                                                ifelse(df15_with_BL$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
 
 
 # get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
-df14_with_BL <- df14_with_BL %>%
+df15_with_BL <- df15_with_BL %>%
   dplyr::filter(
     (Display == "Trials ") |
       (Display == "Anxiety ") |
@@ -536,18 +570,18 @@ df14_with_BL <- df14_with_BL %>%
   )
 
 # # setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
-df14_with_BL$Trial.Number <- ifelse(df14_with_BL$Display == 'Mood ' | df14_with_BL$Display == 'Anxiety ', df14_with_BL$Trial.Number - 2, df14_with_BL$Trial.Number)
-# df14_with_BL$Display <- ifelse(df14_with_BL$Display == 'Mood ' | df14_with_BL$Display == 'Anxiety ', "Trials", df14_with_BL$Display)
+df15_with_BL$Trial.Number <- ifelse(df15_with_BL$Display == 'Mood ' | df15_with_BL$Display == 'Anxiety ', df15_with_BL$Trial.Number - 2, df15_with_BL$Trial.Number)
+# df15_with_BL$Display <- ifelse(df15_with_BL$Display == 'Mood ' | df15_with_BL$Display == 'Anxiety ', "Trials", df15_with_BL$Display)
 
-final_df14_with_BL <- df14_with_BL[c("Trial.Number", "Display", "Screen", "Response", "Random_ID")]
+final_df15_with_BL <- df15_with_BL[c("Trial.Number", "Display", "Screen", "Response", "Random_ID")]
 
-final_df14_with_BL <- final_df14_with_BL %>%
-  left_join(df14_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
+final_df15_with_BL <- final_df15_with_BL %>%
+  left_join(df15_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
 
-final_df14_with_BL <- final_df14_with_BL %>%
+final_df15_with_BL <- final_df15_with_BL %>%
   left_join(CESD_data_clean %>% select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
 
-final_df14_with_BL$Social_Anxiety <- ifelse(final_df14_with_BL$mini_SPIN_total >= 6, "high", "low")
+final_df15_with_BL$Social_Anxiety <- ifelse(final_df15_with_BL$mini_SPIN_total >= 6, "high", "low")
 ```
 
 
@@ -557,10 +591,10 @@ final_df14_with_BL$Social_Anxiety <- ifelse(final_df14_with_BL$mini_SPIN_total >
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df14_BL_ax <- subset(final_df14_with_BL, Display == "Anxiety ")
-df14_BL_H <- subset(final_df14_with_BL,Display == "Mood ")
+df15_BL_ax <- subset(final_df15_with_BL, Display == "Anxiety ")
+df15_BL_H <- subset(final_df15_with_BL,Display == "Mood ")
 
-ggplot(df14_BL_H, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
+ggplot(df15_BL_H, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
   geom_line(color = "blue") +
   geom_vline(xintercept = 1, linetype = "dashed", color = "red") + # Adding a vertical line at Trial.Number == 1
   theme_minimal() +
@@ -579,7 +613,7 @@ ggplot(df14_BL_H, aes(x = Trial.Number, y = Response, color = Display, group = D
 \newpage 
 # Anxiety over time 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(df14_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
+ggplot(df15_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
   geom_line(color = "blue") +
   geom_vline(xintercept = 1, linetype = "dashed", color = "red") + # Adding a vertical line at Trial.Number == 1
   theme_minimal() +
@@ -596,88 +630,19 @@ ggplot(df14_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = 
 ```
 
 
-
-\newpage
-# Participants' feedback
-In the feedback we received from people, some people mentioned they did not like being watched and some mentioned since they did not see the other person, they did not care and did not think they were real and did not influence how they felt. We did have a few people who mentioned "the observer" or "they" when trying to descrive the virtual players. But overall, seeing how weaker the relationship is, I don't think having the cartoon images helps.  
-
-But since in this new pilot we have had several changes at once, shall we repeat the pilot with the new narrative but with the old pictures we had?
-
-
-\newpage 
-# Anxiety- SubjPE correlations
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_Ax_merged <- merge(correlations_Ax, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_Ax_summary <- correlations_Ax_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_Ax_summary)
-```
-
-\newpage 
-# Anxiety- Feedback correlations
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_merged <- merge(correlations, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_summary <- correlations_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_summary)
-```
-
-\newpage 
-# Mood - SubjPE correlations
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_M_merged <- merge(correlations_M, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_M_summary <- correlations_M_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_M_summary)
-```
-
-\newpage 
-# Mood-Feedback correlations
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_Mfd_merged <- merge(correlations_Mfd, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_Mfd_summary <- correlations_Mfd_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_Mfd_summary)
-```
-
 \newpage
 # LME models for Mood and SubjPE
-I will now look at the best LME models including feedback as well. But since subjective PE does include feedback, I will either only include feedback or SubjPE.
 
-When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16192.33
-When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 16014.14
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 11681.18
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 11615
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
 
-model4 <- lme4::lmer(Response_H ~ Response_fdbk + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model5 <- lme4::lmer(Response_H ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model6 <- lme4::lmer(Response_H ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_H ~ Response_fdbk + (1 | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model5 <- lme4::lmer(Response_H ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model6 <- lme4::lmer(Response_H ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
 
 summary(model1)
 summary(model2)
@@ -705,20 +670,20 @@ standard_beta_subjPE <- parameters:: standardise_parameters (model2)
 
 \newpage 
 # Individual plots with LME for Mood with SubjPE
-When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16192.33
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 11681.18
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
+ggplot(final_df15, aes(x=Response_SubjPE, y=Response_H)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
-  xlab("Feedback") + 
+  xlab("Subjective PE") + 
   ylab("Mood") +
   ggtitle("Relationship between Mood and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
-                           length(unique(final_df14$Random_ID))))+
-  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+                           length(unique(final_df15$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
   theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
@@ -731,11 +696,11 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
 \newpage 
 # Individual plots with LME for Mood with feedback instead of SubjPE
 
-When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 16014.14
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 11615.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
+ggplot(final_df15, aes(x=Response_fdbk, y=Response_H)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
@@ -743,8 +708,8 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
   ylab("Mood") +
   ggtitle("Relationship between Mood and Feedback",
           subtitle = paste("estimated slopes of the association in n = ", 
-                           length(unique(final_df14$Random_ID))))+
-  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+                           length(unique(final_df15$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
   theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_fdbk$Std_Coefficient[2],2), ", 95%CI = ",
@@ -756,17 +721,17 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
 \newpage
 # LME models for Anxiety and SubjPE
 
-When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16097.78
-When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 16084.09
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 11764.61
+When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 11705.6
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
 
-model4 <- lme4::lmer(Response_Ax ~ Response_fdbk + (1 | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model5 <- lme4::lmer(Response_Ax ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
-model6 <- lme4::lmer(Response_Ax ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df14, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_Ax ~ Response_fdbk + (1 | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model5 <- lme4::lmer(Response_Ax ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
+model6 <- lme4::lmer(Response_Ax ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df15, control=lmerControl(optimizer="bobyqa"))
 
 summary(model1)
 summary(model2)
@@ -794,20 +759,20 @@ standard_beta_subjPE <- parameters:: standardise_parameters (model2)
 
 \newpage 
 # Individual plots with LME for Anxiety with SubjPE
-When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 16097.78
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 11764.61
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
+ggplot(final_df15, aes(x=Response_SubjPE, y=Response_Ax)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
-  xlab("Feedback") + 
+  xlab("Subjective PE") + 
   ylab("Mood") +
   ggtitle("Relationship between Anxiety and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
-                           length(unique(final_df14$Random_ID))))+
-  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+                           length(unique(final_df15$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
   theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
@@ -820,11 +785,11 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
 \newpage 
 # Individual plots with LME for Anxiety with feedback instead of SubjPE
 
-When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 16084.09
+When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 11705.6
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
+ggplot(final_df15, aes(x=Response_fdbk, y=Response_Ax)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
@@ -832,8 +797,8 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
   ylab("Mood") +
   ggtitle("Relationship between Anxiety and Feedback",
           subtitle = paste("estimated slopes of the association in n = ", 
-                           length(unique(final_df14$Random_ID))))+
-  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+                           length(unique(final_df15$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
   theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_fdbk$Std_Coefficient[2],2), ", 95%CI = ",
@@ -841,3 +806,45 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
                                                  round(standard_beta_fdbk$CI_high[2],2))) 
   
 ```
+
+
+\newpage
+# Bayesian LME
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# library(brms)
+# # Prefer ar from the stats package
+# conflicts_prefer(stats::ar)
+# conflicts_prefer(Matrix::expand)
+# conflicts_prefer(dplyr::filter)
+# conflicts_prefer(dplyr::lag)
+# conflicts_prefer(brms::ngrps)
+# conflicts_prefer(tidyr::pack)
+# conflicts_prefer(tidyr::unpack)
+# 
+# # Define prior distributions for the parameters
+# prior <- c(
+#   prior(normal(0, 10), "b"), # Priors for the fixed effects coefficients
+#   prior(student_t(5, 0, 10), "sd"), # Priors for the standard deviations of the random effects
+#   prior(lkj(2), "cor") # Prior for the correlation of the random effects
+# )
+# 
+# # Fit the Bayesian LME model
+# bayesian_model <- brm(
+#   formula = Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID),
+#   data = final_df15,
+#   family = gaussian(), # Assuming a Gaussian family, adjust if necessary
+#   prior = prior,
+#   control = list(optimizer = "bobyqa"),
+#   warmup = 1000, # Number of warmup iterations for the MCMC
+#   iter = 4000, # Total number of iterations for the MCMC
+#   chains = 4, # Number of chains
+#   core = parallel::detectCores(), # Use multiple cores for faster computation
+#   seed = 123 # For reproducibility
+# )
+# 
+# # Inspect the model output
+# summary(bayesian_model)
+
+```
+

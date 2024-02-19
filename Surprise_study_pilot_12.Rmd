@@ -74,7 +74,7 @@ df12 <- df12 %>%
   filter(!is.na(Response))
 
 df12$m_hist <- ifelse(df12$Spreadsheet..Histogram == "h1.png", 20,
-                      ifelse(df12$Spreadsheet..Histogram == "h2.png", 212,
+                      ifelse(df12$Spreadsheet..Histogram == "h2.png", 29,
                              ifelse(df12$Spreadsheet..Histogram == "h3.png", 37,
                                     ifelse(df12$Spreadsheet..Histogram == "h4.png", 46,
                                            ifelse(df12$Spreadsheet..Histogram == "h5.png", 54,

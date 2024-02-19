@@ -150,7 +150,7 @@ df13$Screen <- ifelse(df13$Trial.Number == 1 & (df13$Display == "Mood " | df13$D
                              df13$Screen))
 
 df13$m_hist <- ifelse(df13$Spreadsheet..Histogram == "h1.png", 20,
-                      ifelse(df13$Spreadsheet..Histogram == "h2.png", 212,
+                      ifelse(df13$Spreadsheet..Histogram == "h2.png", 29,
                              ifelse(df13$Spreadsheet..Histogram == "h3.png", 37,
                                     ifelse(df13$Spreadsheet..Histogram == "h4.png", 46,
                                            ifelse(df13$Spreadsheet..Histogram == "h5.png", 54,
