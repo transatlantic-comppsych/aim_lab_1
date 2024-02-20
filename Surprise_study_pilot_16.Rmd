@@ -42,6 +42,16 @@ The task is the following: https://app.gorilla.sc/admin/task/772053/editor
 df16_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_early_pred/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2_task_main.csv")
 df16_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_early_pred/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2_mini_spin.csv")
 df16_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_early_pred/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2/SUP_PRF_pilot_vid_big_PE_narr2_early_pred_v2_ces_d.csv")
+
+df16_raw <- df16_raw %>%
+  dplyr::filter(Random_ID != "SUPPRF83198")
+
+df16_spin <- df16_spin %>%
+  dplyr::filter(Random_ID != "SUPPRF83198")
+
+df16_cesd <- df16_cesd %>%
+  dplyr::filter(Random_ID != "SUPPRF83198")
+
 ```
 
 
@@ -248,7 +258,7 @@ final_df16$Social_Anxiety <- ifelse(final_df16$mini_SPIN_total >= 6, "high", "lo
 
 write.csv(final_df16, "pilot_16_variables.csv", row.names = FALSE)
 
-print("It seems everyone has done all the 48 trials, Elena managed to fix the issue some people were experiencing, possibly not seeing the next button") 
+print("It seems everyone has done all the 48 trials, Elena managed to fix the issue some people were experiencing, possibly not seeing the next button. There is only 1 participant who did 46 trials due to an emergency from their side.") 
 final_df16 %>%
   group_by(Random_ID) %>%
   summarise(Trial.Number = n())
@@ -686,8 +696,8 @@ ggplot(df16_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = 
 \newpage
 # LME models for Mood and SubjPE
 
-When looking at subjective PE, the best model is  Mood ~ SubjPE * mini_SPIN_total + (SubjPE | Random_ID) with an AIC of 9123.999
-When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 8879.897
+When looking at subjective PE, the best model is  Mood ~ SubjPE + (SubjPE | Random_ID) with an AIC of 19784.67
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 19380.41
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df16, control=lmerControl(optimizer="bobyqa"))
 model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df16, control=lmerControl(optimizer="bobyqa"))
@@ -729,20 +739,24 @@ print("AIC model6:")
 AIC(model6)
 
 # anova(model2, model5)
-
-coef_fixed <- fixef(model3)
-intercept_Mood <- coef_fixed[1]
-slope_Mood <- coef_fixed[2]
-standard_beta_fdbk <- parameters:: standardise_parameters (model5)
-standard_beta_subjPE <- parameters:: standardise_parameters (model3)
+# coef_fixed <- fixef(model3)
+# intercept_Mood <- coef_fixed[1]
+# slope_Mood <- coef_fixed[2]
+# standard_beta_fdbk <- parameters:: standardise_parameters (model5)
+# standard_beta_subjPE <- parameters:: standardise_parameters (model2)
 # test <- model5 %>% broom.mixed::tidy("fixed") 
 ```
 
 \newpage 
 # Individual plots with LME for Mood with SubjPE
-When looking at subjective PE, the best model is  Mood ~ SubjPE * mini_SPIN_total  + (SubjPE | Random_ID) with an AIC of 9123.999
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 19784.67
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+coef_fixed <- fixef(model2)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
 
 ggplot(final_df16, aes(x=Response_SubjPE, y=Response_H)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
@@ -766,9 +780,14 @@ ggplot(final_df16, aes(x=Response_SubjPE, y=Response_H)) +
 \newpage 
 # Individual plots with LME for Mood with feedback instead of SubjPE
 
-When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 8879.897.
+When including feedback the best model is Mood ~ feedback  + (feedback | Random_ID) with an AIC of 19380.41
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+coef_fixed <- fixef(model5)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model5)
+
 
 ggplot(final_df16, aes(x=Response_fdbk, y=Response_H)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
@@ -791,8 +810,8 @@ ggplot(final_df16, aes(x=Response_fdbk, y=Response_H)) +
 \newpage
 # LME models for Anxiety and SubjPE
 
-When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 8823.219
-When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 8761.136
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 19691.4
+When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with an AIC of 19530.9
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df16, control=lmerControl(optimizer="bobyqa"))
@@ -836,26 +855,37 @@ AIC(model6)
 
 # anova(model2, model5)
 
-# coef_fixed <- fixef(model4)
-# intercept_Mood <- coef_fixed[1]
-# slope_Mood <- coef_fixed[2]
-standard_beta_fdbk <- parameters:: standardise_parameters (model4)
+coef_fixed_subjPE <- fixef(model2)
+intercept_ax_subjPE <- coef_fixed[1]
+slope_ax_subjPE <- coef_fixed[2]
+
+coef_fixed_fdbk <- fixef(model5)
+intercept_ax_fdbk <- coef_fixed[1]
+slope_ax_fdbk <- coef_fixed[2]
+
+standard_beta_fdbk <- parameters:: standardise_parameters (model5)
 standard_beta_subjPE <- parameters:: standardise_parameters (model2)
 ```
 
 
 \newpage 
 # Individual plots with LME for Anxiety with SubjPE
-When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 8823.219
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 19691.4
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+coef_fixed <- fixef(model2)
+intercept_ax <- coef_fixed[1]
+slope_ax <- coef_fixed[2]
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
+
 
 ggplot(final_df16, aes(x=Response_SubjPE, y=Response_Ax)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
-  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  geom_abline(intercept = intercept_ax, slope = slope_ax, color="purple", linetype="dashed", size=1) +
   xlab("Subjective PE") + 
-  ylab("Mood") +
+  ylab("Anxiety") +
   ggtitle("Relationship between Anxiety and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
                            length(unique(final_df16$Random_ID))))+
@@ -876,12 +906,18 @@ When including feedback the best model is Anxiety ~ feedback  + (Random_ID) with
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
+coef_fixed <- fixef(model5)
+intercept_ax <- coef_fixed[1]
+slope_ax <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model5)
+
+
 ggplot(final_df16, aes(x=Response_fdbk, y=Response_Ax)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
-  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  geom_abline(intercept = intercept_ax, slope = slope_ax, color="purple", linetype="dashed", size=1) +
   xlab("Feedback") + 
-  ylab("Mood") +
+  ylab("Anxiety") +
   ggtitle("Relationship between Anxiety and Feedback",
           subtitle = paste("estimated slopes of the association in n = ", 
                            length(unique(final_df16$Random_ID))))+
