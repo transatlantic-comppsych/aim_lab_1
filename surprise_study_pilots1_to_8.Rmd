@@ -60,7 +60,7 @@ In batch3, the histogram mean and sd were changed so that we can less extreme va
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(root.dir = "/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise", echo = TRUE)
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
 ```
 
 
@@ -72,8 +72,8 @@ library(tidyr)
 
 \newpage We can see below the data from batch 1 of pilot 4: prediction with no feedback on Prolific:
 ```{r echo=FALSE}
-df1 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_pred_nopic_vid_v5_task_main.csv") # Prolific, no picture taken
-df2 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_pred_nopic_aud_v5_task_main.csv") # Prolific, no picture taken, only audio (no video)
+df1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_vid/SUP_PRF_pilot_pred_nopic_vid_v5/SUP_PRF_pilot_pred_nopic_vid_v5_task_main.csv") # Prolific, no picture taken
+df2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_aud/SUP_PRF_pilot_pred_nopic_aud_v5/SUP_PRF_pilot_pred_nopic_aud_v5_task_main.csv") # Prolific, no picture taken, only audio (no video)
 ```
 
 ```{r echo=FALSE}
@@ -210,7 +210,7 @@ ggplot(df12_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) 
 The following people had different histogram means and smaller sd for histograms, so we plot them separately despite having a similar task design and also being from Prolific.
 
 ```{r echo=FALSE}
-df3 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_pred_nopic_vid_v8_task_main.csv")   # Prolific, no picture taken, has both audio and video, histograms had different means () and sd = 3 to be narrower, this change was made to help us create histograms that would allow us create prediction errors more easily.
+df3 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_vid/SUP_PRF_pilot_pred_nopic_vid_v8/SUP_PRF_pilot_pred_nopic_vid_v8_task_main.csv")   # Prolific, no picture taken, has both audio and video, histograms had different means () and sd = 3 to be narrower, this change was made to help us create histograms that would allow us create prediction errors more easily.
 
 if (!(identical(colnames(df1), colnames(df3)))) {
   stop("The two dataframes have different columns or order of columns!")
@@ -509,8 +509,9 @@ There were two different versions: <br>
 
 Below we will be looking at the non-random feedback.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df4 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_AMT_pilot_fdbk_nrand_typing_novid_v4_task_main.csv")
-df5 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_AMT_pilot_fdbk_nrand_typing_novid_v5_task_main.csv")
+df4 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_AMT_pilot_fdbk_nrnd_typ/SUP_AMT_pilot_fdbk_nrnd_typ_v4/SUP_AMT_pilot_fdbk_nrnd_typ_v4_task_main.csv")
+                                                                                 
+df5 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_AMT_pilot_fdbk_nrnd_typ/SUP_AMT_pilot_fdbk_nrnd_typ_v5/SUP_AMT_pilot_fdbk_nrnd_typ_v5_task_main.csv")
 
 
 df5 <- rbind(df4, df5)
@@ -752,7 +753,7 @@ ggplot(subset3, aes(x = Trial.Number, y = Response, color = Display, group = Dis
 ### Pilot 6: We repeated task with non-random feedback on Prolific to see whether the data quality would be better. Below you can see the results. Experiment: https://app.gorilla.sc/admin/experiment/147682/design, Task: https://app.gorilla.sc/admin/task/667140/editor?version=7
 
 ```{r echo=FALSE}
-df6 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_nrand_typing_novid_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio)
+df6 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_nrnd_typ/SUP_PRF_pilot_fdbk_nrnd_typ_v3/SUP_PRF_pilot_fdbk_nrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio)
 
 # if (!(identical(colnames(df1), colnames(df3)))) {
 #   stop("The two dataframes have different columns or order of columns!")
@@ -854,7 +855,7 @@ Now let's make plots for each subject that show how prediction, feedback, histog
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # lets add the feedback in the same column as the rest of the data since they are all from 0-100 values and since we want a long format data
 
-df6_raw <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_nrand_typing_novid_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio)
+df6_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_nrnd_typ/SUP_PRF_pilot_fdbk_nrnd_typ_v3/SUP_PRF_pilot_fdbk_nrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio)
 
 # create a new df6 that only keeps the columns we need
 
@@ -1472,7 +1473,7 @@ print(t_test_result)
 <font size="3"> It may also be interesting to look at the relationship between the correlation between anxiety and PE, with mini-SPIN score to see how the levels of social anxiety may influence this relationship </font>
 <br> <br> 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df7 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_task_main.csv")
+df7 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ/SUP_PRF_pilot_fdbk_bignrnd_typ_v3/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_task_main.csv")
 # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
 # This includes the additional 20 people we tested
 
@@ -1622,7 +1623,7 @@ Now let's make plots for each subject that show how prediction, feedback, histog
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df7_raw <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge, 37 (40 for now) subjects
+df7_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ/SUP_PRF_pilot_fdbk_bignrnd_typ_v3/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge, 37 (40 for now) subjects
 
 # create a new df7 that only keeps the columns we need
 df7 <- df7_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
@@ -2010,7 +2011,7 @@ ggplot(df7_fdbk_Ax_H, aes(x=Response, y=Response_H)) +
 \newpage The relationship between mini-SPIN and anxiety rating:
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df7_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
+df7_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ/SUP_PRF_pilot_fdbk_bignrnd_typ_v3/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
 
 df7_spin <- df7_spin %>%
   rename(
@@ -2331,7 +2332,7 @@ Again, the relationship between SubjPE and mood is slightly stronger than PE and
 \newpage Since these people were not screened for social anxiety, let's see how many of them had social anxiety scores higher than or equal to 6.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df7_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
+df7_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ/SUP_PRF_pilot_fdbk_bignrnd_typ_v3/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
 
 df7_spin <- df7_spin %>%
   rename(
@@ -2557,7 +2558,7 @@ So after keeping people with high mini_SPIN scores, the correlation becomes -0.2
 It may also be interesting to look at the relationship between the correlation between anxiety and PE, with mini-SPIN score to see how the levels of social anxiety may influence this relationship </font>
 <br> <br> 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df8 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_task_main.csv")
+df8 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_biggestnrnd_typ/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_task_main.csv")
 # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge, biggest PE (1 feedback of 90-100)
 
 # exclude this person who has not done all the trials:
@@ -2711,7 +2712,7 @@ Now let's make plots for each subject that show how prediction, feedback, histog
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df8_raw <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio) with biggest PE (1 feedback between 90-100), once per judge, 41 subjects
+df8_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_biggestnrnd_typ/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_task_main.csv")   # Prolific,non-random feedback, text only (no video/audio) with biggest PE (1 feedback between 90-100), once per judge, 41 subjects
 
 # create a new df8 that only keeps the columns we need
 df8 <- df8_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
@@ -3202,7 +3203,7 @@ Again, the relationship between SubjPE and mood is similar to SubjPE and much lo
 \newpage Since these people were not screened for social anxiety, let's see how many of them had social anxiety scores higher than or equal to 6.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df8_spin <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with biggest PE, once per judge
+df8_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_biggestnrnd_typ/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3/SUP_PRF_pilot_fdbk_biggestnrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with biggest PE, once per judge
 
 df8_spin <- df8_spin %>%
   rename(

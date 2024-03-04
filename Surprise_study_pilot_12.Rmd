@@ -37,12 +37,6 @@ The task is the following: https://app.gorilla.sc/admin/task/728998/editor?versi
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# all_pilots_with_mini_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_with_mini_spin.csv")
-# df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 11")
-# df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 10")
-# # Let's merge pilots that used the same task version (video re-introduced and colour code the anxiety levels)
-# df_10_11 <- rbind(df11_data, df10_data)
-
 df12_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2_task_main.csv")
 
 df12_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_anxQ_v2_mini_spin.csv")
@@ -71,7 +65,7 @@ df12 <- df12_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Resp
 
 df12 <- df12 %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
-  filter(!is.na(Response))
+  dplyr::filter(!is.na(Response))
 
 df12$m_hist <- ifelse(df12$Spreadsheet..Histogram == "h1.png", 20,
                       ifelse(df12$Spreadsheet..Histogram == "h2.png", 29,
@@ -85,7 +79,7 @@ df12$m_hist <- ifelse(df12$Spreadsheet..Histogram == "h1.png", 20,
 
 # get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
 df12 <- df12 %>%
-  filter(
+  dplyr::filter(
     (Display == "Trials ") |
       (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
       (Display == "Mood " & !Trial.Number %in% c(1, 2)) 
@@ -277,6 +271,7 @@ model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_
 
 anova(model2, model3)
 
+
 coef_fixed <- fixef(model2)
 intercept_Mood <- coef_fixed[1]
 slope_Mood <- coef_fixed[2]
@@ -302,8 +297,52 @@ ggplot(final_df12, aes(x=Response_SubjPE, y=Response_H)) +
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 0, y = 55, label = paste("beta = ", round(standard_beta$Std_Coefficient[2],2), ", 95%CI = ",
                                                  round(standard_beta$CI_low[2],2), "-", 
-                                                 round(standard_beta$CI_high[2],2))) 
+                                                 round(standard_beta$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100)) +
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p12_m.png", plot = p12_m, dpi = 300, width = 6, height = 4)
+  
 ```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df12, control=lmerControl(optimizer="bobyqa"))
+
+coef_fixed <- fixef(model2)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
+```
+
+
+\newpage 
+# Individual plots with LME for Anxiety with SubjPE
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot(final_df12, aes(x=Response_SubjPE, y=Response_Ax)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective PE") + 
+  ylab("Relaxed") +
+  ggtitle("Relationship between anxiety and subjective PE",
+          subtitle = paste("estimated slopes of the association in n = ", 
+                           length(unique(final_df12$Random_ID))))+
+  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_subjPE$CI_low[2],2), "-", 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100)) +
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p12_ax.png", plot = p12_ax, dpi = 300, width = 6, height = 4)
+  
+```
+
 
 
 

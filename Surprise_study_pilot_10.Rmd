@@ -40,8 +40,7 @@ video. The task can be found here: https://app.gorilla.sc/admin/task/698788/edit
 There were three people that ignored the histogram values and always chose similar values for prediction: "SUBPRF34408", "SUBPRF70880", "SUBPRF89542". I will do the analysis with and without them to see how they influenced the group correlations with anxiety and mood.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# df10 <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
-df10 <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise//SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
+df10 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_task_main.csv")
 
 df10_raw <- df10
 ```
@@ -916,7 +915,7 @@ Since these people were not screened for social anxiety, let's see how many of t
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df10_spin <- read.csv("~/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_mini_spin.csv")
+df10_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5/SUP_PRF_pilot_fdbk_bignrnd_YPAG_vid_v5_mini_spin.csv")
   
 df10_spin <- df10_spin %>%
   rename(
@@ -1103,8 +1102,8 @@ In the plot below we have anxiety ratings during pilots 9 (no video, more people
 library(purrr)
 
 # let's create a df for pilot 9 with all relevant variables similar to final_df10
-df9_raw <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
-df9_spin <- read.csv("aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
+df9_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_task_main.csv")
+df9_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6/SUP_PRF_pilot_fdbk_bignrnd_typ_YPAG_v6_mini_spin.csv")
   
 df9_spin <- df9_spin %>%
   rename(
@@ -1130,7 +1129,7 @@ df9 <- df9[!df9$Random_ID %in% ids_to_exclude, ]
 
 df9 <- df9 %>%
   mutate(Response = as.numeric(as.character(Response))) %>%
-  filter(!is.na(Response))
+  dplyr::filter(!is.na(Response))
 
 # add the histogram values depending on file name:
 df9$m_hist <- ifelse(df9$Spreadsheet..Histogram == "h1.png", 20,
@@ -1270,8 +1269,8 @@ write.csv(dfs_9_10, "pilots_9_10_variables.csv", row.names = FALSE)
 # reading Eleanor's data to get the mean and SD of anxiety ratings in WITH (self-focused) and WITHOUT (externally focused) conditions
 
 
-dfs_9_10 <- read.csv("aim_lab_1/pilots_9_10_variables.csv")
-df_Eleanor <- read.csv("aim_lab_1/Aim1.Database Stage 2_11.2019.csv")
+dfs_9_10 <- read.csv("/Users/marjan/Desktop/aim_lab_1/pilots_9_10_variables.csv")
+df_Eleanor <- read.csv("/Users/marjan/Desktop/aim_lab_1/Aim1.Database Stage 2_11.2019.csv")
 
 # calculate mean and sd for the WITH condition
 mean_value_WITH <- mean(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)

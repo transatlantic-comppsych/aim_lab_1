@@ -42,6 +42,7 @@ The task is the following: https://app.gorilla.sc/admin/task/768786/editor
 df15_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_task_main.csv")
 df15_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_mini_spin.csv")
 df15_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4/SUP_PRF_pilot_vid_big_PE_narr2_oldjudges_v4_ces_d.csv")
+
 ```
 
 
@@ -151,6 +152,7 @@ df15$m_hist <- ifelse(df15$Spreadsheet..Histogram == "h1.png", 20,
 df15 <- df15 %>%
   dplyr::filter(
     (Display == "Trials ") |
+      (Display == "Exit") |
       (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
       (Display == "Mood " & !Trial.Number %in% c(1, 2))
   )
@@ -170,21 +172,20 @@ df15$PE <- ifelse(df15$Screen == "Prediction ", df15$fdbk - df15$m_hist, NA)
 # and replace the rest with NA so that when we want to convert to long format we won't have duplicates
 df15$fdbk <- ifelse(df15$Screen == "Prediction ", df15$fdbk, NA)
 df15$m_hist <- ifelse(df15$Screen == "Prediction ", df15$m_hist, NA)
-
+df15$stress_level <- ifelse(df15$Screen == "Screen 12", df15$Response, NA)
 
 long_df15 <- df15 %>%
-  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
-  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
+  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, stress_level) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE, stress_level),
                names_to = "Screen",
                values_to = "Response")
-
 
 # This will keep only the rows where 'Response' is not NA
 long_df15 <- long_df15[!is.na(long_df15$Response), ]
 
 # Selecting relevant columns from the original df15
 df15 <- df15 %>%
-  select(-c(fdbk, m_hist, PE, SubjPE))
+  select(-c(fdbk, m_hist, PE, SubjPE, stress_level))
 
 # Binding the rows together
 df15 <- bind_rows(df15, long_df15)
@@ -207,6 +208,10 @@ names(df15_fdbk)[names(df15_fdbk) == "Response"] <- "Response_fdbk"
 df15_hist <- subset(df15, Screen == "m_hist")
 names(df15_hist)[names(df15_hist) == "Screen"] <- "Screen_m_hist"
 names(df15_hist)[names(df15_hist) == "Response"] <- "Response_m_hist"
+
+df15_stress_level <- subset(df15, Screen == "Screen 12")
+names(df15_stress_level)[names(df15_stress_level) == "Screen"] <- "Screen_stress_level"
+names(df15_stress_level)[names(df15_stress_level) == "Response"] <- "Response_stress_level"
 
 df15_predic <- subset(df15, Screen == "Prediction ")
 names(df15_predic)[names(df15_predic) == "Screen"] <- "Screen_pred"
@@ -242,6 +247,9 @@ final_df15 <- final_df15 %>%
   left_join(df15_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
 
 final_df15 <- final_df15 %>%
+  left_join(df15_stress_level %>% select(Random_ID, Response_stress_level), by = "Random_ID")
+
+final_df15 <- final_df15 %>%
   left_join(CESD_data_clean %>% select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
 
 final_df15$Social_Anxiety <- ifelse(final_df15$mini_SPIN_total >= 6, "high", "low")
@@ -252,6 +260,9 @@ write.csv(final_df15, "pilot_15_variables.csv", row.names = FALSE)
 final_df15 %>%
   group_by(Random_ID) %>%
   summarise(Trial.Number = n())
+
+write.csv(final_df15, "final_df15_with_stresslevels.csv", row.names = FALSE)
+
 ```
 
 \newpage 
@@ -688,7 +699,11 @@ ggplot(final_df15, aes(x=Response_SubjPE, y=Response_H)) +
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
                                                  round(standard_beta_subjPE$CI_low[2],2), "-", 
-                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p15_m.png", plot = p15_m, dpi = 300, width = 6, height = 4)
   
 ```
 
@@ -768,7 +783,7 @@ ggplot(final_df15, aes(x=Response_SubjPE, y=Response_Ax)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
   xlab("Subjective PE") + 
-  ylab("Mood") +
+  ylab("Anxiety") +
   ggtitle("Relationship between Anxiety and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
                            length(unique(final_df15$Random_ID))))+
@@ -777,7 +792,11 @@ ggplot(final_df15, aes(x=Response_SubjPE, y=Response_Ax)) +
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
                                                  round(standard_beta_subjPE$CI_low[2],2), "-", 
-                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p15_ax.png", plot = p15_ax, dpi = 300, width = 6, height = 4)
   
 ```
 
@@ -807,44 +826,51 @@ ggplot(final_df15, aes(x=Response_fdbk, y=Response_Ax)) +
   
 ```
 
-
 \newpage
-# Bayesian LME
+# Relationship average anxiety on the task and how stressful they rated the task
+
+We have only one scale at the end when asking feedback, and we ask them "How stressful was this as a social situation?" on a scale of 0-100. Let's look at the relationshio between this score and anxiety on the task, but also the average score in people with high and low social anxiety.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# library(brms)
-# # Prefer ar from the stats package
-# conflicts_prefer(stats::ar)
-# conflicts_prefer(Matrix::expand)
-# conflicts_prefer(dplyr::filter)
-# conflicts_prefer(dplyr::lag)
-# conflicts_prefer(brms::ngrps)
-# conflicts_prefer(tidyr::pack)
-# conflicts_prefer(tidyr::unpack)
-# 
-# # Define prior distributions for the parameters
-# prior <- c(
-#   prior(normal(0, 10), "b"), # Priors for the fixed effects coefficients
-#   prior(student_t(5, 0, 10), "sd"), # Priors for the standard deviations of the random effects
-#   prior(lkj(2), "cor") # Prior for the correlation of the random effects
-# )
-# 
-# # Fit the Bayesian LME model
-# bayesian_model <- brm(
-#   formula = Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID),
-#   data = final_df15,
-#   family = gaussian(), # Assuming a Gaussian family, adjust if necessary
-#   prior = prior,
-#   control = list(optimizer = "bobyqa"),
-#   warmup = 1000, # Number of warmup iterations for the MCMC
-#   iter = 4000, # Total number of iterations for the MCMC
-#   chains = 4, # Number of chains
-#   core = parallel::detectCores(), # Use multiple cores for faster computation
-#   seed = 123 # For reproducibility
-# )
-# 
-# # Inspect the model output
-# summary(bayesian_model)
+filter_final_df15 <- subset(final_df15, final_df15$Trial.Number == 1)
+
+high <- filter_final_df15[filter_final_df15$Social_Anxiety == "high", ]$Response_stress_level
+low <- filter_final_df15[filter_final_df15$Social_Anxiety == "low", ]$Response_stress_level
+
+shapiro_test_high <- shapiro.test(high)
+shapiro_test_low <- shapiro.test(low)
+
+if (shapiro_test_high$p.value <= 0.05 || shapiro_test_low$p.value <= 0.05) {
+  # At least one group is not normally distributed, use Mann-Whitney U test
+  mw_test_result <- wilcox.test(high, low)
+  print(mw_test_result)
+}
+
+ggplot(filter_final_df15, aes(x = Social_Anxiety, y = Response_stress_level , fill = Social_Anxiety)) +
+  geom_boxplot(outlier.colour = "black") +
+  stat_boxplot(geom = "errorbar",
+               width = 0.15) + 
+  geom_point(color = "black", position = position_jitter(width = 0.2), alpha = 0.7) +
+  theme_minimal() +
+  # labs(x = "Display", y = "Response") +
+  # scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  # ggtitle("Average anxiety ratings in pilots 1 and 2 in socially anxious people") +
+  xlab("") + 
+  ylab("stress levels (0-10)") +
+  # facet_wrap(~group, scales = "free", ncol = 4) +
+  # scale_fill_manual(values = c("black", "purple", "darkgreen", "blue"))+
+  # ylim(c(50, 100)) + 
+  # scale_y_continuous(breaks = seq(50, 100, by = 10), limits = c(50, 100))+
+  theme(
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    panel.grid.minor = element_blank(),  # Removes minor grid lines
+    panel.border = element_blank(),      # Removes the border line
+    axis.line = element_blank(),          # Removes axis lines
+    plot.background = element_rect(fill = "white", colour = NA)   # Ensure plot background is white
+  )
 
 ```
+
+
+
 

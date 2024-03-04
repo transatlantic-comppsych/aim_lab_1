@@ -46,10 +46,12 @@ In this sample, only 17 people out of 41 had high social anxiety.
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df14_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_task_main.csv")
-df14_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_mini_spin.csv")
-df14_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_avatars/SUP_PRF_pilot_vid_big_PE_avatars_v9/SUP_PRF_pilot_vid_big_PE_avatars_v9_ces_d.csv")
+# the path to be changed to the original folder after stress levels are extracted:
+df14_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr1_avatars/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9_task_main.csv")
+df14_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr1_avatars/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9_mini_spin.csv")
+df14_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_vid_big_PE_narr1_avatars/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9/SUP_PRF_pilot_vid_big_PE_narr1_avatars_v9_ces_d.csv")
 ```
+
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -67,7 +69,7 @@ excluded_columns <-  c("Random_ID", "Multiple.Choice.Grid.object.3.4...I.felt.I.
                        "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
                        "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
                        "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
-                  
+
 
 CESD_data_clean<- CESD_data_clean %>%
   mutate(across(-excluded_columns , ~ case_when(
@@ -119,6 +121,7 @@ for (i in 1:nrow(CESD_data_clean)) {
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
+
 df14_spin <- df14_spin %>%
   rename(
    "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
@@ -158,6 +161,7 @@ df14$m_hist <- ifelse(df14$Spreadsheet..Histogram == "h1.png", 20,
 df14 <- df14 %>%
   dplyr::filter(
     (Display == "Trials ") |
+      (Display == "Exit") |
       (Display == "Anxiety " & !Trial.Number %in% c(1, 2)) |
       (Display == "Mood " & !Trial.Number %in% c(1, 2))
   )
@@ -177,21 +181,20 @@ df14$PE <- ifelse(df14$Screen == "Prediction ", df14$fdbk - df14$m_hist, NA)
 # and replace the rest with NA so that when we want to convert to long format we won't have duplicates
 df14$fdbk <- ifelse(df14$Screen == "Prediction ", df14$fdbk, NA)
 df14$m_hist <- ifelse(df14$Screen == "Prediction ", df14$m_hist, NA)
-
+df14$stress_level <- ifelse(df14$Screen == "Screen 12", df14$Response, NA)
 
 long_df14 <- df14 %>%
-  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE) %>%
-  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE),
+  select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, stress_level) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE, stress_level),
                names_to = "Screen",
                values_to = "Response")
-
 
 # This will keep only the rows where 'Response' is not NA
 long_df14 <- long_df14[!is.na(long_df14$Response), ]
 
 # Selecting relevant columns from the original df14
 df14 <- df14 %>%
-  select(-c(fdbk, m_hist, PE, SubjPE))
+  select(-c(fdbk, m_hist, PE, SubjPE, stress_level))
 
 # Binding the rows together
 df14 <- bind_rows(df14, long_df14)
@@ -214,6 +217,10 @@ names(df14_fdbk)[names(df14_fdbk) == "Response"] <- "Response_fdbk"
 df14_hist <- subset(df14, Screen == "m_hist")
 names(df14_hist)[names(df14_hist) == "Screen"] <- "Screen_m_hist"
 names(df14_hist)[names(df14_hist) == "Response"] <- "Response_m_hist"
+
+df14_stress_level <- subset(df14, Screen == "Screen 12")
+names(df14_stress_level)[names(df14_stress_level) == "Screen"] <- "Screen_stress_level"
+names(df14_stress_level)[names(df14_stress_level) == "Response"] <- "Response_stress_level"
 
 df14_predic <- subset(df14, Screen == "Prediction ")
 names(df14_predic)[names(df14_predic) == "Screen"] <- "Screen_pred"
@@ -249,17 +256,23 @@ final_df14 <- final_df14 %>%
   left_join(df14_spin %>% select(Random_ID, mini_SPIN_total), by = "Random_ID")
 
 final_df14 <- final_df14 %>%
+  left_join(df14_stress_level %>% select(Random_ID, Response_stress_level), by = "Random_ID")
+
+final_df14 <- final_df14 %>%
   left_join(CESD_data_clean %>% select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
 
 final_df14$Social_Anxiety <- ifelse(final_df14$mini_SPIN_total >= 6, "high", "low")
 
-write.csv(final_df14, "pilot_14_variables.csv", row.names = FALSE)
+# write.csv(final_df14, "pilot_14_variables.csv", row.names = FALSE)
 
-# print("It seems everyone has done all the 48 trials, except subjects SUPPRF05583 (trial_nr = 26), SUPPRF08160 (trial_nr = 39),  SUPPRF68822 (47), SUPPRF80696 (51??! how?? this person was stuck on trial 13, their answer and PE were repeated so I wonder whether for some reason this happened once but saved 3 times when writing the output file? we should ask Gorilla what happened there!):") 
 final_df14 %>%
   group_by(Random_ID) %>%
   summarise(Trial.Number = n())
+
+# write.csv(final_df14, "final_df14_with_stresslevels.csv", row.names = FALSE)
+
 ```
+
 \newpage 
 # Relationship between Anxiety and SubjPE
 
@@ -607,61 +620,62 @@ But since in this new pilot we have had several changes at once, shall we repeat
 \newpage 
 # Anxiety- SubjPE correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_Ax_merged <- merge(correlations_Ax, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_Ax_summary <- correlations_Ax_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_Ax_summary)
+# avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
+# avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+# correlations_Ax_merged <- merge(correlations_Ax, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
+# 
+# correlations_Ax_summary <- correlations_Ax_merged %>%
+# group_by(Thought_avatars_real) %>%
+# summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+#             sample_size = n())
+# 
+# print(correlations_Ax_summary)
 ```
 
 \newpage 
 # Anxiety- Feedback correlations
+If we wanted to run this again, we need the file "avatar_pilot_task_with_feedback.csv" which Elena has but since it has identifiable data we have not put it on Github.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_merged <- merge(correlations, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
+# avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
+# avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+# correlations_merged <- merge(correlations, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
+# 
+# correlations_summary <- correlations_merged %>%
+# group_by(Thought_avatars_real) %>%
+# summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+#             sample_size = n())
 
-correlations_summary <- correlations_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_summary)
+# print(correlations_summary)
 ```
 
 \newpage 
 # Mood - SubjPE correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_M_merged <- merge(correlations_M, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_M_summary <- correlations_M_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_M_summary)
+# avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
+# avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+# correlations_M_merged <- merge(correlations_M, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
+# 
+# correlations_M_summary <- correlations_M_merged %>%
+# group_by(Thought_avatars_real) %>%
+# summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+#             sample_size = n())
+# 
+# print(correlations_M_summary)
 ```
 
 \newpage 
 # Mood-Feedback correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
-avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
-correlations_Mfd_merged <- merge(correlations_Mfd, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
-
-correlations_Mfd_summary <- correlations_Mfd_merged %>%
-group_by(Thought_avatars_real) %>%
-summarize(mean_correlation = mean(correlation,na.rm = TRUE),
-            sample_size = n())
-
-print(correlations_Mfd_summary)
+# avatar_feedback <- read.csv("avatar_pilot_task_with_feedback.csv")
+# avatar_feedback <- dplyr::filter(avatar_feedback, Screen.ID == "tuhtwy" & Response.Type == "response")
+# correlations_Mfd_merged <- merge(correlations_Mfd, avatar_feedback[, c("Random_ID", "Thought_avatars_real")], by = "Random_ID", all.x = TRUE)
+# 
+# correlations_Mfd_summary <- correlations_Mfd_merged %>%
+# group_by(Thought_avatars_real) %>%
+# summarize(mean_correlation = mean(correlation,na.rm = TRUE),
+#             sample_size = n())
+# 
+# print(correlations_Mfd_summary)
 ```
 
 \newpage
@@ -709,11 +723,11 @@ When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Ran
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
+ggplot(final_df14, aes(x=Response_SubjPE, y=Response_H)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
-  xlab("Feedback") + 
+  xlab("SubjPE") + 
   ylab("Mood") +
   ggtitle("Relationship between Mood and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
@@ -723,7 +737,11 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_H)) +
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
                                                  round(standard_beta_subjPE$CI_low[2],2), "-", 
-                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100)) +
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p14_m.png", plot = p14_m, dpi = 300, width = 6, height = 4)
   
 ```
 
@@ -784,7 +802,7 @@ AIC(model6)
 
 # anova(model2, model5)
 
-coef_fixed <- fixef(model4)
+coef_fixed <- fixef(model2)
 intercept_Mood <- coef_fixed[1]
 slope_Mood <- coef_fixed[2]
 standard_beta_fdbk <- parameters:: standardise_parameters (model4)
@@ -798,12 +816,12 @@ When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + (SubjPE | 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
+ggplot(final_df14, aes(x=Response_SubjPE, y=Response_Ax)) +
   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
-  xlab("Feedback") + 
-  ylab("Mood") +
+  xlab("Subjective PE") + 
+  ylab("Anxiety") +
   ggtitle("Relationship between Anxiety and subjective PE",
           subtitle = paste("estimated slopes of the association in n = ", 
                            length(unique(final_df14$Random_ID))))+
@@ -812,7 +830,11 @@ ggplot(final_df14, aes(x=Response_fdbk, y=Response_Ax)) +
   theme(axis.title = element_text(size = 10))+
   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
                                                  round(standard_beta_subjPE$CI_low[2],2), "-", 
-                                                 round(standard_beta_subjPE$CI_high[2],2))) 
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100)) +
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p14_ax.png", plot = p14_ax, dpi = 300, width = 6, height = 4)
   
 ```
 

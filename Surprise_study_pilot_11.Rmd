@@ -34,8 +34,8 @@ In this pilot we screened people for high social anxiety. The task itself, is th
 all_pilots_with_mini_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/all_pilots_with_mini_spin.csv")
 
 
-df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 11")
-df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == "Pilot 10")
+df11_data <- subset(all_pilots_with_mini_spin, pilot_nr == 11)
+df10_data <- subset(all_pilots_with_mini_spin, pilot_nr == 10)
 
 # Let's merge pilots that used the same task version (video re-introduced and colour code the anxiety levels)
 df_all_vid <- rbind(df11_data, df10_data)
@@ -292,22 +292,9 @@ ggplot(df_all_vid, aes(x=SubjPE, y=Anxiety)) +
   #                                                round(standard_beta$CI_high[2],2))) 
 
 ```
-```{r}
-ggplot(df_all_vid, aes(x=SubjPE, y=Anxiety)) +
-  geom_smooth(method = "lm", se = TRUE, alpha = 0.7, aes(group=Social_Anxiety)) + 
-  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
-  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
-  geom_abline(intercept = intercept_Ax, slope = slope_Ax, color="purple", linetype="dashed", size=1) +
-  xlab("Subjective Prediction Error: feedback - prediction") + 
-  ylab("Mood") +
-  # theme_minimal() +
-  # theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9)) +
-  # annotate("text", x = Inf, y = Inf, label = paste("positive slope without social anxiety =", 100*round(perc_pos_slop[1,2],2), "%"), hjust = 1.1, vjust = 90, color = "black", size = 3.7) +
-  # annotate("text", x = Inf, y = Inf, label = paste("positive slope with social anxiety =", 100*round(perc_pos_slop[2,2],2), "%"), hjust = 1.1, vjust = 92, color = "black", size = 3.7)+
-  ggtitle("Relationship between Anxiety and Surprises",
-          subtitle = paste("estimated slopes of the association in n = ", 
-                           length(unique(df_all_vid$Random_ID))))+
-  theme(plot.title = element_text(size=14), plot.subtitle = element_text(size = 10))+
-  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
-  theme(axis.title = element_text(size = 10)) 
-```
+
+
+
+
+
+

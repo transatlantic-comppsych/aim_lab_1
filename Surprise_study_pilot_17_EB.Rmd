@@ -37,12 +37,12 @@ The Gorilla experiment is the following: https://app.gorilla.sc/admin/experiment
 The task is the following: https://app.gorilla.sc/admin/task/777911/editor
 
 
-Note:Due to incorrect coding of the experiment on gorilla, there were no chocking and no_chocking blocks. Instead, this experiemnt had an event-related design (Randomized). Further, for some participants some anxiety and/or mood ratings were duplicated. This was easiest to fix manually in excel. The corrected excel file is called "CORRECT_SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4_task_main.csv". Please use this file for the following analysis. 
+Note:Due to incorrect coding of the experiment on gorilla, there were no chocking and no_chocking blocks. Instead, this experiemnt had an event-related design (Randomized). Further, for some participants some anxiety and/or mood ratings were duplicated. This was easiest to fix manually in excel. The corrected excel file is called "CORRECT_SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4_task_main.csv". Please use this file for the following analysis. 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df17_raw <- read.csv("/Users/Elena/OneDrive - University College London/Documents/GitHub/aim_lab_1/CORRECT_SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4_task_main.csv")
-df17_spin <- read.csv("/Users/Elena/OneDrive - University College London/Documents/GitHub/aim_lab_1/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4_mini_spin.csv")
-df17_cesd <- read.csv("/Users/Elena/OneDrive - University College London/Documents/GitHub/aim_lab_1/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_cbal_v4_ces_d.csv")
+df17_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4/CORRECT_SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4_task_main.csv")
+df17_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4_mini_spin.csv")
+df17_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4/SUP_PRF_p17_vid_bigPE_nar2_earlypred_chk_event_rel_v4_ces_d.csv")
 ```
 
 
