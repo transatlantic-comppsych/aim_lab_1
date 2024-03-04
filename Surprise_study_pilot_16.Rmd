@@ -1100,3 +1100,56 @@ ggplot(filter_final_df16, aes(x = Social_Anxiety, y = Response_stress_level , fi
 
 ```
 
+\newpage 
+# ICC for anxiety
+
+we will now look at the ICC outcome for anxiety
+<br> The ICC for anxiety is 0.62, which is moderate according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(irr)
+library(lme4)
+library(psych)
+
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df16)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for anxiety with just the intercept")
+print(icc)
+
+confint(model)
+```
+
+
+\newpage 
+# ICC for mood 
+
+The ICC for mood is 0.48, which is lower than anxiety and is actually just within the poor catrgoery, according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df16)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for mood with just the intercept")
+print(icc)
+
+confint(model)
+```
