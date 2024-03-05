@@ -1466,6 +1466,62 @@ print(t_test_result)
 
 ```
 
+\newpage 
+# ICC for anxiety pilot 6
+
+we will now look at the ICC outcome for anxiety
+<br> The ICC for anxiety is 0.63, which is moderate according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(irr)
+library(lme4)
+library(psych)
+
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df6)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for anxiety with just the intercept")
+print(icc)
+
+confint(model)
+```
+
+
+\newpage 
+# ICC for mood pilot 6
+
+The ICC for mood is 0.42, which is lower than anxiety and is actually  within the poor category, according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df6)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for mood with just the intercept")
+print(icc)
+
+confint(model)
+```
+
+
+
 \newpage <font size="3"> ### Pilot 7: The following pilot had a non-randomly provided feedback, with one bigger positive feedback per participant to increase the size of positive PE to see how it would influence mood and anxiety, using the following experiment:https://app.gorilla.sc/admin/experiment/147683/design and task: pilot_fdbk_nrand_bigPE_typing_novid </font>
 
 <br> <br> For this study, we did not screen for social anxiety but need to see their social anxiety scores to see how many are bigger than or equal the threshold of 6. The data below includes the additional 20 people we have tested (we have 37 people now, we need to approve 3 other people manually, will add them later).
@@ -1729,20 +1785,20 @@ for (i in seq_along(list_of_plots)) {
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # if you need to correlate variables using the long dataset, it is very simple
-df7$Response <- as.numeric(df7$Response)
-
-cors_by_id <- numeric(length(random_ids))
-
-# Loop through each ID
-for (i in seq_along(random_ids)) {
-  # Subset data for current ID
-  current_id <- random_ids[i]
-  d_PE <- df7[df7$Screen == "PE" & df7$Random_ID == current_id, ]$Response
-  d_SubjPE <- df7[df7$Screen == "SubjPE" & df7$Random_ID == current_id, ]$Response
-  
-  # Calculate correlation for the current ID
-  cors_by_id[i] <- cor(d_PE, d_SubjPE, use = "complete.obs")  # 'complete.obs' to ignore NA values
-}
+# df7$Response <- as.numeric(df7$Response)
+# 
+# cors_by_id <- numeric(length(random_ids))
+# 
+# # Loop through each ID
+# for (i in seq_along(random_ids)) {
+#   # Subset data for current ID
+#   current_id <- random_ids[i]
+#   d_PE <- df7[df7$Screen == "PE" & df7$Random_ID == current_id, ]$Response
+#   d_SubjPE <- df7[df7$Screen == "SubjPE" & df7$Random_ID == current_id, ]$Response
+#   
+#   # Calculate correlation for the current ID
+#   cors_by_id[i] <- cor(d_PE, d_SubjPE, use = "complete.obs")  # 'complete.obs' to ignore NA values
+# }
 
 # Print the correlations
 # print(cors_by_id)
@@ -2015,9 +2071,9 @@ df7_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd
 
 df7_spin <- df7_spin %>%
   rename(
-   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
-   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
-   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears." 
+   "Q1" =  "Rating.Scale.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears." 
   )
 
 df7_spin <- df7_spin %>%
@@ -2335,10 +2391,10 @@ Again, the relationship between SubjPE and mood is slightly stronger than PE and
 df7_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_fdbk_bignrnd_typ/SUP_PRF_pilot_fdbk_bignrnd_typ_v3/SUP_PRF_pilot_fdbk_bignrnd_typ_v3_mini_spin.csv")   # Prolific,non-random feedback, text only (no video/audio) with bigger PE, once per judge
 
 df7_spin <- df7_spin %>%
-  rename(
-   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
-   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
-   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears." 
+   rename(
+    "Q1" =  "Rating.Scale.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears." 
   )
 
 df7_spin <- df7_spin %>%
@@ -2396,7 +2452,7 @@ Now, the negative correlation between the latter correlation and mini-SPIN means
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # reading Eleanor's data to get the mean and SD of anxiety ratings in WITH (self-focused) and WITHOUT (externally focused) conditions
 
-df_Eleanor <- read.csv("/Users/marjan/Desktop/pilot_surprise_SeptOCT2023/Pilot_surprise/Aim1.Database Stage 2_11.2019.csv")
+df_Eleanor <- read.csv("/Users/marjan/Desktop/aim_lab_1/Aim1.Database Stage 2_11.2019.csv")
 
 # calculate mean and sd for the WITH condition
 mean_value_WITH <- mean(df_Eleanor$Anxiety_with_Study2, na.rm = TRUE)
@@ -2494,11 +2550,11 @@ average_high <- average_correlations$average_correlation[average_correlations$So
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 
-modelAx <- lm(Response_Ax ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
+modelAx <- lm(Anxiety ~ SubjPE * mini_SPIN_total, data = df7_all_8_var)
 summary(modelAx)
 
 
-modelH <- lm(Response_H ~ Response_SubjPE * mini_SPIN_total, data = df7_long_mini_SPIN)
+modelH <- lm(Mood ~ SubjPE * mini_SPIN_total, data = df7_all_8_var)
 summary(modelH)
 ```
 
@@ -2506,7 +2562,7 @@ summary(modelH)
 \newpage I will now subset people with high social anxiety score and repeat the correlations
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-subset_df7 <- subset(df7_long_mini_SPIN, mini_SPIN_total >= 6)
+subset_df7 <- subset(filtered_data, mini_SPIN_total >= 6)
 ids_to_exclude <- c("SUPPRF67412")
 
 # Subset the data
@@ -2515,12 +2571,12 @@ subset_df7 <- subset_df7[!subset_df7$Random_ID %in% ids_to_exclude, ]
 # remove outliers, we can see from the plots that the outlier value is bigger than 50
 subset_df7 <- subset_df7 %>%
   group_by(Random_ID) %>%
-  filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
+  dplyr::filter(!(Random_ID %in% c("SUPPRF44350") & Anxiety > 50))
 
 # Calculate correlation by Random_ID for anxiety
 correlations_Ax_excludedoutliers <- subset_df7 %>%
   group_by(Random_ID) %>%
-  summarise(correlation = cor(Response_Ax, Response_PE, use = "complete.obs")) %>%
+  summarise(correlation = cor(Anxiety, SubjPE, use = "complete.obs")) %>%
   mutate(label = paste("R = ", round(correlation, digits = 2)))  # create a label for the plot
 
 # calculate the average correlation across all individuals and print it 
@@ -2529,7 +2585,7 @@ message_to_print <- paste("average correlation between Anxiety and PE after excl
 print(message_to_print)
 
 
-ggplot(subset_df7, aes(x=Response_Ax, y=Response_PE)) +
+ggplot(subset_df7, aes(x=Anxiety, y=SubjPE)) +
   geom_point(aes(color="Data Points", alpha = 0.5)) +
   geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
@@ -2547,9 +2603,64 @@ ggplot(subset_df7, aes(x=Response_Ax, y=Response_PE)) +
 
 ```
 <br> <br>
-So after keeping people with high mini_SPIN scores, the correlation becomes -0.22 from -0.17. <br>
+So after keeping people with high mini_SPIN scores, the correlation becomes -0.19 from -0.17. <br>
 
 
+
+
+\newpage 
+# ICC for anxiety pilot 7
+
+we will now look at the ICC outcome for anxiety
+<br> The ICC for anxiety is 0.76, which is moderate according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(irr)
+library(lme4)
+library(psych)
+
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df7)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for anxiety with just the intercept")
+print(icc)
+
+confint(model)
+```
+
+
+\newpage 
+# ICC for mood pilot 7
+
+The ICC for mood is 0.71, which is within the moderate category, according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df7)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for mood with just the intercept")
+print(icc)
+
+confint(model)
+```
 
 \newpage <font size="3"> ### Pilot 8: We will now look at the same data in a pilot with bigger prediction errors. Per judge we now provide a rating between 90-100 to have the maximum positive PE possible using the following experiment:https://app.gorilla.sc/admin/experiment/149662/design and task: surprise_task_PE_feedback_biggestPE (https://app.gorilla.sc/admin/task/690668/editor?version=1)
 
@@ -2973,12 +3084,46 @@ ggplot(final_df8, aes(x = Response_H)) +
 ```
 
 
-\newpage we will now look at the ICC outcome for anxiety
+\newpage 
+# ICC for anxiety pilot 7
+
+we will now look at the ICC outcome for anxiety
+<br> The ICC for anxiety is 0.76, which is moderate according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(irr)
 library(lme4)
 library(psych)
 
+# change name to model null (same for all others)
+model <- lme4::lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df7)
+# Extract variance components
+var_components <- VarCorr(model)
+subject_variance <- as.numeric(var_components[1])
+residual_variance <- as.numeric(attr(var_components, "sc")^2)
+
+# Calculate ICC
+icc <- subject_variance / (subject_variance + residual_variance)
+print("lmer for anxiety with just the intercept")
+print(icc)
+
+confint(model)
+```
+
+
+\newpage 
+# ICC for anxiety pilot 8
+
+The ICC for anxiety is 0.80, which is within the good category, according to guidelines by Koo and Li (2016):<br>
+<br> below 0.50: poor<br>
+<br>between 0.50 and 0.75: moderate<br>
+<br>between 0.75 and 0.90: good<br>
+<br>above 0.90: excellent<br>
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 model <- lmer(Response_Ax ~ 1 + (1 | Random_ID), data = final_df8)
 # Extract variance components
 var_components <- VarCorr(model)
@@ -3000,6 +3145,7 @@ confint(model)
 
 
 \newpage 
+# ICC for mood pilot 8
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model <- lmer(Response_H ~ 1 + (1 | Random_ID), data = final_df8)
 
@@ -3146,19 +3292,6 @@ ggplot(subset_df8, aes(x=Response_Ax, y=Response_PE)) +
 ```
 Again similar to SubjPE, close to zero! <br><br>
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-# ids_to_exclude <- c("SUPPRF67412")
-# 
-# # Subset the data
-# subset_df8 <- final_df8[!final_df8$Random_ID %in% ids_to_exclude, ]
-
-# # remove outliers, we can see from the plots that the outlier value is bigger than 50
-# subset_df8 <- subset_df8 %>%
-#   group_by(Random_ID) %>%
-#   filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
-
-```
-
 
 \newpage We will repeat the same thing for the relationship between PE and mood:
 
@@ -3284,7 +3417,7 @@ subset_df8 <- subset(df8_long_mini_SPIN, mini_SPIN_total >= 6)
 # remove outliers, we can see from the plots that the outlier value is bigger than 50
 subset_df8 <- subset_df8 %>%
   group_by(Random_ID) %>%
-  filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
+  dplyr::filter(!(Random_ID %in% c("SUPPRF44350") & Response_Ax > 50))
 
 # Calculate correlation by Random_ID for anxiety
 correlations_Ax_excludedoutliers <- subset_df8 %>%
