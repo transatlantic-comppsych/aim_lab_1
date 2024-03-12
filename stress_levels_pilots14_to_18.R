@@ -9,18 +9,20 @@ final_df15 <- read.csv("/Users/marjan/Desktop/aim_lab_1/final_df15_with_stressle
 final_df16 <- read.csv("/Users/marjan/Desktop/aim_lab_1/final_df16_with_stresslevels.csv")
 final_df17 <- read.csv("/Users/marjan/Desktop/aim_lab_1/final_df17_with_stresslevels.csv")
 final_df18 <- read.csv("/Users/marjan/Desktop/aim_lab_1/final_df18_with_stresslevels.csv")
+final_df19 <- read.csv("/Users/marjan/Desktop/aim_lab_1/final_df19_with_stresslevels.csv")
 
 final_df14$pilot_nr <- 14
 final_df15$pilot_nr <- 15
 final_df16$pilot_nr <- 16
 final_df17$pilot_nr <- 17
 final_df18$pilot_nr <- 18
+final_df19$pilot_nr <- 19
 
-combined_df <- bind_rows(final_df14, final_df15, final_df16, final_df17, final_df18)
+combined_df <- bind_rows(final_df14, final_df15, final_df16, final_df17, final_df18, final_df19)
 
 filter_combined_df <- subset(combined_df, combined_df$Trial.Number == 1)
 
-write.csv(filter_combined_df, "stresslevels_p14_p18.csv", row.names = FALSE)
+write.csv(filter_combined_df, "stresslevels_p14_p19.csv", row.names = FALSE)
 
 stress_level_plots <- ggplot(filter_combined_df, aes(x = Social_Anxiety, y = Response_stress_level , fill = Social_Anxiety)) +
   geom_boxplot(outlier.colour = "black") +
@@ -96,45 +98,75 @@ correlations_df <- combined_df %>%
   summarise(correlation = cor(Response_pred, Response_m_hist, use = "complete.obs")) %>%
   ungroup() 
 
-
+correlations_df$pilot_nr <- as.factor(correlations_df$pilot_nr)
 
 ggplot(correlations_df, aes(x = Trial.Number, y = correlation, group = pilot_nr, color = as.factor(pilot_nr))) +
   geom_line() +
+  geom_smooth(method = "lm", se = TRUE, aes(fill = as.factor(pilot_nr))) +
   geom_point() +
   theme_minimal() +
   labs(x = "Trial Number", y = "Correlation histogram and prediction", color = "Pilot Number") +
   ggtitle("Correlation between Prediction and Histogram over time and per pilot")+
   stat_cor(aes(color = pilot_nr), label.x = 3)
+  # stat_cor(aes(color = pilot_nr), label.x = 3, label.y = max(correlations_df$correlation, na.rm = TRUE) * 1)
 
 
-overall_correlation_df <- combined_df %>%
-  group_by(pilot_nr) %>%
-  summarise(overall_correlation = cor(Response_pred, Response_m_hist, use = "complete.obs")) %>%
-  ungroup()
 
-annotated_df <- annotated_df %>%
-  left_join(overall_correlation_df, by = "pilot_nr")
+# Does certainty rating changes across time
 
-correlation_with_trial_df <- annotated_df %>%
-  group_by(pilot_nr) %>%
-  summarise(correlation_with_trial = cor(Trial.Number, correlation, use = "complete.obs")) %>%
-  ungroup()
+combined_df$pilot_nr <- as.factor(combined_df$pilot_nr)
 
-annotated_df <- annotated_df %>%
-  left_join(correlation_with_trial_df, by = "pilot_nr")
-
-
-ggplot(annotated_df, aes(x = Trial.Number, y = correlation, group = pilot_nr, color = as.factor(pilot_nr))) +
-  geom_line() +
-  geom_point() +
+conf_overtime <- ggplot(combined_df, aes(x = Trial.Number, y = Response_certainty, group = pilot_nr, color = as.factor(pilot_nr))) +
+  # geom_line() +
   geom_smooth(method = "lm", se = TRUE, aes(fill = as.factor(pilot_nr))) +
-  geom_text(data = annotated_df %>% group_by(pilot_nr) %>% summarize(max_trial = max(Trial.Number), last_correlation = last(correlation), correlation_with_trial = first(correlation_with_trial)), 
-            aes(x = max_trial, y = last_correlation, label = sprintf("Corr: %.2f", correlation_with_trial)), 
-            hjust = 3, vjust = 0, check_overlap = TRUE, color = "black") +
+  # geom_point() +
   theme_minimal() +
-  labs(x = "Trial Number", y = "Correlation histogram and prediction", color = "Pilot Number") +
-  ggtitle("Correlation between Prediction and Histogram over time and per pilot")
-  theme(legend.position = "bottom")
+  labs(x = "Trial Number", y = "Certainty rating 0-100", color = "Pilot Number") +
+  ggtitle("Certainty rating over time and per pilot")+
+stat_cor(aes(color = pilot_nr), label.x = 3)+
+  scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100))
+
+ggsave(filename = "conf_overtime_p14-18.png", plot = conf_overtime, dpi = 300, width = 9, height = 9)
+
+
+
+
+
+new_df <- combined_df %>%
+  group_by(Random_ID, pilot_nr) %>%
+  summarise(mean_confidence = mean(Response_certainty, na.rm = TRUE)) %>%
+  ungroup()
+
+mean_conf <- ggplot(new_df, aes(x = pilot_nr, y = mean_confidence)) +
+  geom_boxplot(outlier.colour = "black") +
+  stat_boxplot(geom = "errorbar",
+               width = 0.15) + 
+  geom_point(color = "black", position = position_jitter(width = 0.2), alpha = 0.7) +
+  theme_minimal() +
+  # labs(x = "Display", y = "Response") +
+  # scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  # ggtitle("Average anxiety ratings in pilots 1 and 2 in socially anxious people") +
+  # xlab("") + 
+  ylab("Certainty rating 0-100") +
+  # facet_wrap(~pilot_nr, scales = "free") +
+  # scale_fill_manual(values = c("black", "purple", "darkgreen", "blue"))+
+  # ylim(c(50, 100)) + 
+  # scale_y_continuous(breaks = seq(50, 100, by = 10), limits = c(50, 100))+
+  theme(
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    panel.grid.minor = element_blank(),  # Removes minor grid lines
+    panel.border = element_blank(),      # Removes the border line
+    axis.line = element_blank(),          # Removes axis lines
+    plot.background = element_rect(fill = "white", colour = NA)   # Ensure plot background is white
+  )
+
+# Save plot to file with 300 dpi resolution
+ggsave(filename = "confidence_ratings_p14-18.png", plot = mean_conf, dpi = 300, width = 9, height = 9)
+
+
+
+# does it correlate with PE?
+
 
 
 
@@ -160,5 +192,7 @@ summary(model3)
 
 # cant really use LME's since we have only one measurement?
 # model1 <- lme4::lmer(Response_stress_level ~ pilot_nr*Social_Anxiety + (1 | Random_ID), data = filter_combined_df, control=lmerControl(optimizer="bobyqa"))
+
+
 
 
