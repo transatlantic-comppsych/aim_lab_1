@@ -274,6 +274,17 @@ final_df19$SubjPE_2 <- final_df19$Response_pred2 - final_df19$Response_pred
 final_df19$SubjPE_3 <- final_df19$Response_fdbk - final_df19$Response_pred2
 
 
+# List of people who clearly stated they believed the judges were not real
+specified_ids <- c("SUPPRF04400", "SUPPRF43481", "SUPPRF74749", "SUPPRF80118", 
+                   "SUPPRF76403", "SUPPRF08502", "SUPPRF25195", "SUPPRF82413", 
+                   "SUPPRF19812", "SUPPRF19869", "SUPPRF84532", "SUPPRF76734", 
+                   "SUPPRF02691")
+
+# Creating a new column based on condition to divide people into "No" or "Yes/maybe/NA" category about believability 
+final_df19$believability <- ifelse(final_df19$Random_ID %in% specified_ids, "No", "Yes/maybe/NA")
+
+
+
 write.csv(final_df19, "pilot_19_variables.csv", row.names = FALSE)
 
 
@@ -284,6 +295,8 @@ final_df19 %>%
 write.csv(final_df19, "final_df19_with_stresslevels.csv", row.names = FALSE)
 
 ```
+
+
 
 \newpage 
 # Relationship between prediction and mean histogram
@@ -942,5 +955,76 @@ ggplot(df19_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = 
   theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
 
 ```
+
+\newpage 
+# Prediction before judgement over time 
+
+Red line presents until what points histograms were presented (4 first trials).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(final_df19, aes(x = Trial.Number, y = Response_pred)) +
+  geom_line(color = "blue") +
+  geom_vline(xintercept = 5, linetype = "dashed", color = "red") + 
+  theme_minimal() +
+  labs(title = "Prediction before performance across time",
+       x = "Trial Number",
+       y = "Pre-prediction",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) + 
+  theme(strip.text = element_text(size = 6)) +  
+  scale_x_continuous(breaks = seq(1, 48, by = 10), limits = c(1, 48)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+
+
+\newpage 
+# Stress level based on believability and social anxiety
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+filter_df <- subset(final_df19, final_df19$Trial.Number == 1)
+
+ggplot(filter_df, aes(x = Social_Anxiety, y = Response_stress_level , fill = Social_Anxiety)) +
+  geom_boxplot(outlier.colour = "black") +
+  stat_boxplot(geom = "errorbar",
+               width = 0.15) + 
+  geom_point(color = "black", position = position_jitter(width = 0.2), alpha = 0.7) +
+  theme_minimal() +
+  # labs(x = "Display", y = "Response") +
+  # scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  # ggtitle("Average anxiety ratings in pilots 1 and 2 in socially anxious people") +
+  xlab("") + 
+  ylab("stress levels (0-10)") +
+  theme(
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    panel.grid.minor = element_blank(),  # Removes minor grid lines
+    panel.border = element_blank(),      # Removes the border line
+    axis.line = element_blank(),          # Removes axis lines
+    plot.background = element_rect(fill = "white", colour = NA)   # Ensure plot background is white
+  )
+
+ggplot(filter_df, aes(x = believability, y = Response_stress_level , fill = believability)) +
+  geom_boxplot(outlier.colour = "black") +
+  stat_boxplot(geom = "errorbar",
+               width = 0.15) + 
+  geom_point(color = "black", position = position_jitter(width = 0.2), alpha = 0.7) +
+  theme_minimal() +
+  # labs(x = "Display", y = "Response") +
+  # scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  # ggtitle("Average anxiety ratings in pilots 1 and 2 in socially anxious people") +
+  xlab("") + 
+  ylab("stress levels (0-10)") +
+  theme(
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    panel.grid.minor = element_blank(),  # Removes minor grid lines
+    panel.border = element_blank(),      # Removes the border line
+    axis.line = element_blank(),          # Removes axis lines
+    plot.background = element_rect(fill = "white", colour = NA)   # Ensure plot background is white
+  )
+
+```
+
 
 
