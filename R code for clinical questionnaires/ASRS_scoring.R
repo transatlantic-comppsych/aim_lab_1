@@ -76,8 +76,8 @@ part_A_scores <- 0
 part_B_scores <- 0
 total_scores <- 0
 for (i in 1:nrow(ASRS_data_clean)) {
-  part_A_score <- sum(ASRS_data_clean[i, part_a_questions] > thresholds[part_a_questions])
-  part_B_score <- sum(ASRS_data_clean[i, part_b_questions] > thresholds[part_b_questions])
+  part_A_score <- sum(ASRS_data_clean[i, part_a_questions] >= thresholds[part_a_questions])
+  part_B_score <- sum(ASRS_data_clean[i, part_b_questions] >= thresholds[part_b_questions])
   total_score <- part_A_score + part_B_score
   
   part_A_scores[i] <- part_A_score
