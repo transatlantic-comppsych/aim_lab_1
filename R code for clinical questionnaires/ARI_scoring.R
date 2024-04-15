@@ -9,7 +9,7 @@ library(readxl)
 setwd("/Users/Elena/Downloads/copy_data_exp_142752-v5")
 #load ARI dataset and clean------------
 ARI_data <- read.csv("data_exp_142752-v5_questionnaire-97cc.csv")
-ARI_data_clean <- ARI_data[, c(32, 34, 36, 38, 40, 42,44, 45)]
+ARI_data_clean <- ARI_data[, c(32, 34, 36, 38, 40, 42, 44, 45)]
 
 # Identify non-ID variable columns
 non_id_cols <- setdiff(names(ARI_data_clean), "Random_ID")
@@ -28,14 +28,23 @@ ARI_data_clean<- ARI_data_clean %>%
     TRUE ~ .
   )))
 
+ARI_data_clean <- ARI_data_clean %>%
+  rename(
+    Q1= Multiple.Choice.Grid.object.2.Easily.annoyed.by.others.Quantised,
+    Q2= Multiple.Choice.Grid.object.2.Often.lose.temper.Quantised,
+    Q3= Multiple.Choice.Grid.object.2.Stay.angry.for.a.long.time.Quantised,
+    Q4= Multiple.Choice.Grid.object.2.Angry.most.of.the.time.Quantised,
+    Q5= Multiple.Choice.Grid.object.2.Get.angry.frequently.Quantised,
+    Q6= Multiple.Choice.Grid.object.2.Lose.temper.easily.Quantised,
+    Q7= Multiple.Choice.Grid.object.2.Overall..irritability.causes.me.problems.Quantised)
+
 #scoring----
-ARI_scores <-  numeric(length(ARI_data_clean$Random_ID))
-ARI_scores <- 0
-Questions <- c(1:6)
+#Questions 1:6 summed only for total raw score
+#total_average_score = raw score/6 and rounded to nearest integer; none (0), mild-moderate (1), or moderate-severe (2)
 
-for (i in 1:nrow(ARI_data_clean)) {
-  ARI_score <- sum(ARI_data_clean[i, Questions])
-  ARI_scores[i] <- ARI_score
-}
+ARI_data_clean <- ARI_data_clean %>%
+  rowwise() %>%
+  mutate(ARI_raw_score = sum(c_across(Q1:Q6)),
+         ARI_total_average_score = round(sum(c_across(Q1:Q6))/6)) %>%
+  ungroup()
 
-ARI_data_clean$ARI_score <-  ARI_scores
