@@ -1,0 +1,1045 @@
+---
+title: "Surprise study pilot 22"
+author: "Marjan Biria"
+date: "2224-04-16"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "", echo = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+library(purrr)
+library(conflicted)
+library(stringr)
+library(readxl)
+```
+
+
+\newpage
+# Study description
+
+This study is the same as pilot 21, except we have now two new questions measuring anxiety: 1) how nervous would you feel to talk to this person again? 2) how embarrassed do you feel right now? 
+
+We would like to see whether these are more specific answers to tap into social anxiety (after the feedback we received from Quentin).
+
+The Gorilla experiment is the following: https://app.gorilla.sc/admin/experiment/175580/design
+The task is the following: https://app.gorilla.sc/admin/task/812527/editor?version=4
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df22_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_task_main.csv")
+df22_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_mini_spin.csv")
+df22_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_ces_d.csv")
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# extract CES-D scores
+CESD_data_clean <- df22_cesd[, c(32, 34, 36, 38, 40, 42, 44, 46,48,50,
+                                 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 71 )]
+# Identify non-ID variable columns
+non_id_cols <- setdiff(names(CESD_data_clean), "Random_ID")
+
+# Convert non-ID variables to numeric
+CESD_data_clean[, non_id_cols] <- lapply(CESD_data_clean[, non_id_cols], as.numeric)
+
+#change numbers to match CES-D scoring system
+excluded_columns <-  c("Random_ID", "Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
+                       "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
+                       "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
+                       "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
+                  
+
+CESD_data_clean<- CESD_data_clean %>%
+  mutate(across(-excluded_columns , ~ case_when(
+    . == 1 ~ 0,
+    . == 2 ~ 1,
+    . == 3 ~ 2,
+    . == 4 ~ 3,
+    TRUE ~ .
+  )))
+
+
+other_columns <- c("Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
+                   "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
+                   "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
+                   "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
+CESD_data_clean<- CESD_data_clean %>%
+  mutate(across(other_columns , ~ case_when(
+    . == 1 ~ 3,
+    . == 2 ~ 2,
+    . == 3 ~ 1,
+    . == 4 ~ 0,
+    TRUE ~ .
+  )))
+
+#scoring----
+CESD_scores <-  numeric(length(CESD_data_clean$Random_ID))
+CESD_scores <- 0
+Questions <- c(1:20)
+
+for (i in 1:nrow(CESD_data_clean)) {
+  CESD_score <- sum(CESD_data_clean[i, Questions])
+  CESD_scores[i] <- CESD_score
+}
+
+CESD_data_clean$CESD_score <-  CESD_scores
+
+CESD_data_clean$Depression_Threshold<- 0
+CESD_data_clean$Depression_status <- "Not_Depressed"
+
+#Assign "1" if they meet Depression threshold 
+for (i in 1:nrow(CESD_data_clean)) {
+  if (CESD_data_clean$CESD_score[i] >= 16) {
+    CESD_data_clean$Depression_Threshold[i] <- 1
+    CESD_data_clean$Depression_status[i] <- "Depressed"
+  }
+}
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# We have now different names for different screens:
+# Prediction (how well do you think you performed?)
+# prediction_2 (how well do you think you performed?)
+# feedback (This is how well X thought you performed)
+# First 4 trials are with the histograms and are called "Trials_Histogram" in Display column instead of "Trials"
+# The trial numbers start from 1 again after the histograms so we need to concatenate them all.
+# Let's rename them to "Trials" to extract them together with the rest of the trials
+
+df22_raw$Trial.Number[df22_raw$Display == "Trials "] <- df22_raw$Trial.Number[df22_raw$Display == "Trials "] + 4
+
+df22_raw <- df22_raw %>%
+  mutate(Screen = if_else(Screen == "Prediction", "Prediction ", Screen))
+
+
+df22_raw <- df22_raw %>%
+  mutate(Display = if_else(Display == "Trials_Histogram", "Trials ", Display))
+
+df22_spin <- df22_spin %>%
+  rename(
+   "Q1" =  "Rating.Scale.object.2.Fear.of.embarrassment.causes.me.to.avoid.doing.things.or.speaking.to.people.",
+   "Q2" =  "Rating.Scale.object.2.I.avoid.activities.in.which.I.am.the.center.of.attention.",
+   "Q3" = "Rating.Scale.object.2.Being.embarrassed.or.looking.stupid.are.among.my.worst.fears."
+  )
+
+df22_spin <- df22_spin %>%
+  rowwise() %>%
+  mutate(mini_SPIN_total = sum(c(Q1, Q2, Q3), na.rm = TRUE)) %>%
+  ungroup()
+
+
+# create a new df22 that only keeps the columns we need
+df22 <- df22_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+                     "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
+
+df22 <- df22 %>% dplyr::filter(Response.Type != "info")
+
+df22 <- df22 %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  dplyr::filter(!is.na(Response))
+
+df22$Screen <- ifelse(df22$Trial.Number == 1 & (df22$Display == "Mood " | df22$Display == "Embarrassment"), "BL_1",
+                      ifelse(df22$Trial.Number == 2 & (df22$Display == "Mood " | df22$Display == "Embarrassment"), "BL_2", 
+                             df22$Screen))
+
+df22$m_hist <- ifelse(df22$Spreadsheet..Histogram == "h2.png", 29,
+                             ifelse(df22$Spreadsheet..Histogram == "h3.png", 37,
+                                                  ifelse(df22$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df22$Spreadsheet..Histogram == "h7.png", 71, NA))))  
+
+
+# get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
+df22 <- df22 %>%
+  dplyr::filter(
+    (Display == "Trials ") |
+      (Display == "Exit") |
+      (Display == "Anxiety ") |
+      (Display == "Mood " & !Trial.Number %in% c(1, 2)) |
+      (Display == "Embarrassment" & !Trial.Number %in% c(1, 2)) 
+  )
+
+# # setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
+df22$Trial.Number <- ifelse(df22$Display == 'Mood ' | df22$Display == 'Embarrassment', df22$Trial.Number - 2, df22$Trial.Number)
+df22$Display <- ifelse(df22$Display == 'Mood ' | df22$Display == 'Embarrassment', "Trials", df22$Display)
+
+# renaming the feedback column to fdbk
+names(df22)[names(df22) == 'Spreadsheet..Feedback'] <- 'fdbk'
+
+# Now let's create columns for PE (fdbk-hist) and Subj_PE (fdbk_Prediction)
+
+df22$SubjPE <- ifelse(df22$Screen == "Prediction ", df22$fdbk - df22$Response, NA)
+df22$PE <- ifelse(df22$Screen == "Prediction ", df22$fdbk - df22$m_hist, NA)
+# to keep just one repetition of feedback and mean histogram per trial per subject 
+# and replace the rest with NA so that when we want to convert to long format we won't have duplicates
+df22$fdbk <- ifelse(df22$Screen == "Prediction ", df22$fdbk, NA)
+df22$m_hist <- ifelse(df22$Screen == "Prediction ", df22$m_hist, NA)
+df22$stress_level <- ifelse(df22$Screen == "Screen 12", df22$Response, NA)
+
+long_df22 <- df22 %>%
+  dplyr::select(Random_ID, Trial.Number, fdbk, m_hist, PE, SubjPE, stress_level) %>%
+  pivot_longer(cols = c(fdbk, m_hist, PE, SubjPE, stress_level),
+               names_to = "Screen",
+               values_to = "Response")
+
+# This will keep only the rows where 'Response' is not NA
+long_df22 <- long_df22[!is.na(long_df22$Response), ]
+
+# Selecting relevant columns from the original df22
+df22 <- df22 %>%
+  dplyr::select(-c(fdbk, m_hist, PE, SubjPE, stress_level))
+
+# Binding the rows together
+df22 <- bind_rows(df22, long_df22)
+
+df22$Response <- as.numeric(df22$Response)
+
+# looking at the relationship between PE and SubjPE
+df22_PE <- subset(df22, Screen == "PE")
+names(df22_PE)[names(df22_PE) == "Screen"] <- "Screen_PE"
+names(df22_PE)[names(df22_PE) == "Response"] <- "Response_PE"
+
+df22_SubjPE <- subset(df22, Screen == "SubjPE")
+names(df22_SubjPE)[names(df22_SubjPE) == "Screen"] <- "Screen_SubjPE"
+names(df22_SubjPE)[names(df22_SubjPE) == "Response"] <- "Response_SubjPE"
+
+df22_fdbk <- subset(df22, Screen == "fdbk")
+names(df22_fdbk)[names(df22_fdbk) == "Screen"] <- "Screen_fdbk"
+names(df22_fdbk)[names(df22_fdbk) == "Response"] <- "Response_fdbk"
+
+df22_hist <- subset(df22, Screen == "m_hist")
+names(df22_hist)[names(df22_hist) == "Screen"] <- "Screen_m_hist"
+names(df22_hist)[names(df22_hist) == "Response"] <- "Response_m_hist"
+
+df22_stress_level <- subset(df22, Screen == "Screen 12")
+names(df22_stress_level)[names(df22_stress_level) == "Screen"] <- "Screen_stress_level"
+names(df22_stress_level)[names(df22_stress_level) == "Response"] <- "Response_stress_level"
+
+df22_predic <- subset(df22, Screen == "Prediction ")
+names(df22_predic)[names(df22_predic) == "Screen"] <- "Screen_pred"
+names(df22_predic)[names(df22_predic) == "Response"] <- "Response_pred"
+
+
+# df22_cert <- subset(df22, Screen == "Certainty rating ")
+# names(df22_cert)[names(df22_cert) == "Screen"] <- "Screen_certainty"
+# names(df22_cert)[names(df22_cert) == "Response"] <- "Response_certainty"
+
+list_of_dfs_22 <- list(df22_PE, df22_fdbk, df22_hist, df22_predic, df22_SubjPE)
+
+# Using reduce with inner_join
+merged_df22 <- reduce(list_of_dfs_22, inner_join, by = c("Random_ID", "Trial.Number"))
+
+df22_Anxious <- subset(df22, Screen == "Anxious")
+names(df22_Anxious)[names(df22_Anxious) == "Screen"] <- "Screen_Ax"
+names(df22_Anxious)[names(df22_Anxious) == "Response"] <- "Response_Ax"
+
+df22_Embarrasment <- subset(df22, Screen == "Screen 1")
+names(df22_Embarrasment)[names(df22_Embarrasment) == "Screen 1"] <- "Screen_Embarrassment"
+names(df22_Embarrasment)[names(df22_Embarrasment) == "Response"] <- "Response_Emb"
+
+df22_Happy <- subset(df22, Screen == "Happy")
+# df22_fdbk <- subset(df22, Screen == "Prediction")
+names(df22_Happy)[names(df22_Happy) == "Screen"] <- "Screen_H"
+names(df22_Happy)[names(df22_Happy) == "Response"] <- "Response_H"
+
+final_df22 <- merged_df22 %>%
+  inner_join(df22_Anxious, by = c("Random_ID", "Trial.Number")) %>%
+  inner_join(df22_Happy, by = c("Random_ID", "Trial.Number")) %>%
+  inner_join(df22_Embarrasment, by = c("Random_ID", "Trial.Number"))
+
+# subset only the columns we are interested in
+final_df22 <- final_df22[c("Trial.Number", "Random_ID", "Response_H", "Response_Ax", "Response_fdbk", "Response_SubjPE", "Response_PE", "Response_m_hist", "Response_pred", "Response_Emb")]
+
+final_df22 <- final_df22 %>%
+  left_join(df22_spin %>% dplyr::select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+final_df22 <- final_df22 %>%
+  left_join(df22_stress_level %>% dplyr::select(Random_ID, Response_stress_level), by = "Random_ID")
+
+final_df22 <- final_df22 %>%
+  left_join(CESD_data_clean %>% dplyr::select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
+
+final_df22$Social_Anxiety <- ifelse(final_df22$mini_SPIN_total >= 6, "high", "low")
+
+
+write.csv(final_df22, "pilot_22_variables.csv", row.names = FALSE)
+
+
+final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(Trial.Number = n())
+
+write.csv(final_df22, "final_df22_with_stresslevels.csv", row.names = FALSE)
+
+```
+
+
+
+\newpage 
+# Relationship between prediction and mean histograms (4x only in the beginning)
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_m_hist, Response_pred, method = "spearman", use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2)))
+
+# # calculate the average correlation across all individuals and print it
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mean_hist and prediction:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_m_hist, y = Response_pred, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("prediction") +
+  ylab("mean_histogram") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),
+        axis.text.y = element_text(size = 5.5),
+        strip.text.x = element_text(face = "bold"),
+        strip.text.y = element_text(face = "bold"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+  
+```
+
+\newpage 
+# Relationship between Anxiety and SubjPE
+
+The anxiety question now asks "how nervous would you feel to talk to this person again?". It shows a correlation of -0.12, in our previous pilot where we asked "how nervous/uncomfortable do you feel right now" we had a correlation of -0.15.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_Ax <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_Ax$correlation, na.rm = TRUE)
+message_to_print_Ax <- paste("average correlation between anxiety and SubjPE:", average_correlation)
+
+print(message_to_print_Ax)
+
+ggplot(final_df22, aes(x = Response_SubjPE, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Anxiety") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations_Ax, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+ylim(c(0, 100)) +
+scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+xlim(c(-100, 100)) +
+scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
+```
+\newpage 
+# Relationship between Embarrassment and SubjPE
+
+We asked people one additional question that was more specifically related to their social anxiety: "how embarrassed do you feel right now?". The correlation is similar to the previous question (r = -0.12).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_Emb <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Emb, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_Emb$correlation, na.rm = TRUE)
+message_to_print_Emb <- paste("average correlation between embarrassment and SubjPE:", average_correlation)
+
+print(message_to_print_Emb)
+
+ggplot(final_df22, aes(x = Response_SubjPE, y = Response_Emb, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Embarrassment") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations_Ax, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+ylim(c(0, 100)) +
+scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+xlim(c(-100, 100)) +
+scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
+```
+
+\newpage 
+# Relationship between Mood and SubjPE
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+correlations_M <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_H, Response_SubjPE, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_M$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mood and SubjPE:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_SubjPE, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("SubjPE: feedback - prediction") + 
+  ylab("Mood") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations_M, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
+  
+```
+\newpage 
+# Relationship between Anxiety and prediction
+
+The correlation between "how nervous would you feel to talk to this person again" and prediction is bigger than the one with SubjPE (-0.14 vs -0.11), with our previous question in pilot 21 it was the other way around, and we had a correlation of almost -0.15.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between anxiety and prediction:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_pred, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Pre performance prediction") + 
+  ylab("Anxiety") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+
+
+\newpage 
+# Relationship between Anxiety and feedback
+
+Again, the relationship between "how nervous would you feel to talk to this person again" and feedback is stronger than what we had before (-0.21, vs -0.17).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Ax, Response_fdbk, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between anxiety and feedback:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_fdbk, y = Response_Ax, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Feedback") + 
+  ylab("Anxiety") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+\newpage 
+# Relationship between Embarrassment and prediction
+
+A much weaker correlation with embarrassment and prediction (r = -0.06).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Emb, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_Emb <- paste("average correlation between Embarrassment and Prediction:", average_correlation)
+
+print(message_to_print_Emb)
+
+ggplot(final_df22, aes(x = Response_pred, y = Response_Emb, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Pre performance prediction") + 
+  ylab("Embarrassment") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+\newpage 
+# Relationship between Embarrassment and prediction
+
+But again a stronger correlation with feedback (r = -0.17).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_Emb, Response_fdbk, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_Emb <- paste("average correlation between Embarrassment and Feedback:", average_correlation)
+
+print(message_to_print_Emb)
+
+ggplot(final_df22, aes(x = Response_fdbk, y = Response_Emb, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Feedback") + 
+  ylab("Embarrassment") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+
+\newpage 
+# Relationship between Mood and feedback
+
+A stronger correlation between mood and feedback which is the same as before.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations_Mfd <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_H, Response_fdbk, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations_Mfd$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mood and feedback:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_fdbk, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Feedback") + 
+  ylab("Mood") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations_Mfd, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+
+\newpage 
+# Relationship between Mood and prediction (pre-performance)
+
+Similar to before, we have a weaker correlation with prediction and mood.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+correlations <- final_df22 %>%
+  group_by(Random_ID) %>%
+  summarise(correlation = cor(Response_H, Response_pred, use = "complete.obs")) %>%
+  mutate(label = paste("R = ", round(correlation, digits = 2))) 
+
+# calculate the average correlation across all individuals and print it 
+average_correlation <- mean(correlations$correlation, na.rm = TRUE)
+message_to_print_H <- paste("average correlation between mood and prediction before performance:", average_correlation)
+
+print(message_to_print_H)
+
+ggplot(final_df22, aes(x = Response_pred, y = Response_H, color = Social_Anxiety, group= Social_Anxiety)) +
+  geom_point(aes(color=Social_Anxiety, alpha = 0.3)) +
+  geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) + 
+  # labs(color="Legend") +
+  theme_minimal() +
+  xlab("Prediction pre performance") + 
+  ylab("Mood") +
+    facet_wrap(~ Random_ID, scales = "free") +
+    geom_text(data=correlations, aes(x=Inf, y=Inf, label=label, group=Random_ID), hjust=1.1, vjust=1.1, size=2.7, fontface = "bold", inherit.aes=FALSE) +
+    theme(strip.text = element_text(size = 6),
+        axis.text.x = element_text(size = 5.5),  
+        axis.text.y = element_text(size = 5.5),  
+        strip.text.x = element_text(face = "bold"),  
+        strip.text.y = element_text(face = "bold"),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank()) +
+  ylim(c(0, 100)) + 
+  scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(0, 100))+
+  xlim(c(-100, 100)) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
+  
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# trying to keep the BL_1 and BL_2 mood and anxiety ratings
+df22_with_BL <- df22_raw[, c("Trial.Number", "Display", "Screen", "Response.Type", "Response", 
+                     "Reaction.Time", "Spreadsheet..Histogram", "Spreadsheet..Feedback", "Random_ID")]
+
+df22_with_BL <- df22_with_BL %>%
+  mutate(Response = as.numeric(as.character(Response))) %>%
+  dplyr::filter(!is.na(Response))
+
+df22_with_BL <- df22_with_BL %>% dplyr::filter(Response.Type != "info")
+
+df22_with_BL$Screen <- ifelse(df22_with_BL$Trial.Number == 1 & (df22_with_BL$Display == "Mood " | df22_with_BL$Display == "Embarrassment"), "BL_1",
+                      ifelse(df22_with_BL$Trial.Number == 2 & (df22_with_BL$Display == "Mood " | df22_with_BL$Display == "Embarrassment"), "BL_2", 
+                             df22_with_BL$Screen))
+
+df22_with_BL$m_hist <- ifelse(df22_with_BL$Spreadsheet..Histogram == "h1.png", 22,
+                      ifelse(df22_with_BL$Spreadsheet..Histogram == "h2.png", 29,
+                             ifelse(df22_with_BL$Spreadsheet..Histogram == "h3.png", 37,
+                                    ifelse(df22_with_BL$Spreadsheet..Histogram == "h4.png", 46,
+                                           ifelse(df22_with_BL$Spreadsheet..Histogram == "h5.png", 54,
+                                                  ifelse(df22_with_BL$Spreadsheet..Histogram == "h6.png", 63,
+                                                         ifelse(df22_with_BL$Spreadsheet..Histogram == "h7.png", 71,
+                                                                ifelse(df22_with_BL$Spreadsheet..Histogram == "h8.png", 80, NA))))))))  
+
+
+# get rid of the rows we don't need: practice runs, continue button presses etc. and only keep Trials, Anxiety and Mood that include all variables we are interested in:
+df22_with_BL <- df22_with_BL %>%
+  dplyr::filter(
+    (Display == "Trials ") |
+      (Display == "Anxiety ") |
+      (Display == "Embarrassment") |
+      (Display == "Mood ")
+  )
+
+# # setting Mood and Anxiety trial numbers to match the trials starting from 1 (since we removed the baseline ones above)
+df22_with_BL$Trial.Number <- ifelse(df22_with_BL$Display == 'Mood ' | df22_with_BL$Display == 'Embarrassment', df22_with_BL$Trial.Number - 2, df22_with_BL$Trial.Number)
+# df22_with_BL$Display <- ifelse(df22_with_BL$Display == 'Mood ' | df22_with_BL$Display == 'Anxiety ', "Trials", df22_with_BL$Display)
+
+final_df22_with_BL <- df22_with_BL[c("Trial.Number", "Display", "Screen", "Response", "Random_ID")]
+
+final_df22_with_BL <- final_df22_with_BL %>%
+  left_join(df22_spin %>% dplyr::select(Random_ID, mini_SPIN_total), by = "Random_ID")
+
+final_df22_with_BL <- final_df22_with_BL %>%
+  left_join(CESD_data_clean %>% dplyr::select(Random_ID, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID")
+
+final_df22_with_BL$Social_Anxiety <- ifelse(final_df22_with_BL$mini_SPIN_total >= 6, "high", "low")
+
+
+```
+
+
+
+\newpage 
+# Mood over time 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df22_BL_ax <- subset(final_df22_with_BL, Display == "Anxiety ")
+df22_BL_Emb <- subset(final_df22_with_BL, Display == "Embarrassment")
+df22_BL_H <- subset(final_df22_with_BL,Display == "Mood ")
+
+ggplot(df22_BL_H, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
+  geom_line(color = "blue") +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") + # Adding a vertical line at Trial.Number == 1
+  theme_minimal() +
+  labs(title = "Mood across time",
+       x = "Trial Number",
+       y = "Mood",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) +
+  theme(strip.text = element_text(size = 6)) +
+  scale_x_continuous(breaks = seq(-1, 48, by = 10), limits = c(-1, 48)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 22), limits = c(0, 100))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+\newpage 
+# Anxiety over time 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df22_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
+  geom_line(color = "blue") +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") + # Adding a vertical line at Trial.Number == 1
+  theme_minimal() +
+  labs(title = "Anxiety across time",
+       x = "Trial Number",
+       y = "Anxiety",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) + 
+  theme(strip.text = element_text(size = 6)) +  
+  scale_x_continuous(breaks = seq(-1, 48, by = 10), limits = c(-1, 48)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 22), limits = c(0, 100))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+
+\newpage 
+# Embarrassment over time 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(df22_BL_Emb, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
+  geom_line(color = "blue") +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") + # Adding a vertical line at Trial.Number == 1
+  theme_minimal() +
+  labs(title = "Embarrassment across time",
+       x = "Trial Number",
+       y = "Embarrassment",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) + 
+  theme(strip.text = element_text(size = 6)) +  
+  scale_x_continuous(breaks = seq(-1, 48, by = 10), limits = c(-1, 48)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 22), limits = c(0, 100))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+
+\newpage 
+# Prediction before performance over time 
+
+Red line presents until what points histograms were presented (4 first trials only).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(final_df22, aes(x = Trial.Number, y = Response_pred)) +
+  geom_line(color = "blue") +
+  geom_vline(xintercept = 5, linetype = "dashed", color = "red") + 
+  theme_minimal() +
+  labs(title = "Prediction before performance across time",
+       x = "Trial Number",
+       y = "Pre performance prediction",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) + 
+  theme(strip.text = element_text(size = 6)) +  
+  scale_x_continuous(breaks = seq(1, 48, by = 10), limits = c(1, 48)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 22), limits = c(0, 100))+
+  theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
+
+```
+
+
+\newpage 
+# Stress levels and social anxiety
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+onetrial_final_df22 <- subset(final_df22, final_df22$Trial.Number == 3)
+
+
+ggplot(onetrial_final_df22, aes(x = Social_Anxiety, y = Response_stress_level , fill = Social_Anxiety)) +
+  geom_boxplot(outlier.colour = "black") +
+  stat_boxplot(geom = "errorbar",
+               width = 0.15) + 
+  geom_point(color = "black", position = position_jitter(width = 0.1), alpha = 0.7) +
+  theme_minimal() +
+  # labs(x = "Display", y = "Response") +
+  # scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(0, 100)) +
+  # ggtitle("Average anxiety ratings in pilots 1 and 2 in socially anxious people") +
+  xlab("") + 
+  ylab("stress levels (0-10)") +
+  # facet_wrap(~pilot_nr, scales = "free") +
+  # scale_fill_manual(values = c("black", "purple", "darkgreen", "blue"))+
+  # ylim(c(50, 100)) + 
+  scale_y_continuous(breaks = seq(0, 10, by = 1), limits = c(1, 10))+
+  theme(
+    panel.grid.major = element_blank(),  # Removes major grid lines
+    panel.grid.minor = element_blank(),  # Removes minor grid lines
+    panel.border = element_blank(),      # Removes the border line
+    axis.line = element_blank(),          # Removes axis lines
+    plot.background = element_rect(fill = "white", colour = NA)   # Ensure plot background is white
+  )
+
+```
+
+\newpage
+# LME models for Mood and SubjPE
+
+The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Response_H <- coef_fixed[1]
+slope_Response_H <- coef_fixed[2]
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+
+# Hypothetical standard errors for intercept and slope
+SE_intercept <- 0.15  # Placeholder value
+SE_slope <- 0.43      # Placeholder value
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+
+# Creating a sequence of `SubjPE` values for prediction
+Response_SubjPE_range <- seq(min(final_df22$Response_SubjPE), max(final_df22$Response_SubjPE), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_SubjPE_range
+CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df22, aes(x=Response_SubjPE, y=Response_H)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_H, slope=slope_Response_H, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_SubjPE, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df22$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_SubjPE$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+
+```
+
+\newpage
+# LME models for Anxiety and SubjPE
+
+The best model seems to be: Anxiety ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Response_Ax <- coef_fixed[1]
+slope_Response_Ax <- coef_fixed[2]
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+
+# Hypothetical standard errors for intercept and slope
+SE_intercept <- -0.03  # Placeholder value
+SE_slope <- -0.27      # Placeholder value
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+
+# Creating a sequence of `SubjPE` values for prediction
+Response_SubjPE_range <- seq(min(final_df22$Response_SubjPE), max(final_df22$Response_SubjPE), length.out = 100)
+
+# Calculating predicted Response_Ax and its CI bounds across the SubjPE range
+predicted_Response_Ax <- intercept_Response_Ax + slope_Response_Ax * Response_SubjPE_range
+CI_lower <- predicted_Response_Ax - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_Ax + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df22, aes(x=Response_SubjPE, y=Response_Ax)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_Ax, slope=slope_Response_Ax, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_SubjPE, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Anxiety") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df22$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_SubjPE$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+```
+
+\newpage
+# LME models for Embarrassment and SubjPE
+
+The best model seems to be: Embarrassment ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Emb ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Emb ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Emb ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+# model4 <- lme4::lmer(Response_Emb ~ Response_pred + Response_fdbk + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df22, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+# AIC(model4)
+
+coef_fixed <- fixef(model3)
+intercept_Response_Ax <- coef_fixed[1]
+slope_Response_Ax <- coef_fixed[2]
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+
+# Hypothetical standard errors for intercept and slope
+SE_intercept <- -0.03  # Placeholder value
+SE_slope <- -0.27      # Placeholder value
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+
+# Creating a sequence of `SubjPE` values for prediction
+Response_SubjPE_range <- seq(min(final_df22$Response_SubjPE), max(final_df22$Response_SubjPE), length.out = 100)
+
+# Calculating predicted Response_Ax and its CI bounds across the SubjPE range
+predicted_Response_Ax <- intercept_Response_Ax + slope_Response_Ax * Response_SubjPE_range
+CI_lower <- predicted_Response_Ax - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_Ax + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df22, aes(x=Response_SubjPE, y=Response_Emb)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_Ax, slope=slope_Response_Ax, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_SubjPE, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Anxiety") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df22$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_SubjPE$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+```
+
