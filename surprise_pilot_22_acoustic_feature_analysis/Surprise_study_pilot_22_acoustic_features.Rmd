@@ -1,0 +1,369 @@
+---
+title: "Surprise study pilot 22 acoustic features"
+author: "Marjan Biria"
+date: "2224-05-01"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "", echo = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+library(purrr)
+library(conflicted)
+library(stringr)
+library(readxl)
+library(knitr)
+library(nortest)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df22_acc_beh <- read.csv("/Users/marjan/Desktop/aim_lab_1/df22_acc_beh.csv")
+
+```
+
+
+\newpage
+# Descriptive stats acoustic data
+
+Since the stimuli/feedback were counterbalanced, we cannot look at the features over time across all subjects. But let's look at correlations between these features with anxiety, mood and PE to see which features are more correlated with these feelings, and since we know for mood we have a robust positive relationship with PE, do we replicate the same relationship with the accoustic features (positive control?). All these variables seem to be significantly different between low vs high social anxiety groups.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+
+variables <- c("Loudness_sma3", "alphaRatio_sma3", "hammarbergIndex_sma3",
+               "slope0.500_sma3", "slope500.1500_sma3", "F0semitoneFrom27.5Hz_sma3nz",
+               "jitterLocal_sma3nz", "shimmerLocaldB_sma3nz", "HNRdBACF_sma3nz",
+               "logRelF0.H1.H2_sma3nz", "logRelF0.H1.A3_sma3nz", "F1frequency_sma3nz",
+               "F1bandwidth_sma3nz", "F1amplitudeLogRelF0_sma3nz", "F2frequency_sma3nz",
+               "F2amplitudeLogRelF0_sma3nz", "F3frequency_sma3nz", "F3amplitudeLogRelF0_sma3nz")
+
+pdf("Normality_Plots.pdf")  # Save plots to a PDF
+for (variable in variables) {
+  # Histogram
+  p1 <- ggplot(df22_acc_beh, aes_string(x = variable)) +
+        geom_histogram(bins = 30, fill = "gray", color = "black") +
+        ggtitle(paste("Histogram of", variable))
+  
+  # Q-Q Plot
+  p2 <- ggplot(df22_acc_beh, aes_string(sample = variable)) +
+        stat_qq() +
+        stat_qq_line() +
+        ggtitle(paste("Q-Q Plot of", variable))
+  
+  # Print plots
+  print(p1)
+  print(p2)
+}
+dev.off()
+
+# many of the features are not normally distributed
+#
+# # Calculate grouped mean, SD, and t-test for each variable
+results <- lapply(variables, function(var) {
+  data_high <- df22_acc_beh[df22_acc_beh$Social_Anxiety == "high", var, drop = FALSE]
+  data_low <- df22_acc_beh[df22_acc_beh$Social_Anxiety == "low", var, drop = FALSE]
+
+#
+#   # # Perform t-test
+#   # t_test <- t.test(data_high[[1]], data_low[[1]], na.action = na.omit)
+#
+#   # Extract means and SDs by group
+  mean_high <- mean(data_high[[1]], na.rm = TRUE)
+  mean_low <- mean(data_low[[1]], na.rm = TRUE)
+  sd_high <- sd(data_high[[1]], na.rm = TRUE)
+  sd_low <- sd(data_low[[1]], na.rm = TRUE)
+
+#   # Compile results
+  c(Mean_High_SA = mean_high, SD_High_SA = sd_high,
+    Mean_Low_SA = mean_low, SD_Low_SA = sd_low
+  ) # T_Statistic = t_test$statistic, P_Value = t_test$p.value
+})
+
+# Convert results into a data frame
+results_df <- do.call(rbind, results)
+row.names(results_df) <- variables
+
+# tinytex::reinstall_tinytex(repository = "illinois")
+# tinytex::tlmgr_install("multirow")
+#
+# library(kableExtra)
+
+
+kable(results_df, format = "html", caption = "mean, SD by Social_Anxiety")
+```
+
+\newpage
+# Boxplots acoustic data according by high vs low SA
+
+For some variables the groups seem to differ more clearly, let's see whether these differences are also related to mood, anxiety or PE's.
+
+
+```{r boxplot-creation, echo=FALSE, fig.cap="Boxplots with Points by Social Anxiety", warning=FALSE, message=FALSE}
+
+variables <- c("Loudness_sma3", "alphaRatio_sma3", "hammarbergIndex_sma3",
+               "slope0.500_sma3", "slope500.1500_sma3", "F0semitoneFrom27.5Hz_sma3nz",
+               "jitterLocal_sma3nz", "shimmerLocaldB_sma3nz", "HNRdBACF_sma3nz",
+               "logRelF0.H1.H2_sma3nz", "logRelF0.H1.A3_sma3nz", "F1frequency_sma3nz",
+               "F1bandwidth_sma3nz", "F1amplitudeLogRelF0_sma3nz", "F2frequency_sma3nz",
+               "F2amplitudeLogRelF0_sma3nz", "F3frequency_sma3nz", "F3amplitudeLogRelF0_sma3nz")
+
+# Aggregate data for boxplot
+aggregated_data <- df22_acc_beh %>%
+  group_by(Random_ID, Social_Anxiety) %>%
+  summarise(across(all_of(variables), mean, na.rm = TRUE), .groups = "drop")
+
+# Variables for Mann-Whitney U test
+mann_whitney_vars <- c("F0semitoneFrom27.5Hz_sma3nz", "jitterLocal_sma3nz", "F1frequency_sma3nz", 
+                       "F1amplitudeLogRelF0_sma3nz", "F2amplitudeLogRelF0_sma3nz", "F3amplitudeLogRelF0_sma3nz")
+
+# Variables for t-test
+t_test_vars <- setdiff(variables, mann_whitney_vars)
+
+# Loop through each variable and create a plot with test annotations
+for (variable in variables) {
+  data_for_test <- aggregated_data %>%
+    dplyr::filter(!is.na(.data[[variable]])) %>%
+    dplyr::select(Social_Anxiety, !!rlang::sym(variable))
+  
+  # Decide which test to use based on the variable type
+  if (variable %in% mann_whitney_vars) {
+    test_result <- wilcox.test(data_for_test[[variable]][data_for_test$Social_Anxiety == "high"],
+                               data_for_test[[variable]][data_for_test$Social_Anxiety == "low"])
+    test_label <- "Mann-Whitney"
+  } else {
+    test_result <- t.test(data_for_test[[variable]][data_for_test$Social_Anxiety == "high"],
+                          data_for_test[[variable]][data_for_test$Social_Anxiety == "low"])
+    test_label <- "t-test"
+  }
+  
+  # Create the plot
+  p <- ggplot(aggregated_data, aes(x = Social_Anxiety, y = .data[[variable]], fill = Social_Anxiety)) +
+    geom_boxplot(alpha = 0.5) +
+    geom_jitter(width = 0.2, size = 1, alpha = 0.5, color = "black") +
+    labs(title = paste("Boxplot of Mean", variable, "by Social Anxiety"),
+         x = "Social Anxiety Level",
+         y = paste("Mean", variable)) +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    annotate("text", x = 1, y = max(aggregated_data[[variable]], na.rm = TRUE) * 1.1, 
+             label = sprintf("%s p = %.3f", test_label, test_result$p.value), 
+             hjust = -0.1, size = 5, color = "red")
+  
+  print(p)
+}
+
+
+```
+
+
+
+
+\newpage
+# Relationship mood and acoustic features
+
+No correlation for either group with low vs high social anxiety, or the group correlation.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+variables <- c("Loudness_sma3", "alphaRatio_sma3", "hammarbergIndex_sma3",
+               "slope0.500_sma3", "slope500.1500_sma3", "F0semitoneFrom27.5Hz_sma3nz",
+               "jitterLocal_sma3nz", "shimmerLocaldB_sma3nz", "HNRdBACF_sma3nz",
+               "logRelF0.H1.H2_sma3nz", "logRelF0.H1.A3_sma3nz", "F1frequency_sma3nz",
+               "F1bandwidth_sma3nz", "F1amplitudeLogRelF0_sma3nz", "F2frequency_sma3nz",
+               "F2amplitudeLogRelF0_sma3nz", "F3frequency_sma3nz", "F3amplitudeLogRelF0_sma3nz")
+
+spearman_vars <- c("F0semitoneFrom27.5Hz_sma3nz", "jitterLocal_sma3nz", "F1frequency_sma3nz", 
+                   "F1amplitudeLogRelF0_sma3nz", "F2amplitudeLogRelF0_sma3nz", "F3amplitudeLogRelF0_sma3nz")
+
+
+for (variable in variables) {
+  method <- ifelse(variable %in% spearman_vars, "spearman", "pearson")
+
+  correlations <- df22_acc_beh %>%
+    group_by(Random_ID, Social_Anxiety) %>%
+    summarise(correlation = cor(Response_H, .data[[variable]], method = method, use = "complete.obs"), .groups = "drop") %>%
+    mutate(label = paste("R =", round(correlation, 2), sep=""))
+
+  total_correlation <- df22_acc_beh %>%
+    group_by(Random_ID) %>%
+    summarise(total_corr = cor(Response_H, .data[[variable]], method = method, use = "complete.obs")) %>%
+    mutate(label_total = paste("Total R =", round(total_corr, 2), sep=""))
+
+  average_correlations <- correlations %>%
+    group_by(Social_Anxiety) %>%
+    summarise(average_correlation = mean(correlation, na.rm = TRUE))
+
+  average_total_correlation <- mean(total_correlation$total_corr, na.rm = TRUE)
+
+  average_correlations %>%
+    mutate(message_to_print = paste("Average", "corr between mood and", variable, "for", Social_Anxiety, "anxiety:", round(average_correlation, 3))) %>%
+    pull(message_to_print) %>%
+    walk(print)
+
+  message_to_print_total <- paste("Average", "corr between mood and", variable, "for both groups:", round(average_total_correlation, 3))
+  print(message_to_print_total)
+
+  p <- ggplot(df22_acc_beh, aes(x = .data[[variable]], y = Response_H, color = Social_Anxiety, group = Social_Anxiety)) +
+    geom_point(aes(color = Social_Anxiety), alpha = 0.3) +
+    geom_smooth(method = "lm", color = "blue", aes(group = Random_ID)) +
+    geom_text(data = correlations, aes(x = Inf, y = Inf, label = label, group = Random_ID), hjust = 1.1, vjust = 1.1, size = 2.7, fontface = "bold", inherit.aes = FALSE) +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme_minimal() +
+    labs(x = variable, y = "Mood") +
+    theme(strip.text = element_text(size = 6),
+          axis.text.x = element_text(size = 5.5),
+          axis.text.y = element_text(size = 5.5),
+          strip.text.x = element_text(face = "bold"),
+          strip.text.y = element_text(face = "bold"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank()) +
+    ylim(c(0, 100))
+
+  print(p)
+}
+
+
+
+```
+
+
+
+\newpage
+# Relationship anxiety and acoustic features
+
+For anxiety, the correlations are slightly higher but still not sure how to interpret. Only loudness in high social anxiety group shows a correlation of -0.11, the other correlations bigger than zero were for the low social anxiety group for F1amplitudeLogRelF0_sma3nz (-0.14), F2amplitudeLogRelF0_sma3nz (-0.12), F3amplitudeLogRelF0_sma3nz (-0.13). But when combining groups, they become zero.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+for (variable in variables) {
+  method <- ifelse(variable %in% spearman_vars, "spearman", "pearson")
+
+  correlations <- df22_acc_beh %>%
+    group_by(Random_ID, Social_Anxiety) %>%
+    summarise(correlation = cor(Response_Ax, .data[[variable]], method = method, use = "complete.obs"), .groups = "drop") %>%
+    mutate(label = paste("R =", round(correlation, 2), sep=""))
+
+  total_correlation <- df22_acc_beh %>%
+    group_by(Random_ID) %>%
+    summarise(total_corr = cor(Response_Ax, .data[[variable]], method = method, use = "complete.obs")) %>%
+    mutate(label_total = paste("Total R =", round(total_corr, 2), sep=""))
+
+  average_correlations <- correlations %>%
+    group_by(Social_Anxiety) %>%
+    summarise(average_correlation = mean(correlation, na.rm = TRUE))
+  
+  average_total_correlation <- mean(total_correlation$total_corr, na.rm = TRUE)
+
+  average_correlations %>%
+    mutate(message_to_print = paste("Average", "corr between Anxiety and", variable, "for", Social_Anxiety, "anxiety:", round(average_correlation, 3))) %>%
+    pull(message_to_print) %>%
+    walk(print)
+  
+  message_to_print_total <- paste("Average", "corr between Anxiety and", variable, "for both groups:", round(average_total_correlation, 3))
+  print(message_to_print_total)
+
+
+  p <- ggplot(df22_acc_beh, aes(x = .data[[variable]], y = Response_Ax, color = Social_Anxiety, group = Social_Anxiety)) +
+    geom_point(aes(color = Social_Anxiety), alpha = 0.3) +
+    geom_smooth(method = "lm", color = "blue", aes(group = Random_ID)) +
+    geom_text(data = correlations, aes(x = Inf, y = Inf, label = label, group = Random_ID), hjust = 1.1, vjust = 1.1, size = 2.7, fontface = "bold", inherit.aes = FALSE) +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme_minimal() +
+    labs(x = variable, y = "Anxiety") +
+    theme(strip.text = element_text(size = 6),
+          axis.text.x = element_text(size = 5.5),  
+          axis.text.y = element_text(size = 5.5),  
+          strip.text.x = element_text(face = "bold"),  
+          strip.text.y = element_text(face = "bold"),  
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank()) +
+    ylim(c(0, 100))
+
+
+  print(p)
+}
+
+
+```
+
+
+
+\newpage
+# Relationship subjective PE and acoustic features
+
+No correlation for either group with low vs high social anxiety, or the group correlation.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+for (variable in variables) {
+  method <- ifelse(variable %in% spearman_vars, "spearman", "pearson")
+
+  correlations <- df22_acc_beh %>%
+    group_by(Random_ID, Social_Anxiety) %>%
+    summarise(correlation = cor(Response_SubjPE, .data[[variable]], method = method, use = "complete.obs"), .groups = "drop") %>%
+    mutate(label = paste("R =", round(correlation, 2), sep=""))
+
+  total_correlation <- df22_acc_beh %>%
+    group_by(Random_ID) %>%
+    summarise(total_corr = cor(Response_SubjPE, .data[[variable]], method = method, use = "complete.obs")) %>%
+    mutate(label_total = paste("Total R =", round(total_corr, 2), sep=""))
+
+  average_correlations <- correlations %>%
+    group_by(Social_Anxiety) %>%
+    summarise(average_correlation = mean(correlation, na.rm = TRUE))
+  
+  average_total_correlation <- mean(total_correlation$total_corr, na.rm = TRUE)
+
+  average_correlations %>%
+    mutate(message_to_print = paste("Average", "corr between subjective PE and", variable, "for", Social_Anxiety, "subjective PE:", round(average_correlation, 3))) %>%
+    pull(message_to_print) %>%
+    walk(print)
+  
+  message_to_print_total <- paste("Average", "corr between subjective PE and", variable, "for both groups:", round(average_total_correlation, 3))
+  print(message_to_print_total)
+
+
+  p <- ggplot(df22_acc_beh, aes(x = .data[[variable]], y = Response_SubjPE, color = Social_Anxiety, group = Social_Anxiety)) +
+    geom_point(aes(color = Social_Anxiety), alpha = 0.3) +
+    geom_smooth(method = "lm", color = "blue", aes(group = Random_ID)) +
+    geom_text(data = correlations, aes(x = Inf, y = Inf, label = label, group = Random_ID), hjust = 1.1, vjust = 1.1, size = 2.7, fontface = "bold", inherit.aes = FALSE) +
+    facet_wrap(~ Random_ID, scales = "free") +
+    theme_minimal() +
+    labs(x = variable, y = "subjective PE") +
+    theme(strip.text = element_text(size = 6),
+          axis.text.x = element_text(size = 5.5),  
+          axis.text.y = element_text(size = 5.5),  
+          strip.text.x = element_text(face = "bold"),  
+          strip.text.y = element_text(face = "bold"),  
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank()) +
+    ylim(c(0, 100))
+
+
+  print(p)
+}
+
+
+```
+
+
+
+
+
+
