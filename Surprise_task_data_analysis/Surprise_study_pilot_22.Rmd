@@ -42,9 +42,9 @@ The task is the following: https://app.gorilla.sc/admin/task/812527/editor?versi
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-df22_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_task_main.csv")
-df22_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_mini_spin.csv")
-df22_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_ces_d.csv")
+df22_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_22/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_task_main.csv")
+df22_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_22/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_mini_spin.csv")
+df22_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_22/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1/SUP_PRF_p22_vid_bigPE_nohist_newjud_2anxQ_v1_ces_d.csv")
 
 ```
 
@@ -1043,3 +1043,27 @@ ggplot(final_df22, aes(x=Response_SubjPE, y=Response_Emb)) +
   scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
 ```
 
+
+\newpage 
+# ICC for Mood with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
+                      final_df22, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
+
+\newpage 
+# ICC for Anxiety with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
+                      final_df22, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```

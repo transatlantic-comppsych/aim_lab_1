@@ -41,13 +41,13 @@ The task is the following: https://app.gorilla.sc/admin/task/799523/editor
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # v3 and v4 have exactly the same task version, but BIQ was causing a problem due to a Gorilla update and it was changed in version 4
 
-df21_raw_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
-df21_spin_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
-df21_cesd_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
+df21_raw_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
+df21_spin_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
+df21_cesd_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
 
-df21_raw_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
-df21_spin_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
-df21_cesd_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p21_vid_bigPE_nohist_newjud/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
+df21_raw_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
+df21_spin_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
+df21_cesd_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
 
 df21_raw <- rbind(df21_raw_part1, df21_raw_part2)
 df21_spin <- rbind(df21_spin_part1, df21_spin_part2)
@@ -834,4 +834,29 @@ ggplot(final_df21, aes(x=Response_SubjPE, y=Response_Ax)) +
                                             round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
   scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
   scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+```
+
+
+\newpage 
+# ICC for Mood with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
+                      final_df21, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
+
+\newpage 
+# ICC for Anxiety with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
+                      final_df21, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
 ```

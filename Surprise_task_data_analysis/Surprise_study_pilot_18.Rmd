@@ -38,9 +38,9 @@ The task is the following: https://app.gorilla.sc/admin/task/785720/editor
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df18_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_task_main.csv")
-df18_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_mini_spin.csv")
-df18_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_ces_d.csv")
+df18_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_18/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_task_main.csv")
+df18_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_18/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_mini_spin.csv")
+df18_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_18/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4/SUP_PRF_p18_vid_bigPE_nar2_earlypred_chk_cbal_v4_ces_d.csv")
 ```
 
 
@@ -310,7 +310,7 @@ final_df18 %>%
   group_by(Random_ID) %>%
   summarise(Trial.Number = n())
 
-write.csv(final_df18, "final_df18_with_stresslevels.csv", row.names = FALSE)
+# write.csv(final_df18, "final_df18_with_stresslevels.csv", row.names = FALSE)
 ```
 
 
@@ -477,3 +477,30 @@ ggplot(df18_ch2nd, aes(x = Trial.Number, y = Response_H, color = counterbalance_
   theme(axis.text.x = element_text(size = 5),axis.text.y = element_text(size = 5))
 
 ```
+
+
+\newpage 
+# ICC for Mood with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
+                      df18_choking, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
+
+\newpage 
+# ICC for Anxiety with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
+                      df18_choking, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
+
+

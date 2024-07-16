@@ -39,9 +39,9 @@ The task is the following: https://app.gorilla.sc/admin/task/788287/editor
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df19_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_task_main.csv")
-df19_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_mini_spin.csv")
-df19_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_ces_d.csv")
+df19_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_task_main.csv")
+df19_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_mini_spin.csv")
+df19_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_ces_d.csv")
 
 ```
 
@@ -1027,4 +1027,26 @@ ggplot(filter_df, aes(x = believability, y = Response_stress_level , fill = beli
 ```
 
 
+\newpage 
+# ICC for Mood with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
+                      final_df19, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
 
+icc_results_id
+```
+
+\newpage 
+# ICC for Anxiety with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
+                      final_df19, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```

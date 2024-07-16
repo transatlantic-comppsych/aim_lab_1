@@ -39,9 +39,9 @@ The task is the following: https://app.gorilla.sc/admin/task/793630/editor
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df20_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_task_main.csv")
-df20_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_mini_spin.csv")
-df20_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_ces_d.csv")
+df20_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_task_main.csv")
+df20_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_mini_spin.csv")
+df20_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_ces_d.csv")
 
 ```
 
@@ -1279,53 +1279,77 @@ When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Ran
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# TO DO:
-# - look at the plots dividing people according believability
-# - look at LME's taking SA into account, taking fdbk into account in the relationship of the pre and post ratings
+# # TO DO:
+# # - look at the plots dividing people according believability
+# # - look at LME's taking SA into account, taking fdbk into account in the relationship of the pre and post ratings
+# # 
+# Yes:
+# 1)SUPPRF67318
+# 2)SUPPRF60790
+# 3)SUPPRF84585
+# 4) SUPPRF99019
+# 5)SUPPRF60041
+# 6)SUPPRF74365
+# 7)SUPPRF88823
+# 8)SUPPRF83047
+# 9)SUPPRF58947
+# 10)SUPPRF74320
+# 11)SUPPRF91090
+# 12)SUPPRF92030
+# 13)SUPPRF51693
 # 
-Yes:
-1)SUPPRF67318
-2)SUPPRF60790
-3)SUPPRF84585
-4) SUPPRF99019
-5)SUPPRF60041
-6)SUPPRF74365
-7)SUPPRF88823
-8)SUPPRF83047
-9)SUPPRF58947
-10)SUPPRF74320
-11)SUPPRF91090
-12)SUPPRF92030
-13)SUPPRF51693
-
-No:
-1)SUPPRF19125
-2)SUPPRF34851
-3) SUPPRF68963
-4)SUPPRF98765
-5) SUPPRF21256
-6)SUPPRF68317
-7)SUPPRF22695
-8)SUPPRF24929
-9)SUPPRF42659
-10)SUPPRF04651
-11)SUPPRF35950
-12)SUPPRF48827
-13)SUPPRF43967
-
-NA:
-1)SUPPRF82392
-2) SUPPRF52787
-3) SUPPRF97604
-4)SUPPRF42335
-5)SUPPRF30067
-6)SUPPRF74430
-7)SUPPRF00347
-8)SUPPRF41805
-9)SUPPRF55636
-10)SUPPRF27495
-11)SUPPRF16624
+# No:
+# 1)SUPPRF19125
+# 2)SUPPRF34851
+# 3) SUPPRF68963
+# 4)SUPPRF98765
+# 5) SUPPRF21256
+# 6)SUPPRF68317
+# 7)SUPPRF22695
+# 8)SUPPRF24929
+# 9)SUPPRF42659
+# 10)SUPPRF04651
+# 11)SUPPRF35950
+# 12)SUPPRF48827
+# 13)SUPPRF43967
+# 
+# NA:
+# 1)SUPPRF82392
+# 2) SUPPRF52787
+# 3) SUPPRF97604
+# 4)SUPPRF42335
+# 5)SUPPRF30067
+# 6)SUPPRF74430
+# 7)SUPPRF00347
+# 8)SUPPRF41805
+# 9)SUPPRF55636
+# 10)SUPPRF27495
+# 11)SUPPRF16624
 ```
 
 
+
+\newpage 
+# ICC for Mood with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
+                      final_df20, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
+
+\newpage 
+# ICC for Anxiety with chocking
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
+                      final_df20, 
+                    REML = FALSE, 
+                    control = lmerControl(optimizer = "bobyqa")) 
+icc_results_id <- performance::icc(test_icc_id)
+
+icc_results_id
+```
 
