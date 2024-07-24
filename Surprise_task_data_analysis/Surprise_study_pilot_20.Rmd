@@ -39,9 +39,9 @@ The task is the following: https://app.gorilla.sc/admin/task/793630/editor
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df20_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_task_main.csv")
-df20_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_mini_spin.csv")
-df20_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_ces_d.csv")
+df20_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_task_main.csv")
+df20_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_mini_spin.csv")
+df20_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_20/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4/SUP_PRF_p20_vid_bigPE_2pred_afterfdbk_nohist_4jud_v4_ces_d.csv")
 
 ```
 
@@ -1182,13 +1182,13 @@ ggplot(onetrial_final_df20, aes(x = Social_Anxiety, y = Response_stress_level , 
 \newpage
 # LME models for Mood and SubjPE
 
-The best model seems to 
+When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID).
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-# model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
-# model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
-# model3 <- lme4::lmer(Response_H ~ Response_SubjPE * mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
-# 
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE + (1 | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+
 # model4 <- lme4::lmer(Response_H ~ Response_fdbk + (1 | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
 # model5 <- lme4::lmer(Response_H ~ Response_fdbk + (Response_fdbk | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
 # model6 <- lme4::lmer(Response_H ~ Response_fdbk * mini_SPIN_total + (Response_fdbk | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
@@ -1209,74 +1209,105 @@ The best model seems to
 # model7g <- lme4::lmer(Response_Ax ~ Response_pred2 * mini_SPIN_total + (1 |Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
 # 
 # model7h <- lme4::lmer(Response_Ax ~ Response_pred2 + Response_fdbk  + (Response_fdbk | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
-# 
-# 
-# 
-# 
-# 
-# AIC(model7a)
-# AIC(model7b)
-# AIC(model7c)
-# AIC(model7d)
-# AIC(model7e)
-# AIC(model7f)
-# AIC(model7g)
-# AIC(model7h)
-# 
-# 
-# summary(model1)
-# summary(model2)
-# summary(model3)
-# summary(model4)
-# summary(model5)
-# summary(model6)
-# 
-# AIC(model1)
-# AIC(model2)
-# AIC(model3)
-# AIC(model4)
-# AIC(model5)
-# AIC(model6)
-# 
-# # anova(model2, model5)
-# 
-# coef_fixed <- fixef(model5)
-# intercept_Mood <- coef_fixed[1]
-# slope_Mood <- coef_fixed[2]
-# standard_beta_fdbk <- parameters:: standardise_parameters (model5)
-# standard_beta_subjPE <- parameters:: standardise_parameters (model2)
-# # test <- model5 %>% broom.mixed::tidy("fixed") 
+
+
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+summary(model1)
+summary(model2)
+summary(model3)
+
+# anova(model2, model5)
+
+coef_fixed <- fixef(model2)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model2)
+standard_beta_subjPE <- parameters:: standardise_parameters (model2)
+# test <- model5 %>% broom.mixed::tidy("fixed")
 ```
 
 
-\newpage 
-# Individual plots with LME for Mood with SubjPE
-When looking at subjective PE, the best model is  Mood ~ SubjPE  + (SubjPE | Random_ID) with an AIC of 
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-# ggplot(final_df20, aes(x=Response_SubjPE, y=Response_H)) +
-#   geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
-#   scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
-#   geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
-#   xlab("Subjective PE") + 
-#   ylab("Mood") +
-#   ggtitle("Relationship between Mood and subjective PE",
-#           subtitle = paste("estimated slopes of the association in n = ", 
-#                            length(unique(final_df20$Random_ID))))+
-#   theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
-#   theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
-#   theme(axis.title = element_text(size = 10))+
-#   annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
-#                                                  round(standard_beta_subjPE$CI_low[2],2), "-", 
-#                                                  round(standard_beta_subjPE$CI_high[2],2))) +
-#   scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
-#   scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+ggplot(final_df20, aes(x=Response_SubjPE, y=Response_H)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective PE") +
+  ylab("Mood") +
+  ggtitle("Relationship between Mood and subjective PE",
+          subtitle = paste("estimated slopes of the association in n = ",
+                           length(unique(final_df20$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_subjPE$CI_low[2],2), "-",
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
 
 # ggsave(filename = "p15_m.png", plot = p15_m, dpi = 300, width = 6, height = 4)
   
 ```
 
+\newpage
+# LME models for Anxiety and SubjPE
+
+When looking at subjective PE, the best model is  Anxiety ~ SubjPE  + mini_SPIN_total + (SubjPE | Random_ID).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (1 | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df20, control=lmerControl(optimizer="bobyqa"))
+
+
+
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+summary(model1)
+summary(model2)
+summary(model3)
+
+# anova(model2, model5)
+
+coef_fixed <- fixef(model3)
+intercept_Mood <- coef_fixed[1]
+slope_Mood <- coef_fixed[2]
+standard_beta_fdbk <- parameters:: standardise_parameters (model3)
+standard_beta_subjPE <- parameters:: standardise_parameters (model3)
+# test <- model5 %>% broom.mixed::tidy("fixed")
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(final_df20, aes(x=Response_SubjPE, y=Response_H)) +
+  geom_smooth(method = "lm", size = 0.5, se = FALSE, aes(group=Random_ID, color=Social_Anxiety)) +
+  scale_color_manual(values = c("low" = "lightblue", "high" = "pink")) +
+  geom_abline(intercept = intercept_Mood, slope = slope_Mood, color="purple", linetype="dashed", size=1) +
+  xlab("Subjective PE") +
+  ylab("Anxiety") +
+  ggtitle("Relationship between Anxiety and subjective PE",
+          subtitle = paste("estimated slopes of the association in n = ",
+                           length(unique(final_df20$Random_ID))))+
+  theme(plot.title = element_text(size=15), plot.subtitle = element_text(size = 10))+
+  theme(legend.title = element_text(size = 9), legend.text = element_text(size = 8))+
+  theme(axis.title = element_text(size = 10))+
+  annotate("label", x = 32, y = 55, label = paste("beta = ", round(standard_beta_subjPE$Std_Coefficient[2],2), ", 95%CI = ",
+                                                 round(standard_beta_subjPE$CI_low[2],2), "-",
+                                                 round(standard_beta_subjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks = seq(0, 100, by = 20), limits = c(0, 100))+
+  scale_x_continuous(breaks = seq(-80, 80, by = 40), limits = c(-80, 80))
+
+# ggsave(filename = "p15_m.png", plot = p15_m, dpi = 300, width = 6, height = 4)
+  
+```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # # TO DO:
