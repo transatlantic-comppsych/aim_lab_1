@@ -1,0 +1,149 @@
+---
+title: "Surprise study analysis"
+author: "Marjan Biria"
+date: "2024-08-19"
+output: 
+    pdf_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lme4)
+library(parameters)
+library(broom.mixed)
+library(purrr)
+library(conflicted)
+library(stringr)
+library(readxl)
+```
+
+
+\newpage
+# Study description
+This is the first surprise study using the same task version as pilot 21. We had the following groups of participants with the experiment's corresponding Gorilla link:
+- Prolific aged 18-25 (n = 30): https://app.gorilla.sc/admin/experiment/180921/design
+- Prolific aged 26-45 (n = 38): https://app.gorilla.sc/admin/experiment/185160/design
+- School students aged 14-18 (n = 30): https://app.gorilla.sc/admin/experiment/177048/design
+- Promunity participants aged 18-25 (n = 24): https://app.gorilla.sc/admin/experiment/180348/design
+
+The sample sizes include participants that potentially need to be excluded.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+df14_18 <- read.csv("/Users/marjan/Desktop/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
+df18_25_com <- read.csv("/Users/marjan/Desktop/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
+df18_25_Pro <- read.csv("/Users/marjan/Desktop/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
+df26_45_Pro <- read.csv("/Users/marjan/Desktop/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
+
+df14_18$Group <- "schools_14_18"
+df18_25_com$Group <- "community_18_25"
+df18_25_Pro$Group <- "Prolific_18_25"
+df26_45_Pro$Group <- "Prolific_26_45"
+
+# Rename the column Random_ID_new to match the other dataframes; we named it "new" because we changed the random IDs we had given to
+# students and community participants so that they cannot compare themselves to others.
+df14_18 <- df14_18 %>%
+  rename(Random_ID = Random_ID_new)
+
+df18_25_com <- df18_25_com %>%
+  rename(Random_ID = Random_ID_new)
+
+All_groups <- rbind(df14_18, df18_25_com, df18_25_Pro, df26_45_Pro)
+
+```
+
+
+\newpage
+# Stress levels per group
+
+It seems that stress levels between high vs low social anxiety groups are different in school kids, prolific participants aged 26-45; in other two groups there seem to be no difference in stress levels. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Plotting stress levels per group
+# install.packages("RColorBrewer")
+library(RColorBrewer)
+
+# We collected stress levels just once per subject; so we only need one trial for this
+All_groups_stresslevels <- subset(All_groups, Trial.Number == 1)
+
+ggplot(All_groups_stresslevels, aes(x = Group, y = Response_stress_level, color = Group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +  # Add boxplot without outliers
+  geom_jitter(aes(shape = Social_Anxiety), position = position_jitter(0.2), size = 1.5, alpha = 0.6) +  # Add smaller black jittered points
+  labs(title = "Boxplot of Response Stress Level by Group",
+       x = "Group",
+       y = "Response Stress Level") +
+  scale_color_brewer(palette = "Set2") +  # Use a slightly more vibrant color palette
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Rotate x-axis labels
+  facet_wrap(~ Social_Anxiety)  # Create subplots for each level of Social_Anxiety
+
+```
+
+\newpage
+# Social Anxiety counts per group
+
+It seems that the social anxiety (mini_SPIN) is quite balanced between groups and the density distribution is quite similar across groups as well. More people aged 18-25 seem to have high mini_spin scores.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+anxiety_counts <- All_groups_stresslevels %>%
+  group_by(Group, Social_Anxiety) %>%
+  summarise(count = n()) %>%
+  spread(Social_Anxiety, count, fill = 0) 
+
+print(anxiety_counts)
+
+# Create a density plot (rainbow plot) showing the distribution of mini_SPIN_total per Group
+ggplot(All_groups_stresslevels, aes(x = mini_SPIN_total, fill = Group)) +
+  geom_density(alpha = 0.6) +  # Use geom_density to plot the density
+  scale_fill_manual(values = rainbow(length(unique(All_groups_stresslevels$Group)))) +  # Apply rainbow colors
+  labs(title = "Distribution of mini_SPIN_total by Group",
+       x = "mini_SPIN_total",
+       y = "Density") +
+  theme_minimal()
+```
+
+\newpage
+# Momentary anxiety per group
+
+It seems that some Prolific participants in both age groups reported lower momentary anxiety, but other than that the distribution seems quite similar. The peak seems to be slightly above 50 (all groups slightly more anxious, community and school students more anxious?).
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+# Create a density plot (rainbow plot) showing the distribution of momentary anxiety per Group (all subjects though; how can we reduce it without losing too much info?)
+ggplot(All_groups_stresslevels, aes(x = Response_Ax, fill = Group)) +
+  geom_density(alpha = 0.6) +  # Use geom_density to plot the density
+  scale_fill_manual(values = rainbow(length(unique(All_groups_stresslevels$Group)))) +  # Apply rainbow colors
+  labs(title = "Distribution of Momentary Anxiety by Group",
+       x = "Momentary Anxiety",
+       y = "Density") +
+  theme_minimal()
+```
+
+
+\newpage
+# Momentary mood per group
+
+The peak seems to be slightly below mid point of 50. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+# Create a density plot (rainbow plot) showing the distribution of momentary mood per Group (all subjects though; how can we reduce it without losing too much info?)
+ggplot(All_groups_stresslevels, aes(x = Response_H, fill = Group)) +
+  geom_density(alpha = 0.6) +  # Use geom_density to plot the density
+  scale_fill_manual(values = rainbow(length(unique(All_groups_stresslevels$Group)))) +  # Apply rainbow colors
+  labs(title = "Distribution of Momentary Mood by Group",
+       x = "Momentary Mood",
+       y = "Density") +
+  theme_minimal()
+```
