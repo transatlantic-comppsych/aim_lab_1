@@ -72,8 +72,9 @@ library(tidyr)
 
 \newpage We can see below the data from batch 1 of pilot 4: prediction with no feedback on Prolific:
 ```{r echo=FALSE}
-df1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_vid/SUP_PRF_pilot_pred_nopic_vid_v5/SUP_PRF_pilot_pred_nopic_vid_v5_task_main.csv") # Prolific, no picture taken
-df2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_aud/SUP_PRF_pilot_pred_nopic_aud_v5/SUP_PRF_pilot_pred_nopic_aud_v5_task_main.csv") # Prolific, no picture taken, only audio (no video)
+df1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_4/SUP_PRF_pilot_pred_nopic_vid_v5/SUP_PRF_pilot_pred_nopic_vid_v5_task_main.csv") # Prolific, no picture taken
+df2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_4/SUP_PRF_pilot_pred_nopic_aud_v5/SUP_PRF_pilot_pred_nopic_aud_v5_task_main.csv") # Prolific, no picture taken, only audio (no video)
+
 ```
 
 ```{r echo=FALSE}
@@ -157,7 +158,7 @@ ggplot(df12_pred, aes(x=Response, y=m_hist)) +
   geom_point(aes(color="Data Points")) +
     geom_smooth(method = "lm", color="blue", aes(group=Random_ID)) +     
   labs(color="Legend") +
-  facet_wrap(~ Random_ID, scales = "free") +
+  facet_wrap(~ Random_ID, scales = "free", ncol = 10) +
   theme_minimal()+
   xlab("Expectation") + 
   ylab("Histogram means")
@@ -186,7 +187,7 @@ ggplot(df12_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) 
        x = "Trial Number",
        y = "Expectation",
        color = "") +
-  facet_wrap(~ Random_ID, ncol = 1) # Separate plot for each ID, one column layout
+  facet_wrap(~ Random_ID, ncol = 10) # Separate plot for each ID, one column layout
 
 ```
 
@@ -202,7 +203,7 @@ ggplot(df12_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) 
        x = "Trial Number",
        y = "mood/happiness and anxiety",
        color = "") +
-  facet_wrap(~ Random_ID, ncol = 1) # Separate plot for each ID, one column layout
+  facet_wrap(~ Random_ID, ncol = 10) # Separate plot for each ID, one column layout
 
 ```
 
@@ -210,7 +211,7 @@ ggplot(df12_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) 
 The following people had different histogram means and smaller sd for histograms, so we plot them separately despite having a similar task design and also being from Prolific.
 
 ```{r echo=FALSE}
-df3 <- read.csv("/Users/marjan/Desktop/aim_lab_1/SUP_PRF_pilot_pred_nopic_vid/SUP_PRF_pilot_pred_nopic_vid_v8/SUP_PRF_pilot_pred_nopic_vid_v8_task_main.csv")   # Prolific, no picture taken, has both audio and video, histograms had different means () and sd = 3 to be narrower, this change was made to help us create histograms that would allow us create prediction errors more easily.
+df3 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_4/SUP_PRF_pilot_pred_nopic_vid_v8/SUP_PRF_pilot_pred_nopic_vid_v8_task_main.csv")   # Prolific, no picture taken, has both audio and video, histograms had different means () and sd = 3 to be narrower, this change was made to help us create histograms that would allow us create prediction errors more easily.
 
 if (!(identical(colnames(df1), colnames(df3)))) {
   stop("The two dataframes have different columns or order of columns!")
@@ -251,6 +252,21 @@ p <- ggplot(df3_pred, aes(x=Response, y=m_hist)) +
   ylab("Histogram means")
 
 print(p)
+
+ggplot(df3_pred, aes(x = Response, y = m_hist)) +
+  # geom_point(aes(color="Data Points")) +
+  geom_smooth(method = "lm", color = "blue", fill = "blue", alpha = 0.3) +  # Wider error shades with alpha for transparency
+  labs(color = "Legend") +
+  # facet_wrap(~ Random_ID, scales = "free") +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 16),  # Increase overall font size
+    plot.title = element_text(size = 20),  # Increase title size
+    panel.grid = element_blank()  # Remove grid lines
+  ) +
+  xlab("Prediction") + 
+  ylab("Histogram means") +
+  ggtitle("Relationship between Expectation and Histogram Means")
 ```
 
 <br><br><br>
@@ -269,6 +285,17 @@ df3_long <- df3_pred_trial_nr %>%
   mutate(Metric = recode(Metric, 
                          Response = "Predictions", 
                          m_hist = "Histograms"))
+
+# Create the plot with facet_wrap
+p <- ggplot(df3_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Expectation across time",
+       x = "Trial Number",
+       y = "Expectation",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 6) # Separate plot for each ID, one column layout
+print(p)
 
 # Create the plot with facet_wrap
 p <- ggplot(df3_long, aes(x = trial_nr, y = Value, color = Metric, group = Metric)) +

@@ -39,9 +39,9 @@ The task is the following: https://app.gorilla.sc/admin/task/788287/editor
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-df19_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_task_main.csv")
-df19_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_mini_spin.csv")
-df19_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_ces_d.csv")
+df19_raw <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_task_main.csv")
+df19_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_mini_spin.csv")
+df19_cesd <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_pilot_19/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5/SUP_PRF_p19_vid_bigPE_nar2_new_qns_hist_early_4jud_v5_ces_d.csv")
 
 ```
 
@@ -330,6 +330,50 @@ ggplot(final_df19, aes(x = Response_m_hist, y = Response_pred, color = Social_An
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
+
+
+ggplot(final_df19, aes(x = Response_pred, y = Response_m_hist)) +
+  # geom_point(aes(color="Data Points")) +
+  geom_smooth(method = "lm", color = "blue", fill = "blue", alpha = 0.3) +  # Wider error shades with alpha for transparency
+  labs(color = "Legend") +
+  # facet_wrap(~ Random_ID, scales = "free") +
+  theme_minimal() +
+  theme(
+    text = element_text(size = 16),  # Increase overall font size
+    plot.title = element_text(size = 20),  # Increase title size
+    panel.grid = element_blank()  # Remove grid lines
+  ) +
+  xlab("Prediction") + 
+  ylab("Histogram mean") +
+ scale_y_continuous(breaks = c(30, 40, 50, 60, 70), limits = c(30, 70)) +
+  ggtitle("Relationship between Expectation and Histogram Mean")
+
+
+correlations_mean_df3 <- final_df19 %>%
+  group_by(Random_ID) %>%
+  summarize(correlation = cor(Response_pred, Response_m_hist, use = "complete.obs"),
+            .groups = 'drop')  # This line is used to avoid a grouped df as output
+
+average_correlation <- mean(correlations_mean_df3$correlation, na.rm = TRUE)
+average_correlation
+
+# long format to be able to have histogram and prediction stacked:
+df19_long <- final_df19 %>%
+  pivot_longer(
+    cols = c(Response_m_hist, Response_pred),  # The columns you want to stack
+    names_to = "variable",  # Name of the new column that will hold the names of the stacked columns
+    values_to = "value"  # Name of the new column that will hold the values of the stacked columns
+  )
+
+
+ggplot(df19_long, aes(x = Trial.Number, y = value, color = variable, group = variable)) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Expectation across time",
+       x = "Trial Number",
+       y = "Expectation",
+       color = "") +
+  facet_wrap(~ Random_ID, ncol = 5)
   
 ```
 
@@ -1049,4 +1093,121 @@ test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data =
 icc_results_id <- performance::icc(test_icc_id)
 
 icc_results_id
+```
+
+# LME models for Mood and SubjPE
+
+The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Response_H <- coef_fixed[1]
+slope_Response_H <- coef_fixed[2]
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+
+# Hypothetical standard errors for intercept and slope
+SE_intercept <- 0.15  # Placeholder value
+SE_slope <- 0.43      # Placeholder value
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+
+# Creating a sequence of `SubjPE` values for prediction
+Response_SubjPE_range <- seq(min(final_df19$Response_SubjPE), max(final_df19$Response_SubjPE), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_SubjPE_range
+CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df19, aes(x=Response_SubjPE, y=Response_H)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_H, slope=slope_Response_H, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_SubjPE, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df19$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_SubjPE$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+
+```
+# LME models for Anxiety and SubjPE
+
+The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df19, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+
+coef_fixed <- fixef(model3)
+intercept_Response_H <- coef_fixed[1]
+slope_Response_H <- coef_fixed[2]
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+
+# Hypothetical standard errors for intercept and slope
+SE_intercept <- 0.15  # Placeholder value
+SE_slope <- 0.43      # Placeholder value
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+
+# Creating a sequence of `SubjPE` values for prediction
+Response_SubjPE_range <- seq(min(final_df19$Response_SubjPE), max(final_df19$Response_SubjPE), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_SubjPE_range
+CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df19, aes(x=Response_SubjPE, y=Response_H)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_H, slope=slope_Response_H, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_SubjPE, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df19$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_SubjPE$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_SubjPE$CI_low[2],2), "-", round(standard_beta_Response_SubjPE$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
+
 ```
