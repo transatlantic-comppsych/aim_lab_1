@@ -1,0 +1,201 @@
+---
+title: "Surprise_prolific_18_25_Bayesian_analysis"
+format: html
+editor: visual
+---
+
+### Fit Hiearchical Bayesian Model for Anxiety in brms 
+
+```{r}
+setwd("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis")
+# Load necessary libraries
+library(dplyr)
+library(purrr)
+library(brms)
+library(ggplot2)
+library(Metrics)
+
+prolific_18_25_data <- read.csv("surprise_study_18_25_Pro_variables.csv")
+#standardise the predictors 
+prolific_18_25_data$Response_SubjPE <- scale(prolific_18_25_data$Response_SubjPE)
+prolific_18_25_data$mini_SPIN_total <- scale(prolific_18_25_data$mini_SPIN_total)
+
+
+# Fit the hierarchical model in brms
+fit_brms_pro_18_25 <- brm(
+  Response_Ax ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID),
+  data = prolific_18_25_data,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 1), class = "b", coef = "Response_SubjPE"), 
+    prior(normal(0, 1), class = "b", coef = "mini_SPIN_total"),
+    prior(cauchy(0, 2.5), class = "sigma")
+  ),
+  iter = 2000,
+  chains = 4,
+  seed = 123
+)
+
+print(fit_brms_pro_18_25)
+
+# Plot posterior distributions
+plot(fit_brms_pro_18_25)
+
+# Extract the predicted values from the brms model
+predicted_values <- fitted(fit_brms_pro_18_25, newdata = prolific_18_25_data)[, "Estimate"]
+
+# Add predicted values to the dataframe
+prolific_18_25_data$predicted_values <- predicted_values
+
+# Calculate residuals
+residuals <- prolific_18_25_data$Response_Ax - predicted_values
+
+# Calculate MSE and MAE
+mse_value <- mse(prolific_18_25_data$Response_Ax, predicted_values)
+mae_value <- mae(prolific_18_25_data$Response_Ax, predicted_values)
+
+# Print MSE and MAE
+cat("MSE: ", mse_value, "\n")
+cat("MAE: ", mae_value, "\n")
+
+# Calculate R-squared for the brms model
+r_squared_brm <- bayes_R2(fit_brms_pro_18_25)
+print(r_squared_brm)
+
+
+# Plot individual real data and fitted curve for each participant using ggplot2
+ggplot(prolific_18_25_data, aes(x = Trial.Number)) +
+  geom_point(aes(y = Response_Ax), color = "blue", size = 2) + 
+  geom_line(aes(y = predicted_values), color = "red", size = 1) +
+  facet_wrap(~ Random_ID, scales = "free_y") +
+  labs(title = "Real Data and Fitted Curve per Participant",
+       x = "Trial Number",
+       y = "Response Ax") +
+  theme_minimal()
+
+
+```
+
+### Fit Hierarchical Bayesian Model for Anxiety in stan (Random intercept only)
+
+```{r}
+
+# Load necessary libraries
+library(rstan)
+# Stan model code as a string
+stan_model_code <- "data {
+  int<lower=1> N;              // Number of observations
+  int<lower=1> K;              // Number of predictors
+  int<lower=1> J;              // Number of groups
+  int<lower=1,upper=J> group[N]; // Group ID for each observation
+  matrix[N, K] X;              // Design matrix
+  vector[N] y;                 // Response variable
+}
+
+parameters {
+  vector[K] beta;              // Coefficients for fixed effects
+  vector[J] u;                 // Random intercepts
+  real<lower=0> sigma_u;       // Std dev of random intercepts
+  real<lower=0> sigma;         // Std dev of residuals
+}
+
+model {
+  // Priors
+  beta ~ normal(0, 1);         // Priors for fixed effects
+  sigma_u ~ cauchy(0, 2.5);    // Prior for random effect std dev
+  sigma ~ cauchy(0, 2.5);      // Prior for residual std dev
+  u ~ normal(0, sigma_u);      // Random intercepts
+
+  // Likelihood
+  y ~ normal(X * beta + u[group], sigma); // Hierarchical linear model
+}
+"
+
+  # Load necessary libraries
+library(rstan)
+
+# Prepare data for Stan
+stan_data <- list(
+  N = nrow(prolific_18_25_data),
+  K = 2,  # Number of fixed effects (Response_SubjPE and mini_SPIN_total)
+  J = length(unique(prolific_18_25_data$Random_ID)),
+  group = as.integer(factor(prolific_18_25_data$Random_ID)),
+  X = model.matrix(~ Response_SubjPE + mini_SPIN_total, data = prolific_18_25_data)[, -1],
+  y = prolific_18_25_data$Response_Ax
+)
+
+# Fit the model
+fit_stan_pro_18_25 <- stan(
+  model_code = stan_model_code,  # Stan model code embedded in R script
+  data = stan_data,
+  iter = 2000,
+  chains = 4,
+  seed = 123
+)
+
+# Print the summary of the model
+print(fit_stan_pro_18_25)
+```
+
+### 
+
+### Fit Hierarchical Bayesian Model for Anxiety in stan (Random intercept and slope)
+
+```{r}
+
+```
+
+### 
+
+Fit Hiearchical Bayesian Model for Mood in brms 
+
+```{r}
+
+
+# Fit the hierarchical model in brms
+fit_brms_pro_18_25_mood <- brm(
+  Response_H ~ Response_SubjPE +  mini_SPIN_total + (Response_SubjPE | Random_ID),
+  data = prolific_18_25_data,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 1), class = "b", coef = "Response_SubjPE"), 
+    prior(normal(0, 1), class = "b", coef = "mini_SPIN_total"),
+    prior(cauchy(0, 2.5), class = "sigma")
+  ),
+  iter = 2000,
+  chains = 4,
+  seed = 123
+)
+
+print(fit_brms_pro_18_25_mood)
+
+# Plot posterior distributions
+plot(fit_brms_pro_18_25_mood)
+```
+
+### 
+Fit Hiearchical Bayesian Model for Mood in stan
+
+```{r}
+# Prepare data for Stan
+stan_data_mood <- list(
+  N = nrow(prolific_18_25_data),
+  K = 2,  # Number of fixed effects (Response_SubjPE and mini_SPIN_total)
+  J = length(unique(prolific_18_25_data$Random_ID)),
+  group = as.integer(factor(prolific_18_25_data$Random_ID)),
+  X = model.matrix(~ Response_SubjPE + mini_SPIN_total, data = prolific_18_25_data)[, -1],
+  y = prolific_18_25_data$Response_H
+)
+
+# Fit the model
+fit_stan_pro_18_25_mood <- stan(
+  model_code = stan_model_code,  # Stan model code embedded in R script
+  data = stan_data_mood,
+  iter = 2000,
+  chains = 4,
+  seed = 123
+)
+
+# Print the summary of the model
+print(fit_stan_pro_18_25_mood)
+```
