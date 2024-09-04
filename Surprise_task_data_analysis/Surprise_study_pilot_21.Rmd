@@ -40,14 +40,13 @@ The task is the following: https://app.gorilla.sc/admin/task/799523/editor
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # v3 and v4 have exactly the same task version, but BIQ was causing a problem due to a Gorilla update and it was changed in version 4
+df21_raw_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
+df21_spin_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
+df21_cesd_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
 
-df21_raw_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
-df21_spin_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
-df21_cesd_part1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
-
-df21_raw_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
-df21_spin_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
-df21_cesd_part2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
+df21_raw_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
+df21_spin_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
+df21_cesd_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
 
 df21_raw <- rbind(df21_raw_part1, df21_raw_part2)
 df21_spin <- rbind(df21_spin_part1, df21_spin_part2)
@@ -730,15 +729,22 @@ model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_
 AIC(model1)
 AIC(model2)
 AIC(model3)
-
+summary(model3)
 coef_fixed <- fixef(model3)
 intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- 0.15  # Placeholder value
-SE_slope <- 0.43      # Placeholder value
+#SE_intercept <- 0.15  # Placeholder value
+#SE_slope <- 0.43      # Placeholder value
+
+model3_summary <- summary(model3)
+
+# Extract the standard errors for the intercept and slope
+SE_intercept <- model3_summary$coefficients["(Intercept)", "Std. Error"]
+SE_slope <- model3_summary$coefficients["Response_SubjPE", "Std. Error"]
+
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 
 # Creating a sequence of `SubjPE` values for prediction
@@ -797,8 +803,14 @@ slope_Response_Ax <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- -0.03  # Placeholder value
-SE_slope <- -0.27      # Placeholder value
+#SE_intercept <- -0.03  # Placeholder value
+#SE_slope <- -0.27      # Placeholder value
+
+model3_summary <- summary(model3)
+
+# Extract the standard errors for the intercept and slope
+SE_intercept <- model3_summary$coefficients["(Intercept)", "Std. Error"]
+SE_slope <- model3_summary$coefficients["Response_SubjPE", "Std. Error"]
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 
 # Creating a sequence of `SubjPE` values for prediction
