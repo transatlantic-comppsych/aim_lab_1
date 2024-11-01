@@ -42,13 +42,16 @@ The sample sizes include participants that potentially need to be excluded.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-dfcom_18_25_1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_task_main.csv")
-dfcom_18_25_2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_task_main.csv")
+dfcom_18_25_1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_task_main.csv")
+dfcom_18_25_2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_task_main.csv")
+dfcom_18_25_2$X.1 <- NULL
+
 
 dfcom_18_25 <- rbind(dfcom_18_25_1, dfcom_18_25_2)
 
-dfcom_18_25_spin_1 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_mini_spin.csv")
-dfcom_18_25_spin_2 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_mini_spin.csv")
+dfcom_18_25_spin_1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_mini_spin.csv")
+dfcom_18_25_spin_2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_mini_spin.csv")
+dfcom_18_25_spin_2$X <- NULL
 
 dfcom_18_25_spin <- rbind(dfcom_18_25_spin_1, dfcom_18_25_spin_2)
 ```
