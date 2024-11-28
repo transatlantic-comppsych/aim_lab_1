@@ -46,12 +46,12 @@ The sample sizes include participants that potentially need to be excluded.
 # df_Pro_18_25 <- read.csv("")
 # df_Pro_18_25 <- read.csv("")
 # df_Prom_18_25 <- read.csv("")
-dfpro_18_25 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_task_main.csv")
+dfpro_18_25 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_task_main.csv")
 
 
 # read CESD, mini_SPIN for all the studies
 
-dfpro_18_25_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_mini_spin.csv")
+dfpro_18_25_spin <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_mini_spin.csv")
 
 
 ```
@@ -582,8 +582,10 @@ slope_Response_H <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- 0.15  # Placeholder value
-SE_slope <- 0.43      # Placeholder value
+vcov_matrix <- vcov(model3)  # Variance-covariance matrix of fixed effects
+SE_intercept <- sqrt(vcov_matrix[1, 1])  # Standard error for the intercept
+SE_slope <- sqrt(vcov_matrix[2, 2])      # Standard error for the slope
+  # Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 
 # Creating a sequence of `SubjPE` values for prediction
@@ -642,8 +644,10 @@ slope_Response_Ax <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- -0.03  # Placeholder value
-SE_slope <- -0.27      # Placeholder value
+vcov_matrix <- vcov(model3)  # Variance-covariance matrix of fixed effects
+SE_intercept <- sqrt(vcov_matrix[1, 1])  # Standard error for the intercept
+SE_slope <- sqrt(vcov_matrix[2, 2])      # Standard error for the slope
+# Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 
 # Creating a sequence of `SubjPE` values for prediction

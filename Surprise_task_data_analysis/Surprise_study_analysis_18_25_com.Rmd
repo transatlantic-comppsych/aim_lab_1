@@ -9,7 +9,6 @@ output:
     toc_float: true
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
 ```
@@ -27,18 +26,13 @@ library(stringr)
 library(readxl)
 ```
 
-
 \newpage
+
 # Study description
 
-This is the first surprise study using the same task version as pilot 21. We had the following groups of participants with the experiment's corresponding Gorilla link:
-- Prolific aged 18-25 (n = 30): https://app.gorilla.sc/admin/experiment/180921/design
-- Prolific aged 26-45 (n = 38): https://app.gorilla.sc/admin/experiment/185160/design
-- School students aged 14-18 (n = 30): https://app.gorilla.sc/admin/experiment/177048/design
-- Community participants aged 18-25 (n = 24): https://app.gorilla.sc/admin/experiment/180348/design
+This is the first surprise study using the same task version as pilot 21. We had the following groups of participants with the experiment's corresponding Gorilla link: - Prolific aged 18-25 (n = 30): <https://app.gorilla.sc/admin/experiment/180921/design> - Prolific aged 26-45 (n = 38): <https://app.gorilla.sc/admin/experiment/185160/design> - School students aged 14-18 (n = 30): <https://app.gorilla.sc/admin/experiment/177048/design> - Community participants aged 18-25 (n = 24): <https://app.gorilla.sc/admin/experiment/180348/design>
 
 The sample sizes include participants that potentially need to be excluded.
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -55,7 +49,6 @@ dfcom_18_25_spin_2$X <- NULL
 
 dfcom_18_25_spin <- rbind(dfcom_18_25_spin_1, dfcom_18_25_spin_2)
 ```
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # extract CES-D scores
@@ -120,7 +113,6 @@ dfcom_18_25_spin <- rbind(dfcom_18_25_spin_1, dfcom_18_25_spin_2)
 #   }
 # }
 ```
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # We have now different names for different screens:
@@ -295,9 +287,8 @@ write.csv(final_df_18_25_com, "final_df_18_25_com_with_stresslevels.csv", row.na
 
 ```
 
+\newpage
 
-
-\newpage 
 # Relationship between prediction and mean histograms (4x only in the beginning)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -332,7 +323,8 @@ ggplot(final_df_18_25_com, aes(x = Response_m_hist, y = Response_pred, color = S
   
 ```
 
-\newpage 
+\newpage
+
 # Relationship between Anxiety and SubjPE
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -370,7 +362,8 @@ xlim(c(-100, 100)) +
 scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
 ```
 
-\newpage 
+\newpage
+
 # Relationship between Mood and SubjPE
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -410,8 +403,8 @@ ggplot(final_df_18_25_com, aes(x = Response_SubjPE, y = Response_H, color = Soci
   
 ```
 
+\newpage
 
-\newpage 
 # Relationship between Mood and prediction (pre-performance)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -449,8 +442,6 @@ ggplot(final_df_18_25_com, aes(x = Response_pred, y = Response_H, color = Social
   scale_x_continuous(breaks = seq(0, 100, by = 25), limits = c(0,100))
   
 ```
-
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # trying to keep the BL_1 and BL_2 mood and anxiety ratings
@@ -502,10 +493,9 @@ final_dfcom_18_25_with_BL$Social_Anxiety <- ifelse(final_dfcom_18_25_with_BL$min
 
 ```
 
+\newpage
 
-
-\newpage 
-# Mood over time 
+# Mood over time
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dfc_18_25_BL_ax <- subset(final_dfcom_18_25_with_BL, Display == "Anxiety ")
@@ -527,8 +517,9 @@ ggplot(dfc_18_25_BL_H, aes(x = Trial.Number, y = Response, color = Display, grou
 
 ```
 
-\newpage 
-# Anxiety over time 
+\newpage
+
+# Anxiety over time
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(dfc_18_25_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
@@ -547,8 +538,9 @@ ggplot(dfc_18_25_BL_ax, aes(x = Trial.Number, y = Response, color = Display, gro
 
 ```
 
-\newpage 
-# Prediction before performance over time 
+\newpage
+
+# Prediction before performance over time
 
 Red line presents until what points histograms were presented (4 first trials only).
 
@@ -569,8 +561,8 @@ ggplot(final_df_18_25_com, aes(x = Trial.Number, y = Response_pred)) +
 
 ```
 
+\newpage
 
-\newpage 
 # Stress levels and social anxiety
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -603,28 +595,37 @@ ggplot(onetrial_final_df_18_25_com, aes(x = Social_Anxiety, y = Response_stress_
 ```
 
 \newpage
+
 # LME models for Mood and SubjPE
 
-The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID_new)
+The best model seems to be: Mood \~ SubjPE + mini_SPIN_total + (SubjPE \| Random_ID_new)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
 model2 <- lme4::lmer(Response_H ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
 model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_H ~ Response_SubjPE + Social_Anxiety + (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
 
 AIC(model1)
 AIC(model2)
 AIC(model3)
+AIC(model4)
+summary(model4)
 
 coef_fixed <- fixef(model3)
 intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
-standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- 0.15  # Placeholder value
-SE_slope <- 0.43      # Placeholder value
+#SE_intercept <- 0.15  # Placeholder value
+#SE_slope <- 0.43      # Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+# Extract the standard errors for intercept and slope from the model summary
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
 
 # Creating a sequence of `SubjPE` values for prediction
 Response_SubjPE_range <- seq(min(final_df_18_25_com$Response_SubjPE), max(final_df_18_25_com$Response_SubjPE), length.out = 100)
@@ -663,28 +664,38 @@ ggplot(final_df_18_25_com, aes(x=Response_SubjPE, y=Response_H)) +
 ```
 
 \newpage
+
 # LME models for Anxiety and SubjPE
 
-The best model seems to be: Anxiety ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID_new)
+The best model seems to be: Anxiety \~ SubjPE + mini_SPIN_total + (SubjPE \| Random_ID_new)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
 model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
 model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_Ax ~ Response_SubjPE + Social_Anxiety + (Response_SubjPE | Random_ID_new), data = final_df_18_25_com, control=lmerControl(optimizer="bobyqa"))
+
 
 AIC(model1)
 AIC(model2)
 AIC(model3)
+AIC(model4)
 
 coef_fixed <- fixef(model3)
 intercept_Response_Ax <- coef_fixed[1]
 slope_Response_Ax <- coef_fixed[2]
-standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
 # Hypothetical standard errors for intercept and slope
-SE_intercept <- -0.03  # Placeholder value
-SE_slope <- -0.27      # Placeholder value
+#SE_intercept <- -0.03  # Placeholder value
+#SE_slope <- -0.27      # Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+# Extract the standard errors for intercept and slope from the model summary
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+
 
 # Creating a sequence of `SubjPE` values for prediction
 Response_SubjPE_range <- seq(min(final_df_18_25_com$Response_SubjPE), max(final_df_18_25_com$Response_SubjPE), length.out = 100)
@@ -721,9 +732,10 @@ ggplot(final_df_18_25_com, aes(x=Response_SubjPE, y=Response_Ax)) +
   scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
 ```
 
+\newpage
 
-\newpage 
-# ICC for Mood 
+# ICC for Mood
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 test_icc_id <- lmer(Response_H ~  (1| Random_ID_new), data = 
                       final_df_18_25_com, 
@@ -734,8 +746,10 @@ icc_results_id <- performance::icc(test_icc_id)
 icc_results_id
 ```
 
-\newpage 
-# ICC for Anxiety 
+\newpage
+
+# ICC for Anxiety
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 test_icc_id <- lmer(Response_Ax ~  (1| Random_ID_new), data = 
                       final_df_18_25_com, 
