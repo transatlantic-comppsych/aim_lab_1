@@ -1,0 +1,860 @@
+---
+title: "Exploring Binary Decision Data on Emotion"
+author: "Johannes Keil"
+format: html
+editor: visual
+---
+
+## Exploring Descriptives
+
+```{r, echo = F, include = F}
+
+#| echo: false, results 
+
+library(tidyverse)
+library(BradleyTerry2)
+library(psychotree)
+library(partykit)
+library(gridExtra)
+
+#load data
+#for now, exclude the one sub-threshold coded participants
+dat <- readRDS(file = "data_BTM.rds") %>% 
+  filter(status %in% c("HV", "MDD")) %>% 
+  mutate(
+    status = factor(status, levels = c("HV", "MDD"))
+  )
+
+items <- c(
+  "I never want to be sad again",
+  "I feel that occasional sadness is important",
+  "I enjoy feeling melancholy sometimes",
+  "It is not always bad to feel low",
+  "It is never good to feel low",
+  "When I feel low, I can see things more clearly",
+  "Feeling sad sometimes is part of normal life",
+  "I have learnt a lot about myself by being happy",
+  "I have learnt a lot about myself by being sad",
+  "How one feels is not the most important thing",
+  "I am always trying to be myself, even if this makes me feel low.",
+  "Feeling anger is always good",
+  "Feeling anger is never good",
+  "Anger can be important in life"
+)
+
+```
+
+First, load in the data, and have a look at the individual items:
+
+```{r, echo = F}
+items
+```
+
+Next, try to get an overview of the data. First, look at sample sizes.
+
+```{r, echo = F, include = F}
+# get an idea of sample sizes in each sub-group
+
+sample_sizes <- dat %>% 
+  select(participant, status, group, sex) %>% 
+  unique() %>%
+  group_by(status, group, sex) %>% 
+  summarize(
+    n = n()
+  )
+
+```
+
+```{r, echo = F}
+sample_sizes
+
+```
+
+
+Looks like adolescent boys are severely underrepresented in this sample. This means that gender-based effects will likely be highly unstable.
+
+Next, generate plots for the raw wins and ranked wins in total and in each predictor category.
+
+
+```{r, echo = F, include = F}
+
+
+#next, plot the raw number of wins for each item across groups
+
+#aggregate wins across items
+dat_plots <- dat %>% 
+  group_by(across(all_of(c("group", "status", "item1", "item2")))) %>% 
+  summarise(
+    wins1 = sum(win1),
+    wins2 = sum(win2)
+  ) %>% 
+  mutate(
+    n_comparisons = wins1 + wins2
+  )
+
+#generate a list of how often each item wins in each group
+dat_wins <- data.frame(
+  item = 1:14,
+  item_str = paste("i", 1:14, sep = ""),
+  adult_MDD = rep(0, 14),
+  adolescent_MDD = rep(0, 14),
+  adult_HV = rep(0, 14),
+  adolescent_HV = rep(0, 14)
+)
+
+
+#the dataset contains every contest in exactly once in one row
+#this makes it hard to summarise data with the sum() function
+#work around this with a little loop
+for(i in 1:length(1:14)) {
+  for (j in 1:nrow(dat_plots)) {
+    if (!is.na(dat_plots$item1[j])) {
+      if (dat_plots$item1[j] == paste("i", i, sep = "")) {
+        if(dat_plots$group[j] == "adult" & dat_plots$status[j] == "MDD") {
+          dat_wins$adult_MDD[i] = dat_wins$adult_MDD[i] + dat_plots$wins1[j]
+          
+        } else if (dat_plots$group[j] == "adult" & dat_plots$status[j] == "HV") {
+          dat_wins$adult_HV[i] = dat_wins$adult_HV[i] + dat_plots$wins1[j]
+          
+        } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "HV") {
+          dat_wins$adolescent_HV[i] = dat_wins$adolescent_HV[i] + dat_plots$wins1[j]
+          
+        } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "MDD") {
+          dat_wins$adolescent_MDD[i] = dat_wins$adolescent_MDD[i] + dat_plots$wins1[j]
+        } 
+      }
+    }
+    
+    if (dat_plots$item2[j] == paste("i", i, sep = "")) {
+      if(dat_plots$group[j] == "adult" & dat_plots$status[j] == "MDD") {
+        dat_wins$adult_MDD[i] = dat_wins$adult_MDD[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adult" & dat_plots$status[j] == "HV") {
+        dat_wins$adult_HV[i] = dat_wins$adult_HV[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "HV") {
+        dat_wins$adolescent_HV[i] = dat_wins$adolescent_HV[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "MDD") {
+        dat_wins$adolescent_MDD[i] = dat_wins$adolescent_MDD[i] + dat_plots$wins2[j]
+      } 
+    }
+  }
+}
+
+#plot raw wins by group
+
+raw_wins <- dat_wins %>% 
+  pivot_longer(cols = c("adult_MDD", "adolescent_MDD", "adult_HV", "adolescent_HV"), names_to = "group", values_to = "wins")
+
+raw_wins_plot <- ggplot(raw_wins) +
+  facet_grid(~group) +
+  geom_col(aes(x = item, y = wins))
+
+#housekeeping
+rm(dat_plots)
+
+# Now plot the ranks of each item as violin plot
+
+#aggregate wins across items
+dat_plots1 <- dat %>% 
+  group_by(across(all_of(c("group", "status", "item1", "participant")))) %>% 
+  summarise(
+    wins1 = sum(win1)
+  ) %>% 
+  rename(item = item1)
+
+dat_plots2 <- dat %>% 
+  group_by(across(all_of(c("group", "status", "item2", "participant")))) %>% 
+  summarise(
+    wins2 = sum(win2)
+  ) %>% 
+  rename(item = item2)
+
+dat_plots <- full_join(dat_plots1, dat_plots2) %>% 
+  mutate(
+    wins1 = ifelse(is.na(wins1), 0, wins1),
+    wins2 = ifelse(is.na(wins2), 0, wins2),
+    wins = wins1 + wins2
+  ) %>% 
+  group_by(status, group, participant) %>% 
+  mutate(
+    rank = rank(wins)
+  ) %>% 
+  select(-wins1, -wins2) %>% 
+  group_by(item)
+
+
+raw_wins_violin <- ggplot(dat_plots) +
+  labs(title = "Wins per item per participant", caption = "Note: Black points indicate median number of wins.\nGray points are individual datapoints.") +
+  ylab("Wins") +
+  xlab("Item") + 
+  theme_bw()+
+  facet_grid(row = vars(status), col = vars(group)) +
+  geom_violin(aes(x = item, y = wins)) +
+  geom_jitter(aes(x = item, y = wins), colour = rgb(0.5, 0.5, 0.5),
+              width = 0.2, height = 0.0, size = 0.5) +
+  stat_summary(aes(x = item, y = rank), geom = "point", fun = "median")
+
+ranked_wins_violin <- ggplot(dat_plots) +
+  labs(title = "Ranks per item", caption = "Note: Higher ranks indicate more wins.\nBlack points indicate median rank.\nGray points are individual datapoints.") +
+  ylab("Rank") +
+  xlab("Item") + 
+  theme_bw()+
+  facet_grid(row = vars(status), col = vars(group)) +
+  geom_violin(aes(x = item, y = rank)) +
+  geom_jitter(aes(x = item, y = rank), colour = rgb(0.5, 0.5, 0.),
+              width = 0.2, height = 0.0, size = 0.5) +
+  stat_summary(aes(x = item, y = rank), geom = "point", fun = "median")
+  
+
+# now show ranks of item per participants
+
+#housekeeping
+rm(list = c("dat_plots", "dat_plots1", "dat_plots2"))
+
+```
+
+```{r, echo = F, include = T}
+
+raw_wins_plot
+raw_wins_violin
+ranked_wins_violin
+
+```
+
+
+## Item level Analysis
+
+#### Model 1
+
+Now, fit a series of Bradley-Terry Models to the data. First, fit an intercept-only model involving every item.
+
+```{r, echo = F, include = F}
+
+model1 <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2, id = "item", data = dat)
+res1 <- summary(model1)
+
+```
+
+Then, list items according to their abilities:
+
+```{r, echo = F}
+ 
+abilities1 <- BTabilities(model1) %>% as.data.frame()
+abilities1$probability <- exp(abilities1[1]) / (exp(abilities1[1]) + 1)
+abilities1$description <- items
+colnames(abilities1) <- c("ability", "se", "p", "description")
+
+abilities1[order(abilities1$ability, decreasing = TRUE),]
+```
+
+#### Model 2
+
+Next, fit a model including depression status, sex and age as predictors. Again, show items ordered by ability.
+
+```{r, echo = F}
+
+model2 <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2, 
+             formula = ~ item + item * status + item * group + item * sex, id = "item", data = dat)
+res2 <- summary(model2)
+
+res2
+
+
+#get abilities, where p = probability of winning against reference item (= item 1)
+abilities2 <- BTabilities(model2) %>% as.data.frame()
+abilities2$probability <- exp(abilities2[1]) / (exp(abilities2[1]) + 1)
+abilities2$description <- items
+colnames(abilities2) <- c("ability", "se", "p", "description")
+
+abilities2[order(abilities2$ability, decreasing = TRUE),]
+
+comp <- anova(model1, model2, test = "Chisq")
+
+comp
+
+```
+
+This model shows that all of age group diagnostic status and sex are significant predictors of emotion preferences, and significantly improved fit. Next, test if inclusion of interaction terms improves model fit.
+
+```{r, echo = F, include = F} 
+
+# Model 3: Predict abilities from MDD, demographics, and their interaction
+
+model3 <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2, 
+              formula = ~ item + item * status + item * group + item * sex + item * group * status + item * group * sex + item * sex * status + item * group * status * sex, id = "item", data = dat)
+res3 <- summary(model3)
+
+
+# Model 4: Predict abilities from MDD and age, ignoring gender
+# This model may be preferred, since we don't have enough adolescent boys in the sample to support a three-way model
+
+model4 <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2, 
+              formula = ~ item + item * status + item * group + item * group * status, id = "item", data = dat)
+res4 <- summary(model4) 
+
+comp23 <- anova(model2, model3, test = "Chisq") # prefer model 3 since chisq is significant and model 3 is more complex
+comp34 <- anova(model3, model4, test = "Chisq") # prefer model 3 since chisq is significant and model 3 is more complex
+
+```
+
+#### Model 3
+
+Look at results for a model including all demographics as predictor (model 3):
+
+```{r, echo = F, include = T}
+res3
+comp23
+
+```
+
+#### Model 4
+
+We get a significant chi-square, showing that model 3 is preferred over model 2. Now, consider a model that does not include the sex variable (model 4)
+
+```{r, echo = F, include = T}
+res4
+comp34
+
+```
+
+The chi-square test is significant. Since model 3 is more complex than model 4, this means that simplification to model 4 results in a significant decrease in fit and model 3 is preferable. However, since we don't have enough adolescent males to meaningfully interpret gender-contrasts, results of model4 are considered as well.
+
+## Group-wise analysis
+
+We had specific hypotheses about the items, forming a set of most-preferred and least-preferred items. We also expected that items involving authenticiy and learning from emotion would be relevant. Group items accordingly, reformat the data and fit a BTM including intercepts for these categories and interactions.
+
+```{r, echo = F, include = F}
+
+dat_group_comp <- dat
+
+#Contrasts for hypothesis 1: Items involving acceptance/learning will be rated highly
+most_pref_list <- c("i2", "i4", "i7", "i8", "i9")
+#Contrasts for hypothesis 2: Items involving 'global' claims (always, never) will be rated low
+least_pref_list <- c("i5", "i12", "i13")
+#Contrasts for hypothesis 3 More depressed -> More likely to see depression as useful
+learning_list <- c("i6", "i9")
+#Contrasts for hypothesis 4: Younger -> More likely to accept feeling low for authenticity
+myself_list <- c("i11")
+no_category_list <- c("i1", "i3", "i10", "i14")
+
+#reformat for groupwise comparisons
+dat_group_comp$item1 <- data.frame(item= dat$item1, 
+                                   most_pref = ifelse(dat$item1 %in% most_pref_list, 1, 0),
+                                   least_pref = ifelse(dat$item1 %in% least_pref_list, 1, 0),
+                                   learning = ifelse(dat$item1 %in% learning_list, 1, 0),
+                                   myself = ifelse(dat$item1 %in% myself_list, 1, 0)
+)
+
+dat_group_comp$item2 <- data.frame(item= dat$item2,
+                                   most_pref = ifelse(dat$item2 %in% most_pref_list, 1, 0),
+                                   least_pref = ifelse(dat$item2 %in% least_pref_list, 1, 0),
+                                   learning = ifelse(dat$item2 %in% learning_list, 1, 0),
+                                   myself = ifelse(dat$item2 %in% myself_list, 1, 0)
+)
+
+```
+
+```{r, echo = F, include = T}
+
+#run comparisons grouped by items without any predictors
+model_grouped_main <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2,
+                          formula = ~
+                            most_pref + least_pref + learning + myself, 
+                            id = "item", data = dat_group_comp)
+
+#same model, but with predictors
+model_grouped_interactions <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2,
+                                  formula = ~ most_pref + least_pref + learning + myself +
+                                    most_pref * status + most_pref * group + most_pref * sex +
+                                    least_pref * status + least_pref * group + least_pref * sex +
+                                    learning * status + learning * group + learning * sex +
+                                    myself * status + myself * group + myself * sex,
+                                  id = "item", data = dat_group_comp)
+
+summary(model_grouped_main)
+summary(model_grouped_interactions)
+
+```
+
+Compare both models:
+
+```{r, echo = F, include = T}
+
+anova(model_grouped_main, model_grouped_interactions, test = "Chisq")
+
+```
+
+This shows again a significant difference in log-likelihood, suggesting that the more complex model (i.e., with the interaction terms) should be retained.
+
+
+## Interpretation
+
+We can now interpret the model in the light of our four main hypotheses:
+
+#### H1: Items 2, 4, 7, 8 and 9 will be rated highest
+
+In the item-wise intercept-only model, this hypothesis by the fact that all those items have abilities larger than 0. Except for item 11 ('I am always trying to be myself, even if this makes me feel low') which overtakes item 4 ("It is not always bad to feel low") on the 5th rank, these items occupy the top 5 items.
+
+In the groupwise model this is indicated by the positive ability of 0.86, indicating that any item from the most-preferred group would win in ca. 70.3% of cases against an average item with ability 0.
+
+###### Exploration without sex in the model
+
+We see an intriguingly consitent pattern. All items in this group lead the charts in all groups. However, adults seem to be less likely to prefer those items (significant groupadult parameter). This holds for item 2 (b = -1.08, SE = 0.17, p < 0.001), item 4 (b = -0.8, SE = 0.17, p < 0.001), item 7 (b = 0.58, SE = 0.18, p = 0.002), item 8 (b = 0.39, SE = 0.17, p = 0.021), and item 9 (b = -0.60, p = 0.17, p < 0.001).
+
+In no case is the interaction significant (not reported in text to save time) - which means that this pattern holds regardless of whether patients were depressed or not.
+
+Item 8 also seems to be linked to depression in the statusMDD parameter (b = -0.73, SE = 0.21, p < .001). Since there was no significant interaction (b = -0.03, SE = 0.24, p = 0.88), this means that depressed participants chose the items concerning learning from being happy less frequently.
+
+
+##### Exploration with sex in the model
+
+I held off on interpreting the data including sex as there are almost no adolescent boys. Thus age effects are confounded by gender. But, with so little boys to go on, estimates for the model with sex would be highly unstable (see also below).
+
+##### Verdict on H1
+
+It seems that the 'most-preferred' items are doing very well - just as expected. However, they tend to perform slightly more poorly in adults than in adolescents. However, since gender and age are unfortunately confounded in the data, it is hard to tell whether this reflects a true effect of age (the older, the less we accept context-bound items) or gender (men endorse less context-bound items).
+
+#### H2: Items 5, 12, and 13 will be rated lowest
+
+Item 5, 12, and 13 performed poorly overall, scoring lowest in the intercept-only model, and consistently receiving scores below 0 in any group. In the group-wise model, their pooled ability is (b = -1.02, SE = 0.029, p \< .001), indicating significantly lower than average performance. These items would, on average, only win 26.5% of comparisons with an average item of ability 0. This suggests that they were in fact, the lowest ranking items.
+
+###### Exploration without sex in the model
+
+Item 12 performed worse in healthy adults versus healthy adolescents (groupadult-parameter, b = -0.39, SE = 0.20, p = 0.049), whereas item 13 performed better in healthy adults than adolescents (groupadult-parameter, b = 0.51, SE = 0.18, p = 0.004).
+
+The interaction parameters were non-significant for item 12 (b = 0.22, SE = 0.28, p = 0.44) and item 13 (b = -0.26, SE = 0.25, p = 0.28). This means that the effect was the same for depressed and healthy participants.
+
+###### Exploration with sex in the model
+
+A noticeable effect occurs in item 12 for the model including interactions and gender. Compared to non-depressed male adults, depressed male adults rated this significantly more highly (consider the three-way interaction parameter; b = 3.26, SE = 1.25, p < .001). This effect was not present in females (adult:depression parameter, b = -0.42, SE = 0.34, p = .21). 
+
+###### Verdict on H2
+
+Clearly, the items in H2 performed poorly in all diagnostic groups. However, there seems to be something interesting going on with anger. In particular, it seems that being an adult is negatively correlated with endorsement of anger (i12) and positively associated with non-endorsement of anger (i13), even at a very un-nuanced global level.
+
+In the analysis with sex, we can only recover an effect for adult depressed men (interesting, since depression was not a predictor in the model without sex). However, this is very unreliable, since standard errors are incredibly large for these estimates (we don't have enough adolescent boys).
+
+
+#### H3: Utility of Depression. Item 6 and item 9 will be ranked more highly by depressed subjects
+
+Simple effects coding was used, meaning that the total effect for a given combination of sex, group and diagnostic status depends on the sum of several estimated parameters. In the group coding, controls were coded as 0 and depressed participants as 1, so a positive parameter would indicate larger preference by depressed participants and a negative parameter larger preference by controls.
+
+###### Analysis without sex in the model
+
+- In this model the difference between depressed and non-depressed adolescents is the statusMDD parameter. This is not significant for item 6 (b = -0.25, SE = 0.20, p = .21). Neither is it significant for item 9 (b = 0.14, SE = 0.21, p = 0.46).
+
+- The difference between depressed and non-depressed adults is the sum of statusMDD (not significant, see above) and the statusMDD:groupadult interaction parameter. This is not significant for item 6 (b = 0.35, SE = 0.23, p = .13) and not significant for item 9 (b = -0.14, SE = 0.24, p = 0.54)
+
+###### Analysis with sex in the model
+
+- The difference between female control adolescents and female depressed adolescents is represented by the statusMDD parameter, which is non-significant for item 6 (b = -0.09, SE = 0.22, p = 0.67) and item 9 (b = 0.16, SE = 0.22, p = .47). So, both assigned similar scores to these items.
+
+- The difference between male control adolescents and male depressed adolescents is the sum of the statusMDD and sexm:statusMDD parameters. The latter is  significant for neither item 6 (b = -1.08, SE = .68, p = .11) nor item 9 (b < 0.001, SE = 0.72, p = .99)
+
+- The difference between female adult controls and female adult depressed participants is the sum of statusMDD and groupadult:statusMDD. The latter parameter is not significant for item 6 (b = 0.31, SE = 0.28, p = 0.26) and item 9 (b = -0.17, SE = 0.29, p = 0.53).
+
+- The difference between preferences for depressed and non-depressed male adults is the sum of statusMDD, groupadult:statusMDD, sexm:statusMDD and the threeway interaction. The threeway interaction is not significant for neither item 6 (b = 0.88, SE = 0.73, p = 0.23) nor item 9 (b = 0.02, SE = 0.76, p = 0.97).
+
+Overall, there was no support for the hypothesis that depressed participants rated items 6 and 9 more highly than controls - regardless of the inclusion of gender.
+
+#### H4: Authenticity. Adolescents will rank item 11 more highly than adults 
+
+##### Analysis without sex in the model
+
+- The difference between healthy adolescents and adults is represented by the groupadult parameter. For this item, it is significant (b = -0.51, SE = 0.16, p = 0.003).
+
+- The difference between depressed adolescents and depressed adults is the sum of the groupadult parameter (b = -0.51, SE = 0.16, p = 0.003) and the two-way interaction parameter (b = 0.69, SE = 0.24, p = 0.003). Both are significant, but points in opposite directions, leading to a total predicted effect of 0.18. Since this is smaller than the pooled standard error (SE = 0.2, quick-and-dirty calculation with arithmetic mean), this effect is unlikely to be significant.
+
+
+In total, these results would support hypothesis 4 in healthy, but not in depressed participants.
+
+##### Analysis with sex in the model
+
+- Simple effects coding was used, meaning that the total effect for a given combination of sex, group and diagnostic status depends on the sum of several estimated parameters. In the group coding, adolescents were grouped as 0 and adults as 1, so a positive parameter would indicate larger preference by adults and a negative parameter larger preference by adolescents.
+
+-   The difference between female control adolescents and adults is represented by the groupadult parameter, which is not significant (b = - .37, SE = 0.19, p = .10). Thus, adolescent control girls were not more or less likely to choose the authenticity parameter than adults control women.
+
+-   The difference between male control adolescents and adults is the sum of the groupadult and groupadult:sexm parameters. Since the groupadult parameter is not significant (see above), it is sufficient to consider the groupadult:sexm parameter, which is significant (b = -1.35, SE = 0.52, p \< .001). This means that adult control boys were less likely to choose the authenticity item than adolescent boys.
+
+-   The difference between female depressed adolescents and female non-depressed adolescents is equivalent to the sums of the groupadult (n.s., see above) and groupadult:statusMDD parameters, which was marginally significant (b = 0.46, SE = 0.28, p = .096). This indicates that there was no difference in endorsing the authenticity items between these two groups, though the depressed female adults seemed somewhat more likely to endorse the authenticity item.
+
+-   The difference between male depressed adolescents and male depressed adults is equivalent to the sums of groupadult (ns. see above), groupadult:statusMDD (b = 0.46, SE = 0.28, p = .096), sexM:groupadult (b = -1.35, SE = 0.52, p \< .001) and the three-way interaction (b = 1.46, SE = 0.75, p = .052). Without marginal effects, this means that male depressed adults were less likely to endorse the authenticity item than depressed male adolescents. However, when including the marginal effects, this changes direction, such that the authenticity item had a higher ability for male depressed adults than male depressed adolescents.
+
+In total, these results show support for hypothesis 4, but only in men. When ignoring marginal effects, there was no difference in reported authenticity between adolescents and adults for girls, irrespective of their depression levels. For men, there was a difference between adolescents and adults, such that adults were less likely to choose the authenticity item over other items. Marginal interactions suggest that this effect may be subject to change in a more highly powered study.
+
+
+##### Overall Verdict on H4
+
+It looks like something interesting is going on here. The authenticity parameter was found to (a) only vary in boys (model3) or (b) only vary in healthy participants (model4). 
+
+Why the discrepant results? My intuition is that, since we hardly have adolescent boys, the gender/age variables are confounded. When including sex as predictor this confounding is taken care of, but since there are way to few boys to interpret parameters confidently this is a point for further research.
+
+#### Plotting outcomes
+
+Now, construct plots showing the item strengths against the underlying actual count data. Note that the first item is the reference category, and as such has an 'error-free' ability that is fixed to 0. Also note that, due to difficulties with properly plotting the standard errors for predicted data, the plotted standard errors correspond to a series of models fitted to each category individualls. This may lead to an underestimation of standard errors in this case.
+
+Also, note that item 9 is both in the 'learning' and 'most-preferred' category. Due to display limitations in R, it is shown in category 'most-preferred' only.
+
+```{r, include = F}
+
+
+#plotting is difficult as constructing standard errors for BT model linear predictions
+#is not intuitive. For convenience, simply fit separate models to all subgroups
+#(Note: this will lead to over-estimation of standard-errors, as each model is run on less data)
+res_groupwise <- data.frame()
+res_itemwise <- data.frame()
+
+#fit BT models for the sub-sets
+for (i in c("MDD", "HV")) {
+  for (j in c("adult", "adolescent")) {
+    this_dat <- dat_group_comp %>% 
+      filter(
+        status == i,
+        group == j
+      )
+    
+    #fit model for groupwise analysis
+    groupwise <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2,
+                              formula = ~
+                              most_pref + least_pref + learning + myself, 
+                              id = "item", data = this_dat)
+    
+    sum <- summary(groupwise)$coefficients 
+    sum <- cbind(rownames(sum), sum)
+    colnames(sum)[1] <- "category"
+    
+    res_groupwise <- sum %>%
+      as.data.frame() %>% 
+      mutate(
+        status = i,
+        group = j,
+        cat = paste(j, i, sep = "_"),
+        category = gsub('[[:digit:]]+', '', category)
+      ) %>% rbind(res_groupwise, .)
+    
+    #fit model for itemwise analysis
+    itemwise <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2,
+                    formula = ~ item, 
+                    id = "item", data = this_dat)
+    
+    sum <- summary(itemwise)$coefficients 
+    sum <- cbind(2:14, sum)
+    colnames(sum)[1] <- "item"
+    
+    res_itemwise <- sum %>%
+      as.data.frame() %>% 
+      mutate(
+        status = i,
+        group = j,
+        cat = paste(j, i, sep = "_")
+      ) %>% rbind(res_itemwise, .)
+    
+   }
+}
+
+model_hypotheses <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2,
+                        formula = ~ most_pref + least_pref + learning * CESD_score + myself * age,
+                        id = "item", data = dat_group_comp)
+res_hypotheses <- summary(model_hypotheses)
+
+#aggregate wins across items
+dat_plots <- dat %>% 
+  group_by(across(all_of(c("group", "status", "item1", "item2")))) %>% 
+  summarise(
+    wins1 = sum(win1),
+    wins2 = sum(win2)
+  ) %>% 
+  mutate(
+    n_comparisons = wins1 + wins2
+  )
+
+#generate a list of how often each item wins in each group
+dat_wins <- data.frame(
+  item = 1:14,
+  item_str = paste("i", 1:14, sep = ""),
+  adult_MDD = rep(0, 14),
+  adolescent_MDD = rep(0, 14),
+  adult_HV = rep(0, 14),
+  adolescent_HV = rep(0, 14)
+)
+
+
+#the dataset contains every contest exactly once in one row
+#this makes it hard to summarise data with the sum() function
+#work around this with a little loop
+for(i in 1:length(1:14)) {
+  for (j in 1:nrow(dat_plots)) {
+    if (!is.na(dat_plots$item1[j])) {
+      if (dat_plots$item1[j] == paste("i", i, sep = "")) {
+         if(dat_plots$group[j] == "adult" & dat_plots$status[j] == "MDD") {
+              dat_wins$adult_MDD[i] = dat_wins$adult_MDD[i] + dat_plots$wins1[j]
+              
+          } else if (dat_plots$group[j] == "adult" & dat_plots$status[j] == "HV") {
+              dat_wins$adult_HV[i] = dat_wins$adult_HV[i] + dat_plots$wins1[j]
+              
+          } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "HV") {
+            dat_wins$adolescent_HV[i] = dat_wins$adolescent_HV[i] + dat_plots$wins1[j]
+            
+          } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "MDD") {
+            dat_wins$adolescent_MDD[i] = dat_wins$adolescent_MDD[i] + dat_plots$wins1[j]
+          } 
+      }
+    }
+    
+    if (dat_plots$item2[j] == paste("i", i, sep = "")) {
+      if(dat_plots$group[j] == "adult" & dat_plots$status[j] == "MDD") {
+        dat_wins$adult_MDD[i] = dat_wins$adult_MDD[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adult" & dat_plots$status[j] == "HV") {
+        dat_wins$adult_HV[i] = dat_wins$adult_HV[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "HV") {
+        dat_wins$adolescent_HV[i] = dat_wins$adolescent_HV[i] + dat_plots$wins2[j]
+        
+      } else if (dat_plots$group[j] == "adolescent" & dat_plots$status[j] == "MDD") {
+        dat_wins$adolescent_MDD[i] = dat_wins$adolescent_MDD[i] + dat_plots$wins2[j]
+      } 
+    }
+  }
+}
+
+#housekeeping
+rm(dat_plots)
+
+#number of expected wins per item/group with prior belief = 0.5
+#0.5 * n_participants * n_contests_with_item
+#there are 14 items, if every item is compared to itself and all other items that's 13 contests per item
+#the number of expected wins per category then is simply the expected wins for a given item multiplied by the number of items in that category
+#Note that items within each category were put in contests with itself. 
+expected <- data.frame(
+  cat = c("adult_MDD", "adult_HV", "adolescent_MDD", "adolescent_HV"),
+  expected = c(
+    filter(dat, status == "MDD" & group == "adult")$participant %>% unique() %>% length() * 0.5 * 13,
+    filter(dat, status == "HV" & group == "adult")$participant %>% unique() %>% length() * 0.5 *13,
+    filter(dat, status == "MDD" & group == "adolescent")$participant %>% unique() %>% length() * 0.5 * 13,
+    filter(dat, status == "HV" & group == "adolescent")$participant %>% unique() %>% length() * 0.5 * 13
+    )
+  )
+
+#pair data on wins with results for a nice overlayed plot
+dat_wins <- dat_wins %>% 
+  pivot_longer(cols = c("adult_MDD", "adolescent_MDD", "adult_HV", "adolescent_HV"), names_to = "cat", values_to = "wins") %>% 
+  full_join(expected, ., by = "cat") %>% 
+  mutate(
+    group = ifelse(grepl("adolescent", cat), "adolescent", "adult"),
+    status = ifelse(grepl("MDD", cat), "MDD", "HV"),
+    wins_rel = wins / expected,
+    most_pref = ifelse(item_str %in% most_pref_list, 1, 0),
+    least_pref = ifelse(item_str %in% least_pref_list, 1, 0),
+    learning = ifelse(item_str %in% learning_list, 1, 0),
+    myself = ifelse(item_str %in% myself_list, 1, 0),
+    category = ifelse(most_pref == 1, "most_pref",
+                      ifelse(least_pref == 1, "least_pref",
+                             ifelse(learning == 1, "learning",
+                                    ifelse(myself == 1, "myself", "No Category")
+                             )
+                          )
+                      ),
+    expected_cat = ifelse(most_pref == 1, expected * length(most_pref_list),
+                      ifelse(least_pref == 1, expected * length(least_pref_list),
+                             ifelse(learning == 1, expected * length(learning_list),
+                                    ifelse(myself == 1, expected * length(myself_list), 
+                                           expected * length(no_category_list))
+                             )
+                      )
+    ),
+    wins_rel_cat = wins / expected_cat
+  )
+
+dat_plotting <- full_join(res_itemwise, dat_wins) %>% 
+  mutate(
+    Estimate = ifelse(item == 1, 0, Estimate),
+    group = ifelse(group == "adolescent", "Adolescent", "Adult")
+  )
+
+plot_itemwise <- ggplot(data = dat_plotting, aes(x = item)) +
+  facet_grid(row = vars(status), col = vars(group)) + 
+  labs(title = "Results Itemwise", 
+       subtitle = "Actual Wins (Colour) and Estimated Item Abilities (Black)") + 
+  geom_col(aes(y = wins_rel, fill = category)) +
+  geom_hline(yintercept = 1, colour = rgb(0.4, 0.4, 0.4)) + 
+  geom_errorbar(
+    aes(x = item, 
+        ymin = (as.numeric(Estimate + 2) - 2 * as.numeric(`Std. Error`))/2, 
+        ymax = (as.numeric(Estimate + 2) + 2 * as.numeric(`Std. Error`))/ 2)
+  ) +
+  geom_point(aes(x = item, y = as.numeric((Estimate + 2)/2))) +
+  xlab("Item") +
+  scale_x_continuous(breaks = c(1:14)) + 
+  scale_y_continuous(
+    limits = c(-0.1, 2.5),
+    name = "Ratio of actual wins / expected wins (Gray)",
+    sec.axis = sec_axis(~.* 2 - 2, name = "Estimated Ability (Black)")
+  ) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12, face = "bold")
+  )
+
+plot_itemwise
+
+l1 <- filter(dat_wins, cat == "adolescent_HV" & learning == 1)$wins %>% sum()
+l2 <- filter(dat_wins, cat == "adolescent_MDD" & learning == 1)$wins %>% sum()
+l3 <- filter(dat_wins, cat == "adult_HV" & learning == 1)$wins %>% sum()
+l4 <- filter(dat_wins, cat == "adult_MDD" & learning == 1)$wins %>% sum()
+
+dat_plotting_groupwise <- dat_wins %>% 
+  group_by(across(all_of(c("cat", "category", "expected")))) %>% 
+  summarise(
+    wins = sum(wins),
+  ) %>%
+  ungroup() %>% 
+  mutate(
+    #note that our labeling algorithm above assumed that each item is in one category,
+    #but this is not the case. Here this leads to us not counting wins on item 9, correct manually. 
+    
+    wins = ifelse(category != "learning", wins,
+                  ifelse(cat == "adolescent_HV", l1,
+                      ifelse(cat == "adolescent_MDD", l2,
+                            ifelse(cat == "adult_HV", l3,
+                               l4)))),
+    
+    
+    expected_cat = ifelse(category == "most_pref", expected * as.numeric(length(most_pref_list)),
+                          ifelse(category == "least_pref", expected * as.numeric(length(least_pref_list)),
+                                 ifelse(category == "learning", expected * as.numeric(length(learning_list)),
+                                        ifelse(category == "myself", expected * as.numeric(length(myself_list)), 
+                                               expected * as.numeric(length(no_category_list)))
+                                 )
+                          )
+    ), 
+    
+    #sum up to get relative win rate, again considering the above caveat
+    wins_rel_cat = ifelse(category == "learning",
+                          wins / (expected * as.numeric(length(learning_list))), wins / expected_cat),
+    
+    
+  ) %>% 
+  full_join(res_groupwise,., by = c("category", "cat")) %>% 
+  mutate(
+    group = ifelse(group == "adolescent", "Adolescent", "Adult")
+  ) %>% 
+  filter(
+    #exclude items without category from plot.
+    category != "No Category"
+  )
+
+
+
+plot_groupwise <- ggplot(data = dat_plotting_groupwise, aes(x = category)) +
+  facet_grid(row = vars(status), col = vars(group)) + 
+  labs(title = "Results Groupwise", 
+       subtitle = "Actual Wins (Gray) and Estimated Item Abilities (Black)") + 
+  geom_col(aes(y = wins_rel_cat), fill = rgb(0.8, 0.8, 0.8)) +
+  geom_hline(yintercept = 1, colour = rgb(0.4, 0.4, 0.4)) + 
+  geom_errorbar(
+    aes(x = category, 
+        ymin = (as.numeric(Estimate)  + 2 - 2 * as.numeric(`Std. Error`))/2, 
+        ymax = (as.numeric(Estimate)  + 2 + 2 * as.numeric(`Std. Error`))/ 2)
+  ) +
+  geom_point(aes(x = category, y = (as.numeric(Estimate)+ 2)/2)) +
+  xlab("Category") +
+  scale_y_continuous(
+    limits = c(-0.1, 2.5),
+    name = "Ratio of actual wins / expected wins (Gray)",
+    sec.axis = sec_axis(~.* 2 - 2, name = "Estimated Ability (Black)")
+  ) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12, face = "bold")
+  )
+
+plot_groupwise
+
+```
+
+```{r, echo = F}
+
+plot_itemwise
+plot_groupwise
+
+```
+
+### Next Steps
+
+Here a few notes:
+
+-   Results in the category 'learning' were diverging - the item-wise analysis shows that both items are unassociated with MDD, but when grouping them there is an association. This is worrying, and means that we need to take care of grouping properly with STAN
+
+-   It seems that, for the authenticity item, only adolescent boys seem to be more likely to endorse the authenticity item than men, while this effect does not occur for girls (model 3). When excluding gender (model 4) this effect moves over to age - hinting at confounding due to small number of adolescent boys. This study would have to be repeated with a more balanced sample to tease these two apart.
+
+-   The assumption of independence in the BTm is likely violated. Find a better way of doing this analysis (RSTAN)
+
+-   Utility in this study was represented through the idea of 'learning' and 'authenticity' with mixed results on H4 are null finding on H3 - maybe we need something more explicit (e.g. sadness helps me disengage and see things from a different angle).
+
+-   Alternatively, this may have to do with the poor coverage of positive emotion in our study - item 8 was negatively linked with depression. So, depressed participants were less likely to endorse learning about themselves by being happy, but not differ from controls on preference for negative emotions?
+
+-   Alternatively, the problem may be that emotions are deeply contextual (this is what the difference between the most preferred and least preferred items seems to suggest). Thus, we may need to run a vignette study including specific contexts (e.g., 'you just have received a promotion at work' -> 'sadness could make me see things more clearly' versus 'you just have been fired at work' -> 'sadness could make me see things more clearly' will have very different utilities). Again, we could differentiate by diagnostic status (the hypothesis being that depressed participants may be more likely to choose the sadness item in the fired-from-work context). This could be a blue-print for other work in the lab, e.g., for Miranda's work on Mood & hunger (do emotion preferences change when participants are asked to imagine they are hungry?).
+
+-   The most preferred items were more 'nuanced' whereas the least preferred items were more 'globalised'. Interestingly, the 'nuanced' items seemed to be more acceptable to the adolescents than the adults - however, we'd need to check with a more balanced sample to see whether this is due to gender confounding.
+
+- Regarding the 'anger'-items, adults were more likely to adopt a more globally negative preference for anger specifically.
+
+- In total, it seems like 'nuance' may be partly lost between adolescence and adulthood, but this may be confounded by gender (where nuance would be lost in men rather than women, since men are more represented in the adult sample).
+
+-   Think of 'framings' for a potential psychotherapy-oriented study. E.g., emotional preference as outcome of a treatment? E.g., we have asked about preferences for emotions in general - what about preferences in CHANGES? Can we devise 'change-versions' differing in globality? E.g., 'I would like to never feel sad again.' versus 'I would like to feel sad only in the right moments.'
+
+
+#### Main takeaways:
+
+- The confounding of age/gender is a big problem, and may mean that to interpret our findings we should validate with a second sample. Alternatively, I could scrap all males from the analysis and re-run. If results are the same, we've ruled out gender as a confounding factor (see below)
+
+- There is something interesting going on with utility-items and depression status but it seems to reflect low preference for positive, rather than high preference for negative emotion item expressing learning/utility. We may need a broader emotion-coverage to tell.
+
+- There is something interesting going on with age/gender and authenticity, but confounding makes it hard to tell what exactly.
+
+#### Background 'to do's' for me:
+- read up on literature from the OSF!
+- Read up on Bayesian Statistics
+- Try to understand STAN
+
+#### Rerun analysis without male participants
+
+```{r, echo = F, include = T}
+
+
+#load data
+#for now, exclude the one sub-threshold coded participants
+dat <- readRDS(file = "data_BTM.rds") %>% 
+  filter(status %in% c("HV", "MDD"),
+         sex == "f") %>% 
+  mutate(
+    status = factor(status, levels = c("HV", "MDD"))
+  ) 
+
+model5 <- BTm(outcome = cbind(win1, win2), player1 = item1, player2 = item2, 
+              formula = ~ item + item * status + item * group + item * group * status, id = "item", data = dat)
+res5 <- summary(model5) 
+
+res5
+
+```
+
+
+A few rough notes on this (will look in more detail ASAP):
+
+H1:
+- Item rankings appear stable. At first glance, the effect that nuanced items do slightly worse in adults is maintained
+
+H2:
+- For the non-preferred items, the effect of anger seems to have disappeared, suggesting that this may have been due to gender rather than age.
+
+H3:
+- findings don't change when considering women only. There is still no effect on items 6 and 9
+- for item 8, the negative association with depression persists
+
+H4:
+- now, there is no significant effect of age on authenticity, but a marginal interaction depression authenticity.
+- Ignoring the marginal interaction, it seems like the age-effect on authenticity in the mixed sample may have been due to gender, rather than age. However, to tell for sure, one would need to recruit a more balanced sample.

@@ -1,0 +1,401 @@
+id,item_id,item,view_response,choice_text,view_rt,null_resp
+10245,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",3442.0,0
+10245,1,Depression,2.0,Depression is the absence of emotions,5930.0,0
+10246,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",3746.0,0
+10246,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9395.0,0
+10247,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7500.0,0
+10247,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,13233.0,0
+10248,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6168.0,0
+10248,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,6999.0,0
+10249,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",3743.0,0
+10249,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6495.0,0
+10251,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4309.0,0
+10251,1,Depression,2.0,Depression is the absence of emotions,11591.0,0
+10254,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7585.0,0
+10254,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4881.0,0
+10256,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4653.0,0
+10256,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6998.0,0
+10257,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",30642.0,0
+10257,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,18264.0,0
+10258,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7613.0,0
+10258,1,Depression,2.0,Depression is the absence of emotions,8414.0,0
+10259,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8993.0,0
+10259,1,Depression,2.0,Depression is the absence of emotions,10191.0,0
+10262,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7968.0,0
+10262,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3222.0,0
+10264,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",17582.0,0
+10264,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9484.0,0
+10266,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10952.0,0
+10266,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,22581.0,0
+10267,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6839.0,0
+10267,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,5278.0,0
+10268,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",18616.0,0
+10268,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8296.0,0
+10273,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6165.0,0
+10273,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,16152.0,0
+10274,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",3122.0,0
+10274,1,Depression,2.0,Depression is the absence of emotions,2908.0,0
+10275,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",17255.0,0
+10275,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,21247.0,0
+10278,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",16303.0,0
+10278,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,19933.0,0
+10280,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5870.0,0
+10280,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6351.0,0
+10319,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6796.0,0
+10319,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,29688.0,0
+10320,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9487.0,0
+10320,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7990.0,0
+10321,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",16560.0,0
+10321,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12480.0,0
+10322,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",20484.0,0
+10322,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15895.0,0
+10323,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12013.0,0
+10323,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,12648.0,0
+10324,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",20328.0,0
+10324,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12571.0,0
+10325,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6856.0,0
+10325,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9810.0,0
+10326,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12095.0,0
+10326,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,11447.0,0
+10327,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",11363.0,0
+10327,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6910.0,0
+10328,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7543.0,0
+10328,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8175.0,0
+10329,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",2127.0,0
+10329,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8456.0,0
+10330,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",14754.0,0
+10330,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,23827.0,0
+10331,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6292.0,0
+10331,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12209.0,0
+10332,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7834.0,0
+10332,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15949.0,0
+10333,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4493.0,0
+10333,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,1119.0,0
+10334,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",13331.0,0
+10334,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5718.0,0
+10335,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9707.0,0
+10335,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,14406.0,0
+10336,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",21844.0,0
+10336,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12944.0,0
+10337,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",172707.0,0
+10337,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8361.0,0
+10338,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",1266.0,0
+10338,1,Depression,2.0,Depression is the absence of emotions,5969.0,0
+10339,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7527.0,0
+10339,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8720.0,0
+10340,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6761.0,0
+10340,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,8375.0,0
+10341,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4678.0,0
+10341,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,821.0,0
+10342,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9193.0,0
+10342,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8173.0,0
+10343,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4541.0,0
+10343,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,10901.0,0
+10344,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",23551.0,0
+10344,1,Depression,2.0,Depression is the absence of emotions,23920.0,0
+10345,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5293.0,0
+10345,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4132.0,0
+10346,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6447.0,0
+10346,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7852.0,0
+10347,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",13854.0,0
+10347,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,11162.0,0
+10348,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11769.0,0
+10348,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15138.0,0
+10349,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",3851.0,0
+10349,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5361.0,0
+10350,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8760.0,0
+10350,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3336.0,0
+10351,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",15618.0,0
+10351,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8447.0,0
+10352,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11974.0,0
+10352,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15027.0,0
+10353,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5911.0,0
+10353,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,4944.0,0
+10354,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10416.0,0
+10354,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9591.0,0
+10355,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7873.0,0
+10355,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,14930.0,0
+10356,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6328.0,0
+10356,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,10856.0,0
+10357,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6545.0,0
+10357,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5346.0,0
+10358,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",56202.0,0
+10358,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,14214.0,0
+10359,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6470.0,0
+10359,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,17965.0,0
+10361,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8414.0,0
+10361,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7506.0,0
+10362,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8998.0,0
+10362,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,22734.0,0
+10363,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",2196.0,0
+10363,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,5151.0,0
+10364,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5165.0,0
+10364,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7609.0,0
+10365,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8736.0,0
+10365,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13016.0,0
+10366,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7528.0,0
+10366,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5526.0,0
+10367,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11228.0,0
+10367,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4801.0,0
+10368,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6561.0,0
+10368,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,11684.0,0
+10369,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",39259.0,0
+10369,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5243.0,0
+10370,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4988.0,0
+10370,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,11483.0,0
+10371,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",11099.0,0
+10371,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4798.0,0
+10372,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6387.0,0
+10372,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15715.0,0
+10373,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",10959.0,0
+10373,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,7545.0,0
+10374,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10457.0,0
+10374,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13959.0,0
+10375,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11198.0,0
+10375,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13410.0,0
+10376,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9493.0,0
+10376,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,19432.0,0
+10377,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8847.0,0
+10377,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9143.0,0
+10378,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",2819.0,0
+10378,1,Depression,2.0,Depression is the absence of emotions,3552.0,0
+10379,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",20293.0,0
+10379,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,16265.0,0
+10380,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8927.0,0
+10380,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9663.0,0
+10381,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8087.0,0
+10381,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,20799.0,0
+10382,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9629.0,0
+10382,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,10468.0,0
+10383,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10701.0,0
+10383,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,14384.0,0
+10385,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9643.0,0
+10385,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,16978.0,0
+10386,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5477.0,0
+10386,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11604.0,0
+10387,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4313.0,0
+10387,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13955.0,0
+10388,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5703.0,0
+10388,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,4231.0,0
+10389,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12185.0,0
+10389,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9152.0,0
+10390,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10718.0,0
+10390,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,34463.0,0
+10391,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",15715.0,0
+10391,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7195.0,0
+10392,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6355.0,0
+10392,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9662.0,0
+10393,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",46097.0,0
+10393,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3357.0,0
+10394,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",10440.0,0
+10394,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8679.0,0
+10395,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",15967.0,0
+10395,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,13575.0,0
+10396,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6225.0,0
+10396,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5964.0,0
+10398,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",21181.0,0
+10398,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3296.0,0
+10399,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",22182.0,0
+10399,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,32788.0,0
+10400,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8078.0,0
+10400,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9373.0,0
+10402,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5933.0,0
+10402,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4747.0,0
+10403,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4453.0,0
+10403,1,Depression,2.0,Depression is the absence of emotions,1984.0,0
+10404,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8707.0,0
+10404,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,10640.0,0
+10405,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9892.0,0
+10405,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,6633.0,0
+10406,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4992.0,0
+10406,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6425.0,0
+10407,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",3876.0,0
+10407,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,3259.0,0
+10408,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6672.0,0
+10408,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8320.0,0
+10409,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",7662.0,0
+10409,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11590.0,0
+10410,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6859.0,0
+10410,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8820.0,0
+10411,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",2215.0,0
+10411,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3048.0,0
+10412,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9071.0,0
+10412,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9358.0,0
+10413,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4717.0,0
+10413,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,36.0,0
+10414,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8605.0,0
+10414,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,39595.0,0
+10415,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9627.0,0
+10415,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7594.0,0
+10416,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",16719.0,0
+10416,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11200.0,0
+10417,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8191.0,0
+10417,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11674.0,0
+10418,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9480.0,0
+10418,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11309.0,0
+10419,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10384.0,0
+10419,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8308.0,0
+10420,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5669.0,0
+10420,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,2169.0,0
+10421,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8407.0,0
+10421,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,21393.0,0
+10422,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",19390.0,0
+10422,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,10386.0,0
+10423,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",40367.0,0
+10423,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,20420.0,0
+10424,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7439.0,0
+10424,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,3975.0,0
+10425,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",16365.0,0
+10425,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12565.0,0
+10426,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4522.0,0
+10426,1,Depression,2.0,Depression is the absence of emotions,4656.0,0
+10428,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",3587.0,0
+10428,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8886.0,0
+10429,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",73875.0,0
+10429,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,6666.0,0
+10430,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6641.0,0
+10430,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,7734.0,0
+10431,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7016.0,0
+10431,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9232.0,0
+10433,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",17558.0,0
+10433,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12284.0,0
+10434,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6703.0,0
+10434,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,10830.0,0
+10435,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8070.0,0
+10435,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7575.0,0
+10436,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6486.0,0
+10436,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6091.0,0
+10438,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4887.0,0
+10438,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6919.0,0
+10439,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9194.0,0
+10439,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11193.0,0
+10440,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4599.0,0
+10440,1,Depression,2.0,Depression is the absence of emotions,1883.0,0
+10441,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8444.0,0
+10441,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,14959.0,0
+10442,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7928.0,0
+10442,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,8876.0,0
+10443,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",17006.0,0
+10443,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15369.0,0
+10444,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",38768.0,0
+10444,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,15923.0,0
+10445,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5234.0,0
+10445,1,Depression,2.0,Depression is the absence of emotions,12199.0,0
+10446,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6082.0,0
+10446,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9431.0,0
+10447,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4033.0,0
+10447,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5810.0,0
+10448,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6626.0,0
+10448,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8014.0,0
+10449,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",20511.0,0
+10449,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,44249.0,0
+10450,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",15496.0,0
+10450,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,17549.0,0
+10451,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",12012.0,0
+10451,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,16760.0,0
+10452,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9119.0,0
+10452,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,13951.0,0
+10453,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12004.0,0
+10453,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13865.0,0
+10454,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",17208.0,0
+10454,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,17135.0,0
+10455,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",20132.0,0
+10455,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15792.0,0
+10456,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12173.0,0
+10456,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9260.0,0
+10457,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",79707.0,0
+10457,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,2978.0,0
+10458,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5865.0,0
+10458,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9739.0,0
+10459,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8512.0,0
+10459,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,12383.0,0
+10460,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9608.0,0
+10460,1,Depression,2.0,Depression is the absence of emotions,11349.0,0
+10461,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",11862.0,0
+10461,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,11255.0,0
+10462,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5155.0,0
+10462,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,5261.0,0
+10463,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",15409.0,0
+10463,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,14869.0,0
+10464,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",13627.0,0
+10464,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,13283.0,0
+10465,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5850.0,0
+10465,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,98071.0,0
+10466,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7758.0,0
+10466,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,9070.0,0
+10467,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6397.0,0
+10467,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,5830.0,0
+10468,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8605.0,0
+10468,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,16683.0,0
+10469,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5499.0,0
+10469,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,7185.0,0
+10470,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",10007.0,0
+10470,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,15679.0,0
+10471,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9239.0,0
+10471,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15495.0,0
+10472,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6914.0,0
+10472,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6352.0,0
+10473,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",12712.0,0
+10473,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12314.0,0
+10474,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",5271.0,0
+10474,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7631.0,0
+10476,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4054.0,0
+10476,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,21900.0,0
+10478,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7374.0,0
+10478,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,1277.0,0
+10479,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",8861.0,0
+10479,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7943.0,0
+10480,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6470.0,0
+10480,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,16591.0,0
+10482,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10498.0,0
+10482,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,7914.0,0
+10483,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7034.0,0
+10483,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13041.0,0
+10484,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9179.0,0
+10484,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12127.0,0
+10485,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",14009.0,0
+10485,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9949.0,0
+10486,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5684.0,0
+10486,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4670.0,0
+10487,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7867.0,0
+10487,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,7715.0,0
+10488,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9289.0,0
+10488,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,12198.0,0
+10489,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11247.0,0
+10489,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6434.0,0
+10490,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",20718.0,0
+10490,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15843.0,0
+10491,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",5016.0,0
+10491,1,Depression,2.0,Depression is the absence of emotions,9091.0,0
+10492,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",6342.0,0
+10492,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,18806.0,0
+10493,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",7885.0,0
+10493,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,6800.0,0
+10494,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6624.0,0
+10494,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,9282.0,0
+10497,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9942.0,0
+10497,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,15044.0,0
+10498,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",11767.0,0
+10498,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,18735.0,0
+10499,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",6884.0,0
+10499,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,25155.0,0
+10500,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",9712.0,0
+10500,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,11020.0,0
+10501,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",4062.0,0
+10501,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,2964.0,0
+10502,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",4784.0,0
+10502,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,4054.0,0
+10504,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",10125.0,0
+10504,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,13183.0,0
+10505,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",10845.0,0
+10505,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,20622.0,0
+10506,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",18552.0,0
+10506,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,18446.0,0
+10507,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",9886.0,0
+10507,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,16141.0,0
+10508,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",16289.0,0
+10508,1,Depression,0.0,Depression is just a more extreme version of normal emotions of sadness or grief,12336.0,0
+10509,0,Aim of life,1.0,"The aim of life is to do something meaningful and worthwhile, and it doesn’t really matter how happy you feel",732.0,0
+10509,1,Depression,2.0,Depression is the absence of emotions,4336.0,0
+10510,0,Aim of life,0.0,"The aim of life is to feel as happy as possible, as much of the time as possible",8698.0,0
+10510,1,Depression,1.0,Depression is a mental illness: it’s very different from normal emotions of sadness or grief,8400.0,0
