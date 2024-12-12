@@ -612,7 +612,7 @@ AIC(model3)
 AIC(model4)
 summary(model4)
 
-coef_fixed <- fixef(model3)
+coef_fixed <- fixef(model4)
 intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
@@ -622,7 +622,7 @@ standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 #SE_slope <- 0.43      # Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 # Extract the standard errors for intercept and slope from the model summary
-model_summary <- summary(model3)
+model_summary <- summary(model4)
 SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
 SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
 
@@ -681,7 +681,7 @@ AIC(model2)
 AIC(model3)
 AIC(model4)
 
-coef_fixed <- fixef(model3)
+coef_fixed <- fixef(model4)
 intercept_Response_Ax <- coef_fixed[1]
 slope_Response_Ax <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
@@ -691,7 +691,7 @@ standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 #SE_slope <- -0.27      # Placeholder value
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 # Extract the standard errors for intercept and slope from the model summary
-model_summary <- summary(model3)
+model_summary <- summary(model4)
 SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
 SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
 
@@ -737,7 +737,7 @@ ggplot(final_df_18_25_com, aes(x=Response_SubjPE, y=Response_Ax)) +
 # ICC for Mood
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-test_icc_id <- lmer(Response_H ~  (1| Random_ID_new), data = 
+test_icc_id <- lme4::lmer(Response_H ~  (1| Random_ID_new), data = 
                       final_df_18_25_com, 
                     REML = FALSE, 
                     control = lmerControl(optimizer = "bobyqa")) 
@@ -751,7 +751,7 @@ icc_results_id
 # ICC for Anxiety
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-test_icc_id <- lmer(Response_Ax ~  (1| Random_ID_new), data = 
+test_icc_id <- lme4::lmer(Response_Ax ~  (1| Random_ID_new), data = 
                       final_df_18_25_com, 
                     REML = FALSE, 
                     control = lmerControl(optimizer = "bobyqa")) 
