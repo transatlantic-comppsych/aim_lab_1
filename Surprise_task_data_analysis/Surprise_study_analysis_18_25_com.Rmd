@@ -617,9 +617,7 @@ intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
-# Hypothetical standard errors for intercept and slope
-#SE_intercept <- 0.15  # Placeholder value
-#SE_slope <- 0.43      # Placeholder value
+#standard errors for intercept and slope
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 # Extract the standard errors for intercept and slope from the model summary
 model_summary <- summary(model4)
@@ -686,9 +684,7 @@ intercept_Response_Ax <- coef_fixed[1]
 slope_Response_Ax <- coef_fixed[2]
 standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
-# Hypothetical standard errors for intercept and slope
-#SE_intercept <- -0.03  # Placeholder value
-#SE_slope <- -0.27      # Placeholder value
+#standard errors for intercept and slope
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
 # Extract the standard errors for intercept and slope from the model summary
 model_summary <- summary(model4)

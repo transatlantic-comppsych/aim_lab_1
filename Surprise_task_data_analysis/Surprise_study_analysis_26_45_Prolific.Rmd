@@ -46,12 +46,12 @@ The sample sizes include participants that potentially need to be excluded.
 # df_Pro_18_25 <- read.csv("")
 # df_Pro_26_45 <- read.csv("")
 # df_comm_18_25 <- read.csv("")
-dfpro_25_46 <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_task_main.csv")
+dfpro_25_46 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_task_main.csv")
 
 
 # read CESD, mini_SPIN for all the studies
 
-dfpro_25_46_spin <- read.csv("/Users/marjan/Desktop/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_mini_spin.csv")
+dfpro_25_46_spin <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_mini_spin.csv")
 
 
 ```
@@ -573,31 +573,39 @@ The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_I
 model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 model2 <- lme4::lmer(Response_H ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 model3 <- lme4::lmer(Response_H ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_H ~ Response_SubjPE + Social_Anxiety + (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 
 AIC(model1)
 AIC(model2)
 AIC(model3)
+AIC(model4)
 
-coef_fixed <- fixef(model3)
+
+coef_fixed <- fixef(model4)
 intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
-standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
-# Hypothetical standard errors for intercept and slope
-SE_intercept <- 0.15  # Placeholder value
-SE_slope <- 0.43      # Placeholder value
+# standard errors for intercept and slope
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+# Extract the standard errors for intercept and slope from the model summary
+model_summary <- summary(model4)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+
 
 # Creating a sequence of `SubjPE` values for prediction
 Response_SubjPE_range <- seq(min(final_df_26_45_Pro$Response_SubjPE), max(final_df_26_45_Pro$Response_SubjPE), length.out = 100)
 
-# Calculating predicted Response_H and its CI bounds across the SubjPE range
+# Calculating predicted Response_Ax and its CI bounds across the SubjPE range
 predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_SubjPE_range
 CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
 CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_SubjPE_range^2 * SE_slope^2))
 
 # Preparing a data frame for ggplot
 CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
 
 
 ggplot(final_df_26_45_Pro, aes(x=Response_SubjPE, y=Response_H)) +
@@ -633,23 +641,28 @@ The best model seems to be: Anxiety ~ SubjPE + mini_SPIN_total + (SubjPE | Rando
 model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 model2 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  mini_SPIN_total + (1 | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 model3 <- lme4::lmer(Response_Ax ~ Response_SubjPE + mini_SPIN_total + (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_Ax ~ Response_SubjPE + Social_Anxiety + (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
 
 AIC(model1)
 AIC(model2)
 AIC(model3)
-
-coef_fixed <- fixef(model3)
+AIC(model4)
+coef_fixed <- fixef(model4)
 intercept_Response_Ax <- coef_fixed[1]
 slope_Response_Ax <- coef_fixed[2]
-standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model3)
+standard_beta_Response_SubjPE <- parameters:: standardise_parameters (model4)
 
-# Hypothetical standard errors for intercept and slope
-SE_intercept <- -0.03  # Placeholder value
-SE_slope <- -0.27      # Placeholder value
+#standard errors for intercept and slope
 CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+# Extract the standard errors for intercept and slope from the model summary
+model_summary <- summary(model4)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+
 
 # Creating a sequence of `SubjPE` values for prediction
-Response_SubjPE_range <- seq(min(final_df_26_45_Pro$Response_SubjPE), max(final_df_26_45_Pro$Response_SubjPE), length.out = 100)
+Response_SubjPE_range <- seq(min(final_df_18_25_com$Response_SubjPE), max(final_df_18_25_com$Response_SubjPE), length.out = 100)
 
 # Calculating predicted Response_Ax and its CI bounds across the SubjPE range
 predicted_Response_Ax <- intercept_Response_Ax + slope_Response_Ax * Response_SubjPE_range
@@ -658,7 +671,6 @@ CI_upper <- predicted_Response_Ax + CI_multiplier * sqrt(SE_intercept^2 + (Respo
 
 # Preparing a data frame for ggplot
 CI_data <- data.frame(Response_SubjPE=Response_SubjPE_range, CI_lower=CI_lower, CI_upper=CI_upper)
-
 
 ggplot(final_df_26_45_Pro, aes(x=Response_SubjPE, y=Response_Ax)) +
   # Adding points from your dataset
