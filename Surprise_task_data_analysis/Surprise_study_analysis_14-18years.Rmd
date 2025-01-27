@@ -732,6 +732,131 @@ ggplot(final_df_students, aes(x=Response_SubjPE, y=Response_Ax)) +
 
 \newpage
 
+# LME models for Mood and Expectation
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_pred +  (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_pred +  mini_SPIN_total + (1 | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_pred + mini_SPIN_total + (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_H ~ Response_pred + Social_Anxiety + (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+
+coef_fixed <- fixef(model4)
+intercept_Response_H <- coef_fixed[1]
+slope_Response_H <- coef_fixed[2]
+standard_beta_Response_pred <- parameters:: standardise_parameters (model4)
+
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+# Creating a sequence of `pred` values for prediction
+Response_pred_range <- seq(min(final_df_students$Response_pred), max(final_df_students$Response_pred), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_pred_range
+CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_pred=Response_pred_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df_students, aes(x=Response_pred, y=Response_H)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_H, slope=slope_Response_H, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_pred, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df_students$Random_ID_new)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_pred$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_pred$CI_low[2],2), "-", round(standard_beta_Response_pred$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(0, 100, by=40), limits=c(0, 100))
+
+
+```
+
+\newpage
+
+# LME models for Anxiety and Expectation
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_pred +  (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_pred +  mini_SPIN_total + (1 | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_pred + mini_SPIN_total + (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_Ax ~ Response_pred + Social_Anxiety + (Response_pred | Random_ID_new), data = final_df_students, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+
+coef_fixed <- fixef(model4)
+intercept_Response_Ax <- coef_fixed[1]
+slope_Response_Ax <- coef_fixed[2]
+standard_beta_Response_pred <- parameters:: standardise_parameters (model4)
+
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+# Creating a sequence of `pred` values for prediction
+Response_pred_range <- seq(min(final_df_students$Response_pred), max(final_df_students$Response_pred), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+  predicted_Response_Ax <- intercept_Response_Ax + slope_Response_Ax * Response_pred_range
+CI_lower <- predicted_Response_Ax - CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_Ax + CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_pred=Response_pred_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df_students, aes(x=Response_pred, y=Response_Ax)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_Ax, slope=slope_Response_Ax, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_pred, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df_students$Random_ID_new)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_pred$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_pred$CI_low[2],2), "-", round(standard_beta_Response_pred$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(0, 100, by=40), limits=c(0, 100))
+
+
+
+```
+
+\newpagd
+
 # ICC for Mood
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}

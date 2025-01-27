@@ -9,7 +9,6 @@ output:
     toc_float: true
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(root.dir = "aim_lab_1", echo = TRUE)
 ```
@@ -27,18 +26,13 @@ library(stringr)
 library(readxl)
 ```
 
-
 \newpage
+
 # Study description
 
-This is the first surprise study using the same task version as pilot 21. We had the following groups of participants with the experiment's corresponding Gorilla link:
-- Prolific aged 18-25 (n = 30): https://app.gorilla.sc/admin/experiment/180921/design
-- Prolific aged 26-45 (n = 38): https://app.gorilla.sc/admin/experiment/185160/design
-- School students aged 14-18 (n = 30): https://app.gorilla.sc/admin/experiment/177048/design
-- Community participants aged 18-25 (n = 24): https://app.gorilla.sc/admin/experiment/180348/design
+This is the first surprise study using the same task version as pilot 21. We had the following groups of participants with the experiment's corresponding Gorilla link: - Prolific aged 18-25 (n = 30): <https://app.gorilla.sc/admin/experiment/180921/design> - Prolific aged 26-45 (n = 38): <https://app.gorilla.sc/admin/experiment/185160/design> - School students aged 14-18 (n = 30): <https://app.gorilla.sc/admin/experiment/177048/design> - Community participants aged 18-25 (n = 24): <https://app.gorilla.sc/admin/experiment/180348/design>
 
 The sample sizes include participants that potentially need to be excluded.
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # v3 and v4 have exactly the same task version, but BIQ was causing a problem due to a Gorilla update and it was changed in version 4
@@ -55,7 +49,6 @@ dfpro_25_46_spin <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive
 
 
 ```
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # extract CES-D scores
@@ -120,7 +113,6 @@ dfpro_25_46_spin <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive
 #   }
 # }
 ```
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # We have now different names for different screens:
@@ -295,9 +287,8 @@ write.csv(final_df_26_45_Pro, "final_df_26_45_Pro_with_stresslevels.csv", row.na
 
 ```
 
+\newpage
 
-
-\newpage 
 # Relationship between prediction and mean histograms (4x only in the beginning)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -334,7 +325,8 @@ ggplot(final_df_26_45_Pro, aes(x = Response_m_hist, y = Response_pred, color = S
   
 ```
 
-\newpage 
+\newpage
+
 # Relationship between Anxiety and SubjPE
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -372,7 +364,8 @@ xlim(c(-100, 100)) +
 scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
 ```
 
-\newpage 
+\newpage
+
 # Relationship between Mood and SubjPE
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -411,8 +404,6 @@ ggplot(final_df_26_45_Pro, aes(x = Response_SubjPE, y = Response_H, color = Soci
   scale_x_continuous(breaks = seq(-80, 80, by = 50), limits = c(-80,80))
   
 ```
-
-
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # trying to keep the BL_1 and BL_2 mood and anxiety ratings
@@ -464,10 +455,9 @@ final_dfpro_25_46_with_BL$Social_Anxiety <- ifelse(final_dfpro_25_46_with_BL$min
 
 ```
 
+\newpage
 
-
-\newpage 
-# Mood over time 
+# Mood over time
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 dfpro_26_45_selected_BL_ax <- subset(final_dfpro_25_46_with_BL, Display == "Anxiety ")
@@ -489,8 +479,9 @@ ggplot(dfpro_26_45_selected_BL_H, aes(x = Trial.Number, y = Response, color = Di
 
 ```
 
-\newpage 
-# Anxiety over time 
+\newpage
+
+# Anxiety over time
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ggplot(dfpro_26_45_selected_BL_ax, aes(x = Trial.Number, y = Response, color = Display, group = Display)) +
@@ -509,8 +500,9 @@ ggplot(dfpro_26_45_selected_BL_ax, aes(x = Trial.Number, y = Response, color = D
 
 ```
 
-\newpage 
-# Prediction before performance over time 
+\newpage
+
+# Prediction before performance over time
 
 Red line presents until what points histograms were presented (4 first trials only).
 
@@ -531,8 +523,8 @@ ggplot(final_df_26_45_Pro, aes(x = Trial.Number, y = Response_pred)) +
 
 ```
 
+\newpage
 
-\newpage 
 # Stress levels and social anxiety
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -565,9 +557,10 @@ ggplot(onetrial_final_df_26_45_Pro, aes(x = Social_Anxiety, y = Response_stress_
 ```
 
 \newpage
+
 # LME models for Mood and SubjPE
 
-The best model seems to be: Mood ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+The best model seems to be: Mood \~ SubjPE + mini_SPIN_total + (SubjPE \| Random_ID)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_H ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
@@ -633,9 +626,10 @@ ggplot(final_df_26_45_Pro, aes(x=Response_SubjPE, y=Response_H)) +
 ```
 
 \newpage
+
 # LME models for Anxiety and SubjPE
 
-The best model seems to be: Anxiety ~ SubjPE + mini_SPIN_total + (SubjPE | Random_ID)
+The best model seems to be: Anxiety \~ SubjPE + mini_SPIN_total + (SubjPE \| Random_ID)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 model1 <- lme4::lmer(Response_Ax ~ Response_SubjPE +  (Response_SubjPE | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
@@ -695,9 +689,138 @@ ggplot(final_df_26_45_Pro, aes(x=Response_SubjPE, y=Response_Ax)) +
   scale_x_continuous(breaks=seq(-80, 80, by=40), limits=c(-80, 80))
 ```
 
+\newpage
 
-\newpage 
-# ICC for Mood 
+# LME models for Mood and Expectation
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_H ~ Response_pred +  (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_H ~ Response_pred +  mini_SPIN_total + (1 | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_H ~ Response_pred + mini_SPIN_total + (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_H ~ Response_pred + Social_Anxiety + (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+
+coef_fixed <- fixef(model4)
+intercept_Response_H <- coef_fixed[1]
+slope_Response_H <- coef_fixed[2]
+standard_beta_Response_pred <- parameters:: standardise_parameters (model4)
+
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+# Creating a sequence of `pred` values for prediction
+Response_pred_range <- seq(min(final_df_students$Response_pred), max(final_df_students$Response_pred), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+predicted_Response_H <- intercept_Response_H + slope_Response_H * Response_pred_range
+CI_lower <- predicted_Response_H - CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_H + CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_pred=Response_pred_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df_students, aes(x=Response_pred, y=Response_H)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_H, slope=slope_Response_H, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_pred, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df_students$Random_ID)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_pred$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_pred$CI_low[2],2), "-", round(standard_beta_Response_pred$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(0, 100, by=40), limits=c(0, 100))
+
+
+
+
+```
+
+\newpage
+
+# LME models for Anxiety and Expectation
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+model1 <- lme4::lmer(Response_Ax ~ Response_pred +  (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model2 <- lme4::lmer(Response_Ax ~ Response_pred +  mini_SPIN_total + (1 | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model3 <- lme4::lmer(Response_Ax ~ Response_pred + mini_SPIN_total + (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+model4 <- lme4::lmer(Response_Ax ~ Response_pred + Social_Anxiety + (Response_pred | Random_ID), data = final_df_26_45_Pro, control=lmerControl(optimizer="bobyqa"))
+
+AIC(model1)
+AIC(model2)
+AIC(model3)
+AIC(model4)
+
+coef_fixed <- fixef(model4)
+intercept_Response_Ax <- coef_fixed[1]
+slope_Response_Ax <- coef_fixed[2]
+standard_beta_Response_pred <- parameters:: standardise_parameters (model4)
+
+CI_multiplier <- 1.96  # 95% CI multiplier for a normal distribution
+model_summary <- summary(model3)
+SE_intercept <- model_summary$coefficients[1, "Std. Error"]  # Standard error for the intercept
+SE_slope <- model_summary$coefficients[2, "Std. Error"]      # Standard error for the slope
+
+# Creating a sequence of `pred` values for prediction
+Response_pred_range <- seq(min(final_df_students$Response_pred), max(final_df_students$Response_pred), length.out = 100)
+
+# Calculating predicted Response_H and its CI bounds across the SubjPE range
+  predicted_Response_Ax <- intercept_Response_Ax + slope_Response_Ax * Response_pred_range
+CI_lower <- predicted_Response_Ax - CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+CI_upper <- predicted_Response_Ax + CI_multiplier * sqrt(SE_intercept^2 + (Response_pred_range^2 * SE_slope^2))
+
+# Preparing a data frame for ggplot
+CI_data <- data.frame(Response_pred=Response_pred_range, CI_lower=CI_lower, CI_upper=CI_upper)
+
+
+ggplot(final_df_students, aes(x=Response_pred, y=Response_Ax)) +
+  # Adding points from your dataset
+  # geom_point() +
+  # Adding a regression line
+  geom_abline(intercept=intercept_Response_Ax, slope=slope_Response_Ax, color="darkgoldenrod1", linetype="dashed", size=1) +
+  # Adding the confidence interval with geom_ribbon
+  geom_ribbon(data=CI_data, aes(x=Response_pred, ymin=CI_lower, ymax=CI_upper), fill="gray80", alpha=0.5, inherit.aes = FALSE) +
+  # Further customization
+  xlab("Social PE") + 
+  ylab("Mood") +
+  ggtitle("", subtitle=paste("Estimated slopes of the association in n = ", length(unique(final_df_students$Random_ID_new)))) +
+  theme(plot.title=element_text(size=12), plot.subtitle=element_text(size=10),
+        legend.title=element_text(size=12), legend.text=element_text(size=12),
+        axis.title=element_text(size=13),
+        axis.text=element_text(size=12),
+        panel.background=element_blank(), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.border=element_rect(colour="black", fill=NA)) +
+  annotate("label", x=12, y=55, label=paste("beta =", round(standard_beta_Response_pred$Std_Coefficient[2],2), ", 95%CI =", 
+                                            round(standard_beta_Response_pred$CI_low[2],2), "-", round(standard_beta_Response_pred$CI_high[2],2))) +
+  scale_y_continuous(breaks=seq(0, 100, by=20), limits=c(0, 100)) +
+  scale_x_continuous(breaks=seq(0, 100, by=40), limits=c(0, 100))
+
+
+
+
+```
+
+\newpage
+
+# ICC for Mood
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 test_icc_id <- lmer(Response_H ~  (1| Random_ID), data = 
                       final_df_26_45_Pro, 
@@ -708,8 +831,10 @@ icc_results_id <- performance::icc(test_icc_id)
 icc_results_id
 ```
 
-\newpage 
-# ICC for Anxiety 
+\newpage
+
+# ICC for Anxiety
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 test_icc_id <- lmer(Response_Ax ~  (1| Random_ID), data = 
                       final_df_26_45_Pro, 
