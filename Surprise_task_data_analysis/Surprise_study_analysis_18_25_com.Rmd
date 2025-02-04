@@ -273,7 +273,7 @@ final_df_18_25_com <- final_df_18_25_com %>%
 final_df_18_25_com$Social_Anxiety <- ifelse(final_df_18_25_com$mini_SPIN_total >= 6, "high", "low")
 
 # excluding people with problematic performance according to Jess's video check
-final_df_18_25_com <- final_df_18_25_com[!(final_df_18_25_com$Random_ID_new %in% c("SUPLCM31721", "SUPLCM52921")), ]
+final_df_18_25_com <- final_df_18_25_com[!(final_df_18_25_com$Random_ID_new %in% c("SUPLCM31721", "SUPLCM52921", "SUPLCM91399", "SUPLCM18538")), ]
 
 
 write.csv(final_df_18_25_com, "surprise_study_18_25_com_variables.csv", row.names = FALSE)
@@ -892,6 +892,7 @@ coef_fixed <- fixef(model4)
 intercept_Response_Ax <- coef_fixed[1]
 slope_Response_Ax <- coef_fixed[2]
 standard_beta_Response_fdbk <- parameters:: standardise_parameters (model4)
+
 
 ```
 

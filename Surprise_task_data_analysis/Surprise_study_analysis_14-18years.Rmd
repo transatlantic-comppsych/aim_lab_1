@@ -281,7 +281,7 @@ final_df_students$Social_Anxiety <- ifelse(final_df_students$mini_SPIN_total >= 
 
 
 # excluding people with problematic performance according to Jess's video check
-final_df_students <- final_df_students[!(final_df_students$Random_ID_new %in% c("SUPSCO12782", "SUPSCO24387", "SUPSCO46030")), ]
+final_df_students <- final_df_students[!(final_df_students$Random_ID_new %in% c("SUPSCO12782", "SUPSCO24387", "SUPSCO46030", "SUPSCO12088","SUPSCO70018")), ]
 
 
 
@@ -874,6 +874,7 @@ coef_fixed <- fixef(model4)
 intercept_Response_H <- coef_fixed[1]
 slope_Response_H <- coef_fixed[2]
 standard_beta_Response_fdbk <- parameters:: standardise_parameters (model4)
+
 
 ```
 
