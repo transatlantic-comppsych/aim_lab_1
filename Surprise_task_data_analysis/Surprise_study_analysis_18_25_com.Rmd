@@ -48,70 +48,77 @@ dfcom_18_25_spin_2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDri
 dfcom_18_25_spin_2$X <- NULL
 
 dfcom_18_25_spin <- rbind(dfcom_18_25_spin_1, dfcom_18_25_spin_2)
+
+dfcom_18_25_ces_d_1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_ces_d.csv")
+dfcom_18_25_ces_d_2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_ces_d.csv")
+dfcom_18_25_ces_d_2$X <- NULL
+
+
+dfcom_18_25_ces_d <- rbind(dfcom_18_25_ces_d_1, dfcom_18_25_ces_d_2)
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # extract CES-D scores
-# CESD_data_clean <- dfc_18_25_cesd[, c(32, 34, 36, 38, 40, 42, 44, 46,48,50,
-#                                  52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 71 )]
-# # Identify non-ID variable columns
-# non_id_cols <- setdiff(names(CESD_data_clean), "Random_ID_new")
-# 
-# # Convert non-ID variables to numeric
-# CESD_data_clean[, non_id_cols] <- lapply(CESD_data_clean[, non_id_cols], as.numeric)
-# 
-# #change numbers to match CES-D scoring system
-# excluded_columns <-  c("Random_ID_new", "Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
-#                        "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
-#                        "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
-#                        "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
-#                   
-# 
-# CESD_data_clean<- CESD_data_clean %>%
-#   mutate(across(-excluded_columns , ~ case_when(
-#     . == 1 ~ 0,
-#     . == 2 ~ 1,
-#     . == 3 ~ 2,
-#     . == 4 ~ 3,
-#     TRUE ~ .
-#   )))
-# 
-# 
-# other_columns <- c("Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
-#                    "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
-#                    "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
-#                    "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
-# CESD_data_clean<- CESD_data_clean %>%
-#   mutate(across(other_columns , ~ case_when(
-#     . == 1 ~ 3,
-#     . == 2 ~ 2,
-#     . == 3 ~ 1,
-#     . == 4 ~ 0,
-#     TRUE ~ .
-#   )))
-# 
-# #scoring----
-# CESD_scores <-  numeric(length(CESD_data_clean$Random_ID_new))
-# CESD_scores <- 0
-# Questions <- c(1:20)
-# 
-# for (i in 1:nrow(CESD_data_clean)) {
-#   CESD_score <- sum(CESD_data_clean[i, Questions])
-#   CESD_scores[i] <- CESD_score
-# }
-# 
-# CESD_data_clean$CESD_score <-  CESD_scores
-# 
-# CESD_data_clean$Depression_Threshold<- 0
-# CESD_data_clean$Depression_status <- "Not_Depressed"
-# 
-# #Assign "1" if they meet Depression threshold 
-# for (i in 1:nrow(CESD_data_clean)) {
-#   if (CESD_data_clean$CESD_score[i] >= 16) {
-#     CESD_data_clean$Depression_Threshold[i] <- 1
-#     CESD_data_clean$Depression_status[i] <- "Depressed"
-#   }
-# }
+CESD_data_clean <- dfcom_18_25_ces_d[, c(32, 34, 36, 38, 40, 42, 44, 46,48,50,
+                                 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 71 )]
+# Identify non-ID variable columns
+non_id_cols <- setdiff(names(CESD_data_clean), "Random_ID_new")
+
+# Convert non-ID variables to numeric
+CESD_data_clean[, non_id_cols] <- lapply(CESD_data_clean[, non_id_cols], as.numeric)
+
+#change numbers to match CES-D scoring system
+excluded_columns <-  c("Random_ID_new", "Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
+                       "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
+                       "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
+                       "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
+
+
+CESD_data_clean<- CESD_data_clean %>%
+  mutate(across(-excluded_columns , ~ case_when(
+    . == 1 ~ 0,
+    . == 2 ~ 1,
+    . == 3 ~ 2,
+    . == 4 ~ 3,
+    TRUE ~ .
+  )))
+
+
+other_columns <- c("Multiple.Choice.Grid.object.3.4...I.felt.I.was.just.as.good.as.other.people..Quantised",
+                   "Multiple.Choice.Grid.object.3.8...I.felt.hopeful.about.the.future..Quantised",
+                   "Multiple.Choice.Grid.object.3.12...I.was.happy..Quantised",
+                   "Multiple.Choice.Grid.object.3.16...I.enjoyed.life..Quantised")
+CESD_data_clean<- CESD_data_clean %>%
+  mutate(across(other_columns , ~ case_when(
+    . == 1 ~ 3,
+    . == 2 ~ 2,
+    . == 3 ~ 1,
+    . == 4 ~ 0,
+    TRUE ~ .
+  )))
+
+#scoring----
+CESD_scores <-  numeric(length(CESD_data_clean$Random_ID_new))
+CESD_scores <- 0
+Questions <- c(1:20)
+
+for (i in 1:nrow(CESD_data_clean)) {
+  CESD_score <- sum(CESD_data_clean[i, Questions])
+  CESD_scores[i] <- CESD_score
+}
+
+CESD_data_clean$CESD_score <-  CESD_scores
+
+CESD_data_clean$Depression_Threshold<- 0
+CESD_data_clean$Depression_status <- "Not_Depressed"
+
+#Assign "1" if they meet Depression threshold
+for (i in 1:nrow(CESD_data_clean)) {
+  if (CESD_data_clean$CESD_score[i] >= 16) {
+    CESD_data_clean$Depression_Threshold[i] <- 1
+    CESD_data_clean$Depression_status[i] <- "Depressed"
+  }
+}
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -267,8 +274,8 @@ final_df_18_25_com <- final_df_18_25_com %>%
 final_df_18_25_com <- final_df_18_25_com %>%
   left_join(dfc_18_25_stress_level %>% dplyr::select(Random_ID_new, Response_stress_level), by = "Random_ID_new")
 
-# final_df_18_25_com <- final_df_18_25_com %>%
-#   left_join(CESD_data_clean %>% dplyr::select(Random_ID_new, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID_new")
+ final_df_18_25_com <- final_df_18_25_com %>%
+   left_join(CESD_data_clean %>% dplyr::select(Random_ID_new, CESD_score, Depression_Threshold, Depression_status), by = "Random_ID_new")
 
 final_df_18_25_com$Social_Anxiety <- ifelse(final_df_18_25_com$mini_SPIN_total >= 6, "high", "low")
 
