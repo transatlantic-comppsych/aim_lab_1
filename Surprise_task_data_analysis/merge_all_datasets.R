@@ -7,7 +7,7 @@ setwd("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondo
 # Define columns to remove
 cols_to_remove <- c( "Score..Separation.Anxiety",   
                     "Score..Generalised.Anxiety", "Score..Obsessive.Compulsive", "Score..Social.Phobia", "Score..Panic.Disorder",
-                   "Depression_Threshold", "Depression_status" )
+                   "Depression_status" )
 
 
 # Function to remove unwanted columns if they exist
@@ -29,12 +29,14 @@ data_26_45_pro <- read.csv("final_df_26_45_Pro_with_stresslevels.csv") %>%
 data_26_45_pro[, c("Depression_score")] <- scale(data_26_45_pro[, c("Depression_score")])
 
 data_14_18 <- read.csv("final_df_students_with_stresslevels.csv") %>%
-  rename(Random_ID = Random_ID_new) %>%
+  mutate(Depression_Threshold = ifelse(Score..Major.Depression >= 15, 1, 0)) 
+
+data_14_18 <- data_14_18 %>%
+rename(Random_ID = Random_ID_new) %>%
   rename(Depression_score = Score..Major.Depression) %>%
   clean_data() %>%
   mutate(Dataset = "14_18")
 data_14_18[, c("Depression_score")] <- scale(data_14_18[, c("Depression_score")])
-
 
 data_18_25_com <- read.csv("final_df_18_25_com_with_stresslevels.csv") %>%
   rename(Random_ID = Random_ID_new) %>%
