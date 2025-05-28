@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-### Fit Hiearchical Bayesian Model for Anxiety in brms 
+### Fit Hiearchical Bayesian Model for Anxiety in brms
 
 ```{r}
 setwd("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis")
@@ -147,7 +147,7 @@ print(fit_stan_pro_18_25)
 
 ### 
 
-Fit Hiearchical Bayesian Model for Mood in brms 
+Fit Hiearchical Bayesian Model for Mood in brms
 
 ```{r}
 
@@ -171,9 +171,12 @@ print(fit_brms_pro_18_25_mood)
 
 # Plot posterior distributions
 plot(fit_brms_pro_18_25_mood)
+
+123
 ```
 
 ### 
+
 Fit Hiearchical Bayesian Model for Mood in stan
 
 ```{r}
