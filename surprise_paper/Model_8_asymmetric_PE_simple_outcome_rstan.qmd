@@ -25,28 +25,8 @@ library(dplyr)
 library(ggplot2)
 
 # Load Data
-data_pilot <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
   
-data <- data_merged
-
-if ("Random_ID_new" %in% names(data)) {
-  names(data)[names(data) == "Random_ID_new"] <- "Random_ID"
-}
-
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
-
 
 # Scale all relevant variables
 data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
@@ -56,6 +36,9 @@ data$Response_Ax <- scale(data$Response_Ax)[, 1]
 # Recalculate positive and negative PEs using original (unscaled) sign
 data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
 data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,
@@ -201,17 +184,6 @@ options(max.print = 9999)  # Set a higher limit
 # Print results
 print(asymmPE_simple_Outcome_anx_fit)
 
-# Recompile the model (you'll need to keep the model code)
-#recompiled_model <- stan_model(model_code = asymmPE_simple_Outcome_anx)
-
-#asymmPE_simple_Outcome_anx_fit@stanmodel <- recompiled_model
-
-#asymmPE_Outcome_mood_fit_info <- list(
- # stanfit = asymmPE_simple_Outcome_anx_fit,
- # stanmodel = asymmPE_simple_Outcome_anx_fit@stanmodel,
-#  data = stan_data
-#)
-
 saveRDS(asymmPE_simple_Outcome_anx_fit, "asymmPE_simple_Outcome_anx_fit.rds")
 ```
 
@@ -333,27 +305,7 @@ library(dplyr)
 library(ggplot2)
 
 # Load Data
-data_pilot <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
-  
-data <- data_merged
-
-if ("Random_ID_new" %in% names(data)) {
-  names(data)[names(data) == "Random_ID_new"] <- "Random_ID"
-}
-
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
 
 
 # Scale all relevant variables
@@ -364,6 +316,9 @@ data$Response_H <- scale(data$Response_H)[, 1]
 # Recalculate positive and negative PEs using original (unscaled) sign
 data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
 data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+  
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,
@@ -508,17 +463,6 @@ options(max.print = 9999)  # Set a higher limit
 # Print results
 print(asymmPE_simple_Outcome_mood_fit)
 
-# Recompile the model (you'll need to keep the model code)
-#recompiled_model <- stan_model(model_code = asymmPE_simple_Outcome_mood)
-
-#asymmPE_simple_Outcome_mood_fit@stanmodel <- recompiled_model
-
-#asymmPE_Outcome_mood_fit_info <- list(
- # stanfit = asymmPE_simple_Outcome_mood_fit,
- # stanmodel = asymmPE_simple_Outcome_mood_fit@stanmodel,
-#  data = stan_data
-#)
-
 saveRDS(asymmPE_simple_Outcome_mood_fit, "asymmPE_simple_Outcome_mood_fit.rds")
 ```
 
@@ -630,61 +574,4 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
-```
-
-```{r}
-#LME TO SENSE CHECK
-
-model <- lmerTest::lmer(Response_H ~ Response_PosPE+Response_NegPE+Response_fdbk + (1+Response_PosPE+Response_NegPE+Response_fdbk |Random_ID), data = data)
-summary(model)
-```
-
-```{r}
-# Load necessary libraries
-library(dplyr)
-library(purrr)
-library(brms)
-library(ggplot2)
-library(Metrics)
-#This combination of gamma values were the best fitted
-gamma <- 0.94
-
-
-data$weighted_cumulative_PE_pos <- numeric(nrow(data))
-data$weighted_cumulative_PE_neg <- numeric(nrow(data))
-data$weighted_cumulative_fdbk <- numeric(nrow(data))
-
-
-for (id in unique(data$Random_ID)) {
-  # Extract the subset of data for the current participant
-  subset_data <- data[data$Random_ID == id, ]
-  
-  # Loop over each trial for the current participant
-  for (t in 1:nrow(subset_data)) {
-    W1 <- 0
-    W2 <- 0
-    W3 <- 0
-    for (j in 1:t) {
-      W1 <- W1 + subset_data$Response_PosPE[j] * gamma ^(t - j)
-          W2 <- W2 + subset_data$Response_NegPE[j] * gamma ^(t - j)
-                    W3 <- W3 + subset_data$Response_fdbk[j] * gamma ^(t - j)
-
-    }
-# Ensure the indices match
-    trial_number <- subset_data$Trial.Number[t]
-    row_index <- which(data$Random_ID == id & data$Trial.Number == trial_number)
-    
-    if (length(row_index) == 1) {
-      data$weighted_cumulative_PE_pos[row_index] <- W1
-      data$weighted_cumulative_PE_neg[row_index] <- W2
-      data$weighted_cumulative_fdbk[row_index] <- W3
-
-    }
-  }
-}
-
-
-
-model <- lmerTest::lmer(Response_H ~ weighted_cumulative_PE_pos+weighted_cumulative_PE_neg+Response_fdbk + (1+weighted_cumulative_PE_pos+weighted_cumulative_PE_neg+Response_fdbk |Random_ID), data = data)
-summary(model)
 ```

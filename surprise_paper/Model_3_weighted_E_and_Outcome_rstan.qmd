@@ -24,21 +24,9 @@ library(rstan)
 library(dplyr)
 library(ggplot2)
 
-data_pilot <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+#Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
   
-data <- data_merged
-
-
 data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax")] <- scale(data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax")])
 
 N <- length(unique(data$Random_ID))  # Number of participants
@@ -98,14 +86,14 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(50, 10);
-  w1_mu  ~ normal(0, 1.0);
-  w2_mu  ~ normal(0, 1.0);
-  gam_mu ~ normal(0, 1.0);
-  sig_mu ~ normal(0, 1.0);
+  intercept  ~ normal(0, 1);
+  w1_mu  ~ normal(0, 0.5);
+  w2_mu  ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
   
-  sigma_w0 ~ normal(0, 10);
-  sigma ~ normal(0, 0.2);
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
 
   // Individual parameters 
   w0_pr  ~ normal(0, 1.0);
@@ -181,7 +169,7 @@ options(max.print = 99999)
 print(weighted_exp_outcome_anx_fit)
 
 # Save the model output as an .rds file
-#saveRDS(weighted_exp_outcome_anx_fit, file = "weighted_exp_outcome_anx_fit.rds")
+saveRDS(weighted_exp_outcome_anx_fit, file = "weighted_exp_outcome_anx_fit.rds")
 
 
 
@@ -379,24 +367,10 @@ library(rstan)
 library(dplyr)
 library(ggplot2)
 
-# Load Data
-#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+#Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
   
-data <- data_merged
-
-
-data[, c("Response_pred", "Response_SubjPE", "Response_H")] <- scale(data[, c("Response_pred", "Response_SubjPE", "Response_H")])
+data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax")] <- scale(data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax")])
 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -540,7 +514,6 @@ print(weighted_exp_outcome_mood_fit)
 
 # Save the model output as an .rds file
 saveRDS(weighted_exp_outcome_mood_fit, file = "weighted_exp_outcome_mood_fit.rds")
-##weighted_exp_outcome_mood_fit <- readRDS("weighted_exp_outcome_mood_fit.rds")
 ```
 
 ```{r}
@@ -656,80 +629,5 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 # Now plot
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
-
-```
-
-```{r}
-
-library(rstan)
-library(tidyverse)
-
-# Extract posterior samples
-posterior_draws <- rstan::extract(weighted_exp_outcome_mood_fit)
-
-# Subject info
-subject_ids <- unique(data$Random_ID)
-subject_info <- data %>%
-  group_by(Random_ID) %>%
-  summarise(Social_Anxiety = first(Social_Anxiety)) %>%
-  ungroup()
-
-# Function to process one parameter
-process_param <- function(param_matrix, param_name) {
-  df <- as.data.frame(param_matrix)
-  colnames(df) <- subject_ids
-  df$draw <- 1:nrow(df)
-  
-  df_long <- df %>%
-    pivot_longer(-draw, names_to = "Random_ID", values_to = "value") %>%
-    left_join(subject_info, by = "Random_ID") %>%
-    mutate(param = param_name)
-  
-  return(df_long)
-}
-
-# Process each parameter
-param_list <- list(
-  process_param(posterior_draws$w0, "w0"),
-  process_param(posterior_draws$w1, "w1"),
-  process_param(posterior_draws$w2, "w2"),
-  process_param(posterior_draws$gam, "gam"),
-  process_param(posterior_draws$sig, "sig")
-)
-
-# Combine all into one data frame
-all_params_long <- bind_rows(param_list)
-
-# Plot distributions for each parameter
-ggplot(all_params_long, aes(x = value, fill = Social_Anxiety)) +
-  geom_density(alpha = 0.5) +
-  facet_wrap(~param, scales = "free", ncol = 2) +
-  theme_minimal() +
-  labs(
-    title = "Posterior Distributions of Parameters by Social Anxiety",
-    x = "Parameter Value",
-    y = "Density"
-  ) +
-  theme(legend.position = "top")
-
-
-# Calculate differences between groups for each parameter
-param_diff_summary <- all_params_long %>%
-  group_by(param, draw) %>%
-  summarise(
-    diff = mean(value[Social_Anxiety == "high"]) - mean(value[Social_Anxiety == "low"]),
-    .groups = "drop"
-  ) %>%
-  group_by(param) %>%
-  summarise(
-    diff_mean = mean(diff),
-    diff_lower = quantile(diff, 0.025),
-    diff_upper = quantile(diff, 0.975),
-    # Check if zero is in the 95% credible interval
-    significant = ifelse(diff_lower > 0 | diff_upper < 0, TRUE, FALSE),
-    .groups = "drop"
-  )
-
-print(param_diff_summary)
 
 ```

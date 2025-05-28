@@ -25,21 +25,9 @@ library(dplyr)
 library(ggplot2)
 
 # Load Data
-#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
-  
-data <- data_merged
-#data[, c("Response_pred", "Response_SubjPE", "Response_Ax")] <- scale(data[, c("Response_pred", "Response_SubjPE", "Response_Ax")])
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+ 
+data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax", "Response_SubjPE")] <- scale(data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax", "Response_SubjPE")])
 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -98,14 +86,14 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(50, 10);
-  w1_mu  ~ normal(0, 1.0);
-  w2_mu  ~ normal(0, 1.0);
-  gam_mu ~ normal(0, 1.0);
-  sig_mu ~ normal(0, 1.0);
+   intercept  ~ normal(0, 1);
+  w1_mu  ~ normal(0, 0.5);
+  w2_mu  ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
   
-  sigma_w0 ~ normal(0, 10);
-  sigma ~ normal(0, 0.2);
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
 
   // Individual parameters 
   w0_pr  ~ normal(0, 1.0);
@@ -181,7 +169,7 @@ print(weighted_exp_PE_anx_fit)
 
 
 # Save the model output as an .rds file
-#saveRDS(weighted_exp_PE_anx_fit, file = "weighted_exp_PE_anx_fit.rds")
+saveRDS(weighted_exp_PE_anx_fit, file = "weighted_exp_PE_anx_fit.rds")
 ```
 
 ```{r}
@@ -282,21 +270,10 @@ library(rstan)
 library(dplyr)
 library(ggplot2)
 
-# Load Data#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
-data_18_25_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_Pro_with_stresslevels.csv")
-
-data_26_45_pro <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_26_45_Pro_with_stresslevels.csv")
-
-data_14_18 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_students_with_stresslevels.csv")
-
-data_18_25_com <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/final_df_18_25_com_with_stresslevels.csv")
-
-
-data_merged <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
-  
-data <- data_merged
-#data[, c("Response_pred", "Response_SubjPE", "Response_H")] <- scale(data[, c("Response_pred", "Response_SubjPE", "Response_H")])
+# Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+ 
+data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax", "Response_SubjPE")] <- scale(data[, c("Response_fdbk", "Response_pred", "Response_H", "Response_Ax", "Response_SubjPE")])
 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -355,14 +332,14 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(50, 10);
-  w1_mu  ~ normal(0, 1.0);
-  w2_mu  ~ normal(0, 1.0);
-  gam_mu ~ normal(0, 1.0);
-  sig_mu ~ normal(0, 1.0);
+   intercept  ~ normal(0, 1);
+  w1_mu  ~ normal(0, 0.5);
+  w2_mu  ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
   
-  sigma_w0 ~ normal(0, 10);
-  sigma ~ normal(0, 0.2);
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
 
   // Individual parameters 
   w0_pr  ~ normal(0, 1.0);
@@ -440,7 +417,7 @@ print(weighted_exp_PE_mood_fit)
 
 
 # Save the model output as an .rds file
-#saveRDS(weighted_exp_PE_mood_fit, file = "weighted_exp_PE_mood_fit.rds")
+saveRDS(weighted_exp_PE_mood_fit, file = "weighted_exp_PE_mood_fit.rds")
 ```
 
 ```{r}
