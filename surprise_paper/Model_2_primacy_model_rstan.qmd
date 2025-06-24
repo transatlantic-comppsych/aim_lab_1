@@ -25,6 +25,8 @@ E_t = \frac{1}{t-1} \sum_{i=1}^{t -1} A_i
 $$
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -123,7 +125,7 @@ data {
 }
  model {
    // group-level priors
- intercept  ~ normal(0, 1);
+ intercept  ~ normal(0, 0.5);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);
@@ -309,6 +311,8 @@ ggplot(plot_data, aes(x = Trial)) +
 ```
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Mood ########################################
 library(rstan)
 library(dplyr)
@@ -408,7 +412,7 @@ data {
 }
  model {
    // group-level priors
-  intercept  ~ normal(0, 1);
+  intercept  ~ normal(0, 0.5);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);

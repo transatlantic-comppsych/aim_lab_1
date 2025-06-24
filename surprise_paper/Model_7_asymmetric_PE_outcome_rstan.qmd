@@ -19,7 +19,6 @@ M_t = \beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \
 $$
 
 ```{r}
-
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -28,7 +27,6 @@ library(ggplot2)
 # Load Data
 data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
   
-data <- data_merged
 
 # Scale all relevant variables
 data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
@@ -197,6 +195,7 @@ readRDS("asymmPE_Outcome_anx_fit.rds")
 ```
 
 ```{r}
+
 ########################################## For Mood ########################################
 library(rstan)
 library(dplyr)

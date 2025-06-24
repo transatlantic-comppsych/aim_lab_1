@@ -183,7 +183,7 @@ recency_anx_fit <- stan(model_code = recency_anx, data = stan_data, iter = 4000,
 print(recency_anx_fit)
 
 # Save the model output as an .rds file
-saveRDS(recency_anx_fit, file = "recency_anx_fit_test.rds")
+saveRDS(recency_anx_fit, file = "recency_anx_fit.rds")
 ```
 
 ```{r}

@@ -19,6 +19,7 @@ M_t = \beta_0 + \beta_1 \cdot \sum_{j=1}^{t} \gamma^{t - j} \cdot Ee_j + \beta_2
 $$
 
 ```{r}
+
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)

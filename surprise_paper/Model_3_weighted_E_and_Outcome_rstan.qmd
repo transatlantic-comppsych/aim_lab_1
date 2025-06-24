@@ -19,6 +19,8 @@ M_t = \beta_0 + \beta_1 \cdot \sum_{j=1}^{t} \gamma^{t - j} \cdot Ee_j + \beta_2
 $$
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -86,7 +88,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(0, 1);
+  intercept  ~ normal(0, 0.5);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);
@@ -362,6 +364,8 @@ print(param_diff_summary)
 ```
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Mood ########################################
 library(rstan)
 library(dplyr)
@@ -429,7 +433,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(0, 1);
+  intercept  ~ normal(0, 0.5);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);
