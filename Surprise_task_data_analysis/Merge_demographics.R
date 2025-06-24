@@ -139,10 +139,13 @@ columns_to_keep <- c(
   "Sex",
   "Gender",
   "Gender_other",
+  "Ethnicity",
+  "ethnicity_other",
   "Mental_health_diagnosis",
   "Depression",
   "Anxiety",
   "ADHD",
+  "ASD", 
   "Other_diagnoses",
   "medication_status",
   "fluoxetine",
@@ -152,8 +155,6 @@ columns_to_keep <- c(
   "ritalin",
   "ritalin_dose",
   "other_medication",
-  "ethnicity_other",
-  "ASD", 
   "dataset"
 )
 
@@ -166,4 +167,4 @@ merged_demo<- rbind(
   subset(local_com_demo, select = columns_to_keep) 
   )
 
-write_csv(merged_demo, "merged_data_demographics.csv")
+write.csv(merged_demo, "merged_data_demographics.csv")
