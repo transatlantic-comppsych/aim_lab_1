@@ -40,7 +40,7 @@ data_18_25_pro <- read.csv("final_df_18_25_Pro_with_stresslevels.csv") %>%
   clean_data() %>%
   rename(Depression_score = CESD_score) %>%
   mutate(Dataset = "18_25_Pro")
-#data_18_25_pro[, c("Depression_score")] <- scale(data_18_25_pro[, c("Depression_score")])
+data_18_25_pro[, c("Depression_score")] <- scale(data_18_25_pro[, c("Depression_score")])
 
 data_18_25_pro_lsas <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_lsas_sr.csv")
 # Generate a sequence of every other column from 30 to 124
@@ -58,7 +58,7 @@ data_26_45_pro <- read.csv("final_df_26_45_Pro_with_stresslevels.csv") %>%
   clean_data() %>%
   rename(Depression_score = CESD_score) %>%
   mutate(Dataset = "26_45_Pro")
-#data_26_45_pro[, c("Depression_score")] <- scale(data_26_45_pro[, c("Depression_score")])
+data_26_45_pro[, c("Depression_score")] <- scale(data_26_45_pro[, c("Depression_score")])
 
 data_26_45_pro_lsas <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_lsas_sr.csv")
 # Generate a sequence of every other column from 30 to 124
@@ -79,7 +79,7 @@ rename(Random_ID = Random_ID_new) %>%
   rename(Depression_score = Score..Major.Depression) %>%
   clean_data() %>%
   mutate(Dataset = "14_18")
-#data_14_18[, c("Depression_score")] <- scale(data_14_18[, c("Depression_score")])
+data_14_18[, c("Depression_score")] <- scale(data_14_18[, c("Depression_score")])
 data_14_18_lsas_v7 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_schools/surprise_study_schools_v7/SUP_SCH_v7_lsas_ca.csv")
 data_14_18_lsas_v9 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_schools/surprise_study_schools_v9/SUP_SCH_v9_lsas_ca.csv")
 data_14_18_lsas_v9 <- data_14_18_lsas_v9[, !(names(data_14_18_lsas_v9) %in% "Participant.External.Session.ID")]
@@ -102,7 +102,7 @@ data_18_25_com <- read.csv("final_df_18_25_com_with_stresslevels.csv") %>%
   rename(Depression_score = CESD_score) %>%
   clean_data() %>%
   mutate(Dataset = "18_25_Com")
-#data_18_25_com[, c("Depression_score")] <- scale(data_18_25_com[, c("Depression_score")])
+data_18_25_com[, c("Depression_score")] <- scale(data_18_25_com[, c("Depression_score")])
 data_18_25_com_lsas_v1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_lsas_sr.csv")
 data_18_25_com_lsas_v2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_lsas_sr.csv")
 data_18_25_com_lsas_v2 <- data_18_25_com_lsas_v2[, !(names(data_18_25_com_lsas_v2) %in% "X")]
@@ -233,4 +233,19 @@ merged_data_w_demographics <- merged_data_w_demographics %>%
     )
   )
 
+merged_data_w_demographics <- merged_data_w_demographics[, !(names(merged_data_w_demographics) %in% "Dataset")]
+merged_data <- merged_data[, !(names(merged_data) %in% "Depression_Threshold")]
 
+library(dplyr)
+
+# Extract participant-level data: one row per Random_ID with Depression_Threshold
+participant_level <- merged_data_w_demographics %>%
+  select(Random_ID, Depression_Threshold) %>%
+  distinct(Random_ID, .keep_all = TRUE)
+
+# Merge participant-level data onto the trial-level dataset
+merged_data <- merged_data %>%
+  left_join(participant_level, by = "Random_ID")
+
+write.csv(merged_data_w_demographics, "merged_data_w_demographics.csv")
+write.csv(merged_data, "surprise_task_merged_data.csv")
