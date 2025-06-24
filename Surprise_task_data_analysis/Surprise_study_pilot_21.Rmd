@@ -40,13 +40,13 @@ The task is the following: https://app.gorilla.sc/admin/task/799523/editor
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # v3 and v4 have exactly the same task version, but BIQ was causing a problem due to a Gorilla update and it was changed in version 4
-df21_raw_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
-df21_spin_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
-df21_cesd_part1 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
+df21_raw_part1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_task_main.csv")
+df21_spin_part1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_mini_spin.csv")
+df21_cesd_part1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_ces_d.csv")
 
-df21_raw_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
-df21_spin_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
-df21_cesd_part2 <- read.csv("C:/Users/Elena/OneDrive - University College London/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
+df21_raw_part2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_task_main.csv")
+df21_spin_part2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_mini_spin.csv")
+df21_cesd_part2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_ces_d.csv")
 
 df21_raw <- rbind(df21_raw_part1, df21_raw_part2)
 df21_spin <- rbind(df21_spin_part1, df21_spin_part2)
