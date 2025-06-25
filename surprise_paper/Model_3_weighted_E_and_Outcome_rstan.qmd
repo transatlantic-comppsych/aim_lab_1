@@ -88,7 +88,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(0, 0.5);
+  intercept  ~ normal(0, 1);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);
@@ -172,8 +172,6 @@ print(weighted_exp_outcome_anx_fit)
 
 # Save the model output as an .rds file
 saveRDS(weighted_exp_outcome_anx_fit, file = "weighted_exp_outcome_anx_fit.rds")
-
-
 
 ```
 
@@ -364,7 +362,6 @@ print(param_diff_summary)
 ```
 
 ```{r}
-rm(list = ls())
 
 ########################################## For Mood ########################################
 library(rstan)
@@ -433,7 +430,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[4] * sig_pr);
 }
 model {
-  intercept  ~ normal(0, 0.5);
+  intercept  ~ normal(0, 1);
   w1_mu  ~ normal(0, 0.5);
   w2_mu  ~ normal(0, 0.5);
   gam_mu ~ normal(0, 0.5);

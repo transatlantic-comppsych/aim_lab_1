@@ -100,7 +100,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[5] * sig_pr);
 }
 model {
-  intercept ~ normal(0, 1);
+  intercept ~ normal(0, 0.5);
   w1_mu ~ normal(0, 0.5);
   w_pos_mu ~ normal(0, 0.5);
   w_neg_mu ~ normal(0, 0.5);
@@ -419,7 +419,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[5] * sig_pr);
 }
 model {
-  intercept ~ normal(0, 1);
+  intercept ~ normal(0, 0.5);
   w1_mu ~ normal(0, 0.5);
   w_pos_mu ~ normal(0, 0.5);
   w_neg_mu ~ normal(0, 0.5);

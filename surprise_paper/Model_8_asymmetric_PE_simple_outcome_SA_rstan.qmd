@@ -28,8 +28,11 @@ library(ggplot2)
 data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
 
 
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
 
-# Scale all relevant variables
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
 data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
 data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
 data$Response_Ax <- scale(data$Response_Ax)[, 1]
@@ -38,7 +41,17 @@ data$mini_SPIN_total <- scale(data$mini_SPIN_total)[, 1]
 # Recalculate positive and negative PEs using original (unscaled) sign
 data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
 data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
-Social_Anxiety_vector <- tapply(data$mini_SPIN_total, data$Random_ID, function(x) unique(x)[1])
+
+# Recalculate LSAS vector in the correct order
+Social_Anxiety_vector <- sapply(participant_ids, function(id) {
+  unique(data$mini_SPIN_total[data$Random_ID == id])[1]
+})
+
+# Construct matrices in the same participant order
+Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
+Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
+Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -47,13 +60,14 @@ stan_data <- list(
   N = N,
   T = T,
   Tsubj = rep(48, N),
-  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE),
-  Response_Ax = matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE),
-  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
-  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE),
-  Social_Anxiety = as.vector(Social_Anxiety_vector)  # vector of length N
+  Response_fdbk = Response_fdbk_matrix,
+  Response_Ax = Response_Ax_matrix,
+  Response_PosPE = Response_PosPE_matrix,
+  Response_NegPE = Response_NegPE_matrix,
+  Social_Anxiety = Social_Anxiety_vector
 
 )
+
 
 
 
@@ -540,7 +554,11 @@ data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityC
 
 
 
-# Scale all relevant variables
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
 data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
 data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
 data$Response_H <- scale(data$Response_H)[, 1]
@@ -549,7 +567,17 @@ data$mini_SPIN_total <- scale(data$mini_SPIN_total)[, 1]
 # Recalculate positive and negative PEs using original (unscaled) sign
 data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
 data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
-Social_Anxiety_vector <- tapply(data$mini_SPIN_total, data$Random_ID, function(x) unique(x)[1])
+
+# Recalculate LSAS vector in the correct order
+Social_Anxiety_vector <- sapply(participant_ids, function(id) {
+  unique(data$mini_SPIN_total[data$Random_ID == id])[1]
+})
+
+# Construct matrices in the same participant order
+Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
+Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
+Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -558,13 +586,14 @@ stan_data <- list(
   N = N,
   T = T,
   Tsubj = rep(48, N),
-  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE),
-  Response_H = matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE),
-  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
-  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE),
-  Social_Anxiety = as.vector(Social_Anxiety_vector)  # vector of length N
+  Response_fdbk = Response_fdbk_matrix,
+  Response_H = Response_H_matrix,
+  Response_PosPE = Response_PosPE_matrix,
+  Response_NegPE = Response_NegPE_matrix,
+  Social_Anxiety = Social_Anxiety_vector
 
 )
+
 
 
 

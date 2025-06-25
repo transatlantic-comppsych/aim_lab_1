@@ -19,6 +19,8 @@ M_t = \beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \
 $$
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -101,7 +103,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[5] * sig_pr);
 }
 model {
-  intercept ~ normal(0, 1);
+  intercept ~ normal(0, 0.5);
   w1_mu ~ normal(0, 0.5);
   w_pos_mu ~ normal(0, 0.5);
   w_neg_mu ~ normal(0, 0.5);
@@ -195,6 +197,7 @@ readRDS("asymmPE_Outcome_anx_fit.rds")
 ```
 
 ```{r}
+rm(list = ls())
 
 ########################################## For Mood ########################################
 library(rstan)
@@ -276,7 +279,7 @@ transformed parameters {
   sig = exp(sig_mu + sigma[5] * sig_pr);
 }
 model {
-  intercept ~ normal(0, 1);
+  intercept ~ normal(0, 0.5);
   w1_mu ~ normal(0, 0.5);
   w_pos_mu ~ normal(0, 0.5);
   w_neg_mu ~ normal(0, 0.5);
