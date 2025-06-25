@@ -20,7 +20,7 @@ data_pilot21 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-Uni
   clean_data() %>%
   rename(Depression_score = CESD_score) %>%
   mutate(Dataset = "Pilot_21")
-#data_pilot21[, c("Depression_score")] <- scale(data_pilot21[, c("Depression_score")])
+data_pilot21$Depression_score_scaled <- scale(data_pilot21[, c("Depression_score")])
 
 data_pilot_21_lsas_v3 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3/SUP_PRF_p21_vid_bigPE_nohist_newjud_v3_lsas_sr.csv")
 data_pilot_21_lsas_v4 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_pilot_21/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4/SUP_PRF_p21_vid_bigPE_nohist_newjud_v4_lsas_sr.csv")
@@ -30,8 +30,13 @@ cols_to_sum <- seq(31, 125, by = 2)
 # Compute the row-wise sum across those columns
 data_pilot_21_lsas$LSAS_Total <- rowSums(data_pilot_21_lsas[, cols_to_sum], na.rm = TRUE)
 data_pilot_21_lsas$SA_status_LSAS <- ifelse(data_pilot_21_lsas$LSAS_Total > 29, "SA", "no_SA")
+cols_to_sum_anxiety <- seq(31, 123, by = 4)
+cols_to_sum_avoidance <- seq(33, 125, by = 4)
+data_pilot_21_lsas$LSAS_Anxiety_score <- rowSums(data_pilot_21_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
+data_pilot_21_lsas$LSAS_Avoidance_score <- rowSums(data_pilot_21_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+
 # Merge only the needed columns from df into df2 by Random_ID
-data_pilot21 <- merge(data_pilot21, data_pilot_21_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS")], 
+data_pilot21 <- merge(data_pilot21, data_pilot_21_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS", "LSAS_Anxiety_score", "LSAS_Avoidance_score")], 
              by = "Random_ID", 
              all.x = TRUE)
 
@@ -40,7 +45,7 @@ data_18_25_pro <- read.csv("final_df_18_25_Pro_with_stresslevels.csv") %>%
   clean_data() %>%
   rename(Depression_score = CESD_score) %>%
   mutate(Dataset = "18_25_Pro")
-data_18_25_pro[, c("Depression_score")] <- scale(data_18_25_pro[, c("Depression_score")])
+data_18_25_pro$Depression_score_scaled <- scale(data_18_25_pro[, c("Depression_score")])
 
 data_18_25_pro_lsas <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_18-25/SUP_PRF_18-25_lsas_sr.csv")
 # Generate a sequence of every other column from 30 to 124
@@ -48,8 +53,13 @@ cols_to_sum <- seq(30, 124, by = 2)
 # Compute the row-wise sum across those columns
 data_18_25_pro_lsas$LSAS_Total <- rowSums(data_18_25_pro_lsas[, cols_to_sum], na.rm = TRUE)
 data_18_25_pro_lsas$SA_status_LSAS <- ifelse(data_18_25_pro_lsas$LSAS_Total > 29, "SA", "no_SA")
+cols_to_sum_anxiety <- seq(30, 122, by = 4)
+cols_to_sum_avoidance <- seq(32, 124, by = 4)
+data_18_25_pro_lsas$LSAS_Anxiety_score <- rowSums(data_18_25_pro_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
+data_18_25_pro_lsas$LSAS_Avoidance_score <- rowSums(data_18_25_pro_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+
 # Merge only the needed columns from df into df2 by Random_ID
-data_18_25_pro <- merge(data_18_25_pro, data_18_25_pro_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS")], 
+data_18_25_pro <- merge(data_18_25_pro, data_18_25_pro_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS", "LSAS_Anxiety_score", "LSAS_Avoidance_score")], 
                       by = "Random_ID", 
                       all.x = TRUE)
 
@@ -58,7 +68,7 @@ data_26_45_pro <- read.csv("final_df_26_45_Pro_with_stresslevels.csv") %>%
   clean_data() %>%
   rename(Depression_score = CESD_score) %>%
   mutate(Dataset = "26_45_Pro")
-data_26_45_pro[, c("Depression_score")] <- scale(data_26_45_pro[, c("Depression_score")])
+data_26_45_pro$Depression_score_scaled <- scale(data_26_45_pro[, c("Depression_score")])
 
 data_26_45_pro_lsas <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_prolific_26-45/SUP_PRF_26-45_lsas_sr.csv")
 # Generate a sequence of every other column from 30 to 124
@@ -66,8 +76,13 @@ cols_to_sum <- seq(30, 124, by = 2)
 # Compute the row-wise sum across those columns
 data_26_45_pro_lsas$LSAS_Total <- rowSums(data_26_45_pro_lsas[, cols_to_sum], na.rm = TRUE)
 data_26_45_pro_lsas$SA_status_LSAS <- ifelse(data_26_45_pro_lsas$LSAS_Total > 29, "SA", "no_SA")
+cols_to_sum_anxiety <- seq(30, 122, by = 4)
+cols_to_sum_avoidance <- seq(32, 124, by = 4)
+data_26_45_pro_lsas$LSAS_Anxiety_score <- rowSums(data_26_45_pro_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
+data_26_45_pro_lsas$LSAS_Avoidance_score <- rowSums(data_26_45_pro_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+
 # Merge only the needed columns from df into df2 by Random_ID
-data_26_45_pro <- merge(data_26_45_pro, data_26_45_pro_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS")], 
+data_26_45_pro <- merge(data_26_45_pro, data_26_45_pro_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS", "LSAS_Anxiety_score", "LSAS_Avoidance_score")], 
                         by = "Random_ID", 
                         all.x = TRUE)
 
@@ -79,7 +94,7 @@ rename(Random_ID = Random_ID_new) %>%
   rename(Depression_score = Score..Major.Depression) %>%
   clean_data() %>%
   mutate(Dataset = "14_18")
-data_14_18[, c("Depression_score")] <- scale(data_14_18[, c("Depression_score")])
+data_14_18$Depression_score_scaled <- scale(data_14_18[, c("Depression_score")])
 data_14_18_lsas_v7 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_schools/surprise_study_schools_v7/SUP_SCH_v7_lsas_ca.csv")
 data_14_18_lsas_v9 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_schools/surprise_study_schools_v9/SUP_SCH_v9_lsas_ca.csv")
 data_14_18_lsas_v9 <- data_14_18_lsas_v9[, !(names(data_14_18_lsas_v9) %in% "Participant.External.Session.ID")]
@@ -91,8 +106,13 @@ cols_to_sum <- seq(32, 126, by = 2)
 # Compute the row-wise sum across those columns
 data_14_18_lsas$LSAS_Total <- rowSums(data_14_18_lsas[, cols_to_sum] - 1, na.rm = TRUE) #subtracted 1 from all columns bc they were coded differently
 data_14_18_lsas$SA_status_LSAS <- ifelse(data_14_18_lsas$LSAS_Total > 29.5, "SA", "no_SA")
+cols_to_sum_anxiety <- seq(32, 124, by = 4)
+cols_to_sum_avoidance <- seq(34, 126, by = 4)
+data_14_18_lsas$LSAS_Anxiety_score <- rowSums(data_14_18_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
+data_14_18_lsas$LSAS_Avoidance_score <- rowSums(data_14_18_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+
 # Merge only the needed columns from df into df2 by Random_ID
-data_14_18 <- merge(data_14_18, data_14_18_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS")], 
+data_14_18 <- merge(data_14_18, data_14_18_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS", "LSAS_Anxiety_score","LSAS_Avoidance_score" )], 
                         by = "Random_ID", 
                         all.x = TRUE)
 
@@ -102,7 +122,7 @@ data_18_25_com <- read.csv("final_df_18_25_com_with_stresslevels.csv") %>%
   rename(Depression_score = CESD_score) %>%
   clean_data() %>%
   mutate(Dataset = "18_25_Com")
-data_18_25_com[, c("Depression_score")] <- scale(data_18_25_com[, c("Depression_score")])
+data_18_25_com$Depression_score_scaled <- scale(data_18_25_com[, c("Depression_score")])
 data_18_25_com_lsas_v1 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_1/SUP_COM_18-25_v1_lsas_sr.csv")
 data_18_25_com_lsas_v2 <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/De_identified_data/surprise_study_community_2/SUP_COM_18-25_v2_lsas_sr.csv")
 data_18_25_com_lsas_v2 <- data_18_25_com_lsas_v2[, !(names(data_18_25_com_lsas_v2) %in% "X")]
@@ -114,8 +134,13 @@ cols_to_sum <- seq(31, 125, by = 2)
 # Compute the row-wise sum across those columns
 data_18_25_com_lsas$LSAS_Total <- rowSums(data_18_25_com_lsas[, cols_to_sum], na.rm = TRUE)
 data_18_25_com_lsas$SA_status_LSAS <- ifelse(data_18_25_com_lsas$LSAS_Total > 29, "SA", "no_SA")
+cols_to_sum_anxiety <- seq(31, 123, by = 4)
+cols_to_sum_avoidance <- seq(33, 125, by = 4)
+data_18_25_com_lsas$LSAS_Anxiety_score <- rowSums(data_18_25_com_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
+data_18_25_com_lsas$LSAS_Avoidance_score <- rowSums(data_18_25_com_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+
 # Merge only the needed columns from df into df2 by Random_ID
-data_18_25_com <- merge(data_18_25_com, data_18_25_com_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS")], 
+data_18_25_com <- merge(data_18_25_com, data_18_25_com_lsas[, c("Random_ID", "LSAS_Total", "SA_status_LSAS", "LSAS_Anxiety_score","LSAS_Avoidance_score")], 
                       by = "Random_ID", 
                       all.x = TRUE)
 
@@ -163,7 +188,7 @@ merged_data <- merged_data[, !(names(merged_data) %in% "X")]
 
 
 # Add demographics  -------------------------------------------------------
-merged_demo <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollxegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
+merged_demo <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
 #merged_task_data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
 merged_task_data <- merged_data
 
@@ -247,5 +272,5 @@ participant_level <- merged_data_w_demographics %>%
 merged_data <- merged_data %>%
   left_join(participant_level, by = "Random_ID")
 
-write.csv(merged_data_w_demographics, "merged_data_w_demographics.csv")
-write.csv(merged_data, "surprise_task_merged_data.csv")
+#write.csv(merged_data_w_demographics, "merged_data_w_demographics.csv")
+#write.csv(merged_data, "surprise_task_merged_data.csv")
