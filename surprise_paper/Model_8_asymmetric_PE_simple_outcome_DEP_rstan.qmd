@@ -19,6 +19,7 @@ M_t =\beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \b
 $$
 
 ```{r}
+rm(list = ls())
 
 ########################################## For Anxiety ########################################
 library(rstan)
@@ -44,9 +45,13 @@ data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_sca
 
 # Recalculate depression vector in the correct order
 Depression_vector <- sapply(participant_ids, function(id) {
-  unique(data$Depression_score[data$Random_ID == id])[1]
+  unique(data$Depression_score_scaled[data$Random_ID == id])[1]
 })
 
+
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
 # Construct matrices in the same participant order
 Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
 Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
@@ -54,9 +59,6 @@ Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow =
 Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
 
 
-
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,
@@ -228,7 +230,7 @@ saveRDS(asymmPE_simple_Outcome_anx_DEP_fit, "asymmPE_simple_Outcome_anx_DEP_fit.
 ```
 
 ```{r}
-
+asymmPE_simple_Outcome_anx_DEP_fit <- readRDS("asymmPE_simple_Outcome_anx_DEP_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_anx_DEP_fit)
 
@@ -345,7 +347,7 @@ posterior <- rstan::extract(asymmPE_simple_Outcome_anx_DEP_fit)
 Dep_info <- data %>%
   group_by(Random_ID) %>%
   summarise(    
-    Dep = first(Depression_score),
+    Dep = first(Depression_score_scaled),
     Dep_Threshold = first(Depression_Threshold)
   ) %>%
   arrange(Random_ID)
@@ -549,6 +551,7 @@ print(corr_results)
 ```
 
 ```{r}
+rm(list = ls())
 
 ########################################## For Mood ########################################
 library(rstan)
@@ -576,8 +579,13 @@ data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_sca
 
 # Recalculate depression vector in the correct order
 Depression_vector <- sapply(participant_ids, function(id) {
-  unique(data$Depression_score[data$Random_ID == id])[1]
+  unique(data$Depression_score_scaled[data$Random_ID == id])[1]
 })
+
+
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
 
 # Construct matrices in the same participant order
 Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
@@ -585,10 +593,6 @@ Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
 Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
 Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
 
-
-
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,
@@ -867,12 +871,12 @@ ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 ```
 
 ```{r}
-
+asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("asymmPE_simple_Outcome_mood_DEP_fit.rds")
 posterior <- rstan::extract(asymmPE_simple_Outcome_mood_DEP_fit)
 Dep_info <- data %>%
   group_by(Random_ID) %>%
   summarise(    
-    Dep = first(Depression_score),
+    Dep = first(Depression_score_scaled),
     Dep_Threshold = first(Depression_Threshold)
   ) %>%
   arrange(Random_ID)
@@ -1009,7 +1013,7 @@ sig_mean  <- apply(posterior$sig, 2, mean)
 # Assuming SA scores are stored like this:
 Dep_scores <- data %>%
   group_by(Random_ID) %>%
-  summarise(Dep = first(Depression_score)) %>%
+  summarise(Dep = first(Depression_score_scaled)) %>%
   arrange(Random_ID)
 
 # Combine into a clean dataframe
@@ -1083,8 +1087,8 @@ library(ggplot2)
 plot_gamma_DEP <- function(df, color = "#FF7F00", filename = "plot_gamma_DEP.png") {
   # Compute Pearson correlation
   test <- cor.test(df$Dep, df$gamma, method = "pearson")
-  r_value <- round(test$estimate, 3)
-  p_value <- round(test$p.value, 3)
+  r_value <- round(test$estimate, 2)
+  p_value <- round(test$p.value, 2)
 
   # Create plot
   p <- ggplot(df, aes(x = Dep, y = gamma)) +
