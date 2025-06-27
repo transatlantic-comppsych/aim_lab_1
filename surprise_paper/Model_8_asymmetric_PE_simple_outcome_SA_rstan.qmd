@@ -19,6 +19,8 @@ M_t =\beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \b
 $$
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -47,14 +49,15 @@ Social_Anxiety_vector <- sapply(participant_ids, function(id) {
   unique(data$mini_SPIN_total[data$Random_ID == id])[1]
 })
 
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
 # Construct matrices in the same participant order
 Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
 Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
 Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
 Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
-
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,
@@ -543,6 +546,8 @@ print(corr_results)
 ```
 
 ```{r}
+rm(list = ls())
+
 ########################################## For Mood ########################################
 library(rstan)
 library(dplyr)
@@ -573,14 +578,16 @@ Social_Anxiety_vector <- sapply(participant_ids, function(id) {
   unique(data$mini_SPIN_total[data$Random_ID == id])[1]
 })
 
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
 # Construct matrices in the same participant order
 Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
 Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
 Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
 Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
 
-N <- length(unique(data$Random_ID))  # Number of participants
-T <- 48  # Trials per participant
 
 stan_data <- list(
   N = N,

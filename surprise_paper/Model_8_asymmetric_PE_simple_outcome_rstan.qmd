@@ -190,6 +190,7 @@ saveRDS(asymmPE_simple_Outcome_anx_fit, "asymmPE_simple_Outcome_anx_fit.rds")
 
 ```{r}
 
+asymmPE_simple_Outcome_anx_fit<- readRDS("asymmPE_simple_Outcome_anx_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_anx_fit)
 
@@ -304,18 +305,17 @@ ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 asymmPE_simple_Outcome_anx_fit <- readRDS("asymmPE_simple_Outcome_anx_fit.rds")
 
 unique(plot_data$Random_ID)
-plot_data_2_pts <- plot_data %>%
+plot_data_1_pt<- plot_data %>%
   group_by(Random_ID) %>%
-  filter(Random_ID %in% c("SUPPRF61251", "SUPSCO91602"))
+  filter(Random_ID %in% c("SUPPRF60894"))
 
 # Replace Random_IDs with readable labels
-plot_data_2_pts$Random_ID <- recode(plot_data_2_pts$Random_ID,
-                                    "SUPPRF61251" = "Participant 1",
-                                    "SUPSCO91602" = "Participant 2")
+plot_data_1_pt$Random_ID <- recode(plot_data_1_pt$Random_ID,
+                                    "SUPPRF60894" = "Participant 1")
 
 # Reshape data for easier plotting with a legend
 library(tidyr)
-plot_long <- plot_data_2_pts %>%
+plot_long <- plot_data_1_pt %>%
   pivot_longer(cols = c(Actual_Response, Predicted_Response),
                names_to = "Type",
                values_to = "Anxiety")
@@ -622,26 +622,23 @@ asymmPE_simple_Outcome_mood_fit <- readRDS("asymmPE_simple_Outcome_mood_fit.rds"
 
 
 unique(plot_data$Random_ID)
-plot_data_2_pts <- plot_data %>%
+plot_data_1_pt<- plot_data %>%
   group_by(Random_ID) %>%
-  filter(Random_ID %in% c("SUPPRF61251", "SUPSCO91602"))
+  filter(Random_ID %in% c("SUPPRF60894"))
 
 # Replace Random_IDs with readable labels
-plot_data_2_pts$Random_ID <- recode(plot_data_2_pts$Random_ID,
-                                    "SUPPRF61251" = "Participant 1",
-                                    "SUPSCO91602" = "Participant 2")
-
-
+plot_data_1_pt$Random_ID <- recode(plot_data_1_pt$Random_ID,
+                                    "SUPPRF60894" = "Participant 1")
 
 # Reshape data for easier plotting with a legend
 library(tidyr)
-plot_long <- plot_data_2_pts %>%
+plot_long_mood <- plot_data_1_pt %>%
   pivot_longer(cols = c(Actual_Response, Predicted_Response),
                names_to = "Type",
                values_to = "Mood")
 
 # Create the plot with larger text
-ggplot(plot_long, aes(x = Trial, y = Mood, color = Type)) +
+ggplot(plot_long_mood, aes(x = Trial, y = Mood, color = Type)) +
   geom_line(size = 1.5) + 
   facet_wrap(~ Random_ID, scales = "free_y") +
   scale_color_manual(values = c(
@@ -655,5 +652,62 @@ ggplot(plot_long, aes(x = Trial, y = Mood, color = Type)) +
        y = "Mood") +
   ylim(-3, 3) +
   theme_minimal(base_size = 18)  # Increase base font size
+
+```
+
+```{r}
+plot_long_mood$Measure <- "Mood"
+plot_long$Measure <- "Anxiety"
+
+plot_long_combined_long <- plot_long_combined %>%
+  pivot_longer(
+    cols = c(Mood, Anxiety),
+    names_to = "Score_Type",
+    values_to = "Score"
+  ) %>%
+  filter(!is.na(Score)) %>%
+  mutate(
+    Response_Label = case_when(
+      Measure == "Mood" & Type == "Actual_Response" ~ "Mood - Reported",
+      Measure == "Mood" & Type == "Predicted_Response" ~ "Mood - Predicted",
+      Measure == "Anxiety" & Type == "Actual_Response" ~ "Anxiety - Reported",
+      Measure == "Anxiety" & Type == "Predicted_Response" ~ "Anxiety - Predicted"
+    ),
+    # Set the order so that predicted lines are drawn last (on top)
+    Response_Label = factor(Response_Label, levels = c(
+      "Mood - Reported", "Anxiety - Reported",
+      "Mood - Predicted", "Anxiety - Predicted"
+    ))
+  )
+
+
+ggplot(plot_long_combined_long, aes(x = Trial, y = Score, color = Response_Label)) +
+  geom_line(size = 1.5) +
+  facet_grid(Random_ID ~ Measure, scales = "free_y") +
+  scale_color_manual(
+    values = c(
+      "Mood - Reported" = "#FDBF6F",       # Light orange
+      "Mood - Predicted" = "#FF7F00",      # Dark orange
+      "Anxiety - Reported" = "#FF9999",    # Light red
+      "Anxiety - Predicted" = "red"        # Red
+    ),
+    name = "Response Type"
+  ) +
+  labs(
+    title = "Reported and Predicted Mood and Anxiety per Participant",
+    x = "Trial Number",
+    y = "Score"
+  ) +
+  ylim(-3, 3) +
+  theme_minimal(base_size = 18)+  # base size for most elements
+theme(
+  legend.title = element_text(size = 20),   # key title
+  legend.text = element_text(size = 18),    # key labels
+  strip.text = element_text(size = 18),     # facet labels
+  axis.title = element_text(size = 18),     # axis titles
+  axis.text = element_text(size = 16),      # axis tick labels
+  plot.title = element_text(size = 22, face = "bold")  # plot title
+)
+
 
 ```

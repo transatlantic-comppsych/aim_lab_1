@@ -548,6 +548,39 @@ print(corr_results)
 ```
 
 ```{r}
+# Filter for w1 and gamma, rename w1 to Feedback
+plot_data_focus <- plot_data %>%
+  filter(param_clean %in% c("w1", "gamma")) %>%
+  mutate(param_clean = ifelse(param_clean == "w1", "Feedback", "Gamma"))
+
+# Compute means for vertical lines
+vlines_focus <- plot_data_focus %>%
+  group_by(param_clean, group) %>%
+  summarise(mean_val = mean(value), .groups = "drop")
+
+ggplot(plot_data_focus, aes(x = value, fill = group, color = group)) +
+  geom_density(alpha = 0.6, size = 0.8) +
+  geom_vline(data = vlines_focus, aes(xintercept = mean_val, color = group),
+             linetype = "dashed", size = 0.7) +
+  scale_fill_manual(values = c("Low SA" = "#FF9999", "High SA" = "red")) +
+  scale_color_manual(values = c("Low SA" = "#FF9999", "High SA" = "red")) +
+  facet_wrap(~ param_clean, scales = "free", ncol = 1) +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold", size = 18),      # Facet strip title
+    legend.text = element_text(size = 16),                    # Legend text
+    legend.title = element_blank()                            # No legend title
+  ) +
+  labs(
+    title = "Posterior Distributions by SA Group",
+    x = "Parameter Value",
+    y = "Density"
+  )
+
+```
+
+```{r}
 rm(list = ls())
 ########################################## For Mood ########################################
 library(rstan)
@@ -758,6 +791,7 @@ saveRDS(asymmPE_simple_Outcome_mood_SA_LSAS_fit, "asymmPE_simple_Outcome_mood_SA
 ```
 
 ```{r}
+asymmPE_simple_Outcome_mood_SA_LSAS_fit <- readRDS("asymmPE_simple_Outcome_mood_SA_LSAS_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
 
@@ -1075,5 +1109,33 @@ print(corr_results)
 
 ```{r}
 
+# Filter for w1 and gamma, rename w1 to Feedback
+plot_data_focus <- plot_data %>%
+  filter(param_clean %in% c("w1", "gamma")) %>%
+  mutate(param_clean = ifelse(param_clean == "w1", "Feedback", "Gamma"))
 
+# Compute means for vertical lines
+vlines_focus <- plot_data_focus %>%
+  group_by(param_clean, group) %>%
+  summarise(mean_val = mean(value), .groups = "drop")
+
+ggplot(plot_data_focus, aes(x = value, fill = group, color = group)) +
+  geom_density(alpha = 0.8, size = 0.8) +
+  geom_vline(data = vlines_focus, aes(xintercept = mean_val, color = group),
+             linetype = "dashed", size = 0.7) +
+  scale_fill_manual(values = c("Low SA" = "#FDBF6F", "High SA" = "#FF7F00")) +
+  scale_color_manual(values = c("Low SA" = "#FDBF6F", "High SA" = "#FF7F00")) +
+  facet_wrap(~ param_clean, scales = "free", ncol = 1) +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold", size = 18),      # Facet strip title
+    legend.text = element_text(size = 16),                    # Legend text
+    legend.title = element_blank()                            # No legend title
+  ) +
+  labs(
+    title = "Posterior Distributions by SA Group",
+    x = "Parameter Value",
+    y = "Density"
+  )
 ```
