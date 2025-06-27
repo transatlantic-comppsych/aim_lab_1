@@ -1,0 +1,676 @@
+---
+title: "Model_7_asymmetric_PE_simple_outcome_rstan"
+format: html
+editor: visual
+---
+
+## Asymmetric PEs and outcome model
+
+In this model, anxiety/mood on trial $t$ is calculated by adding the intercept $\beta_0$ (the value of anxiety/mood when $W_{1t}$ and $W_{2t}$ are set to 0), a weighted cumulative PE, a weighted cumulative expectation on trial $t$ and a trait social anxiety score.
+
+The term $\gamma^{(t - j)}$ decreases as $j$ becomes smaller relative to $t$. This means that PE and expectations closer to the current trial $t$ have larger weights, while PE and expectations further in the past have smaller weights. The exponential function ensures that PE and expectations further back in time are **"discounted" exponentially**. This is a type of **recency** **model**.
+
+$$
+A_t = \beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \beta_2\cdot \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{neg}(j)  + \beta_3\cdot O(t)\ + \beta_4\cdot Age 
+$$
+
+$$
+M_t =\beta_0 +\beta_1\cdot  \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{pos}(j) + \beta_2\cdot \sum_{j=1}^{t} \gamma^{t - j} \cdot PE_{neg}(j)  + \beta_3\cdot O(t)\ + \beta_4\cdot Age 
+$$
+
+```{r}
+rm(list = ls())
+########################################## For Anxiety ########################################
+library(rstan)
+library(dplyr)
+library(ggplot2)
+
+# Load Data
+#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+data$Age <- scale(data$Age)[, 1]
+
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+# Recalculate LSAS vector in the correct order
+Age_vector <- sapply(participant_ids, function(id) {
+  unique(data$Age[data$Random_ID == id])[1]
+})
+
+
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+# Construct matrices in the same participant order
+Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
+Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
+Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_fdbk = Response_fdbk_matrix,
+  Response_Ax = Response_Ax_matrix,
+  Response_PosPE = Response_PosPE_matrix,
+  Response_NegPE = Response_NegPE_matrix,
+  Age = Age_vector
+
+)
+
+
+
+
+# Stan Model
+asymmPE_simple_Outcome_anx_Age <- "data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1, upper=T> Tsubj[N]; 
+  array[N, T] real Response_fdbk;
+  array[N, T] real Response_Ax;
+  array[N, T] real Response_PosPE;
+  array[N, T] real Response_NegPE;
+  vector[N] Age;
+}
+parameters {
+  real intercept;
+  real w1_mu;
+  real w_pos_mu;
+  real w_neg_mu;
+  real gam_mu;
+  real sig_mu;
+
+
+  // Regression weights for Age
+  real beta_w0;
+  real beta_w1;
+  real beta_w_pos;
+  real beta_w_neg;
+  real beta_gam;
+  real beta_sig;
+  real beta_Age;  // Direct effect of Age
+  
+  real<lower=0> sigma_w0;
+  vector<lower=0>[5] sigma;
+
+  vector[N] w0_pr;
+  vector[N] w1_pr;
+  vector[N] w_pos_pr;
+  vector[N] w_neg_pr;
+  vector[N] gam_pr;
+  vector[N] sig_pr;
+}
+transformed parameters {
+  vector[N] w0;
+  vector[N] w1;
+  vector[N] w_pos;
+  vector[N] w_neg;
+  vector<lower=0, upper=1>[N] gam;
+  vector<lower=0>[N] sig;
+  
+  for (i in 1:N) {
+    w0[i]  = intercept + beta_w0 * Age[i] + sigma_w0 * w0_pr[i];
+    w1[i]  = w1_mu + beta_w1 * Age[i] + sigma[1] * w1_pr[i];
+    w_pos[i]  = w_pos_mu + beta_w_pos * Age[i] + sigma[2] * w_pos_pr[i];
+    w_neg[i]  = w_neg_mu + beta_w_neg * Age[i] + sigma[3] * w_neg_pr[i];
+
+    gam[i] = Phi_approx(gam_mu + beta_gam * Age[i] + sigma[4] * gam_pr[i]);
+    sig[i] = exp(sig_mu + beta_sig * Age[i] + sigma[5] * sig_pr[i]);
+  }
+}
+
+model {
+  intercept ~ normal(0, 1);
+  w1_mu ~ normal(0, 0.5);
+  w_pos_mu ~ normal(0, 0.5);
+  w_neg_mu ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
+
+  beta_w0  ~ normal(0, 0.5);
+  beta_w1  ~ normal(0, 0.5);
+  beta_w_pos  ~ normal(0, 0.5);
+  beta_w_neg  ~ normal(0, 0.5);
+  beta_gam ~ normal(0, 0.5);
+  beta_sig ~ normal(0, 0.5);
+  beta_Age  ~ normal(0, 0.5);
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
+
+  w0_pr ~ normal(0, 1);
+  w1_pr ~ normal(0, 1);
+  w_pos_pr ~ normal(0, 1);
+  w_neg_pr ~ normal(0, 1);
+  gam_pr ~ normal(0, 1);
+  sig_pr ~ normal(0, 1);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+
+    for (t in 1:Tsubj[i]) {
+      Response_Ax[i, t] ~ normal(
+        w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum + beta_Age * Age[i],sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+generated quantities {
+  real mu_w0;
+  real mu_w1;
+  real mu_w_pos;
+  real mu_w_neg;
+  real<lower=0, upper=1> mu_gam;
+  real<lower=0> mu_sig;
+
+  real log_lik[N];
+  real y_pred[N, T];
+
+  mu_w0 = intercept;
+  mu_w1 = w1_mu;
+  mu_w_pos = w_pos_mu;
+  mu_w_neg = w_neg_mu;
+  mu_gam = Phi_approx(gam_mu);
+  mu_sig = exp(sig_mu);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+    log_lik[i] = 0;
+
+    for (t in 1:Tsubj[i]) {
+      real mu = w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum + beta_Age * Age[i];
+      log_lik[i] += normal_lpdf(Response_Ax[i, t] | mu, sig[i]);
+      y_pred[i, t] = normal_rng(mu, sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+"
+
+```
+
+```{r}
+
+# Compile and Fit the Model
+asymmPE_simple_Outcome_anx_Age_fit <- stan(model_code = asymmPE_simple_Outcome_anx_Age, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+  max_treedepth = 10))
+
+options(max.print = 9999)  
+
+# Print results
+print(asymmPE_simple_Outcome_anx_Age_fit)
+
+
+saveRDS(asymmPE_simple_Outcome_anx_Age_fit, "aasymmPE_simple_Outcome_anx_Age_fit.rds")
+```
+
+```{r}
+
+asymmPE_simple_Outcome_anx_Age_fit <- readRDS("asymmPE_simple_Outcome_anx_Age_fit")
+
+# Plot results
+traceplot(asymmPE_simple_Outcome_anx_Age_fit)
+
+# Extract posterior samples
+posterior_samples <- rstan::extract(asymmPE_simple_Outcome_anx_Age_fit)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+# 2. Calculate the estimated Response_Ax for each participant
+# Generate the estimated Response_Ax from posterior predictive distribution
+y_pred <- posterior_samples$y_pred
+
+
+# Extract log-likelihood per participant (N-length vector)
+log_lik_vector <- rstan::extract(asymmPE_simple_Outcome_anx_Age_fit, pars = "log_lik")$log_lik  # Dimensions: [S, N] (S = posterior samples)
+
+# Compute LOO-CV
+library(loo)
+loo_result <- loo(log_lik_vector)
+print(loo_result)
+dim(log_lik_vector)
+library(loo)
+
+# Compute WAIC
+waic_result <- waic(log_lik_vector)
+print(waic_result)
+
+
+
+# Extract the posterior samples
+posterior_samples <- rstan::extract(asymmPE_simple_Outcome_anx_Age_fit)
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+# Load required package
+library(matrixStats)
+
+# Compute mean predicted values (posterior mean)
+y_pred_mean <- apply(y_pred, c(2,3), mean)  # Mean across posterior samples
+
+# Compute MSE
+mse <- mean((y_pred_mean - stan_data$Response_Ax)^2)
+
+# Compute MAE
+mae <- mean(abs(y_pred_mean -  stan_data$Response_Ax))
+
+print(paste("MSE:", mse))
+print(paste("MAE:", mae))
+
+
+y_pred_mean <- apply(posterior_samples$y_pred, c(2, 3), mean) 
+y_pred_df <- as.data.frame(y_pred_mean)
+colnames(y_pred_df) <- paste0("Trial_", 1:T)
+y_pred_df$Random_ID <- unique(data$Random_ID)
+
+
+# Convert Response_Ax to matrix and then to a data frame
+Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+Response_Ax_df <- as.data.frame(Response_Ax_matrix)
+colnames(Response_Ax_df) <- paste0("Trial_", 1:T)
+Response_Ax_df$Random_ID <- unique(data$Random_ID)
+
+# Reshape data into long format
+y_pred_long <- pivot_longer(y_pred_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Predicted_Response")
+Response_Ax_long <- pivot_longer(Response_Ax_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Actual_Response")
+
+# Merge actual and predicted data
+plot_data <- left_join(Response_Ax_long, y_pred_long, by = c("Random_ID", "Trial"))
+
+# Convert Trial to numeric
+plot_data$Trial <- as.numeric(gsub("Trial_", "", plot_data$Trial))
+
+
+
+# Plot individual real data and fitted curve for each participant using ggplot2
+ggplot(plot_data, aes(x = Trial)) +
+  geom_line(aes(y = Actual_Response), color = "blue", size = 1) + 
+  geom_line(aes(y = Predicted_Response), color = "red", size = 1) +
+  facet_wrap(~ Random_ID, scales = "free_y") +
+  labs(title = "Real Data and Fitted Curve per Participant",
+       x = "Trial Number",
+       y = "Anxiety") +
+  ylim(-3,3)
+  theme_minimal()
+
+  
+library(bayesplot)
+y_obs <- stan_data$Response_Ax
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+# Now plot
+color_scheme_set("blue")
+ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+rm(list = ls())
+########################################## For Mood ########################################
+library(rstan)
+library(dplyr)
+library(ggplot2)
+
+# Load Data
+#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
+
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_H <- scale(data$Response_H)[, 1]
+data$Age <- scale(data$Age)[, 1]
+
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+# Recalculate LSAS vector in the correct order
+Age_vector <- sapply(participant_ids, function(id) {
+  unique(data$Age[data$Random_ID == id])[1]
+})
+
+
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+# Construct matrices in the same participant order
+Response_fdbk_matrix <- matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE)
+Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+Response_PosPE_matrix <- matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE)
+Response_NegPE_matrix <- matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_fdbk = Response_fdbk_matrix,
+  Response_H = Response_H_matrix,
+  Response_PosPE = Response_PosPE_matrix,
+  Response_NegPE = Response_NegPE_matrix,
+  Age = Age_vector
+
+)
+
+
+
+
+# Stan Model
+asymmPE_simple_Outcome_mood_Age <- "data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1, upper=T> Tsubj[N]; 
+  array[N, T] real Response_fdbk;
+  array[N, T] real Response_H;
+  array[N, T] real Response_PosPE;
+  array[N, T] real Response_NegPE;
+  vector[N] Age;
+}
+parameters {
+  real intercept;
+  real w1_mu;
+  real w_pos_mu;
+  real w_neg_mu;
+  real gam_mu;
+  real sig_mu;
+
+
+  // Regression weights for Age
+  real beta_w0;
+  real beta_w1;
+  real beta_w_pos;
+  real beta_w_neg;
+  real beta_gam;
+  real beta_sig;
+  real beta_Age;  // Direct effect of Age
+  
+  real<lower=0> sigma_w0;
+  vector<lower=0>[5] sigma;
+
+  vector[N] w0_pr;
+  vector[N] w1_pr;
+  vector[N] w_pos_pr;
+  vector[N] w_neg_pr;
+  vector[N] gam_pr;
+  vector[N] sig_pr;
+}
+transformed parameters {
+  vector[N] w0;
+  vector[N] w1;
+  vector[N] w_pos;
+  vector[N] w_neg;
+  vector<lower=0, upper=1>[N] gam;
+  vector<lower=0>[N] sig;
+  
+  for (i in 1:N) {
+    w0[i]  = intercept + beta_w0 * Age[i] + sigma_w0 * w0_pr[i];
+    w1[i]  = w1_mu + beta_w1 * Age[i] + sigma[1] * w1_pr[i];
+    w_pos[i]  = w_pos_mu + beta_w_pos * Age[i] + sigma[2] * w_pos_pr[i];
+    w_neg[i]  = w_neg_mu + beta_w_neg * Age[i] + sigma[3] * w_neg_pr[i];
+
+    gam[i] = Phi_approx(gam_mu + beta_gam * Age[i] + sigma[4] * gam_pr[i]);
+    sig[i] = exp(sig_mu + beta_sig * Age[i] + sigma[5] * sig_pr[i]);
+  }
+}
+
+model {
+  intercept ~ normal(0, 1);
+  w1_mu ~ normal(0, 0.5);
+  w_pos_mu ~ normal(0, 0.5);
+  w_neg_mu ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
+
+  beta_w0  ~ normal(0, 0.5);
+  beta_w1  ~ normal(0, 0.5);
+  beta_w_pos  ~ normal(0, 0.5);
+  beta_w_neg  ~ normal(0, 0.5);
+  beta_gam ~ normal(0, 0.5);
+  beta_sig ~ normal(0, 0.5);
+  beta_Age  ~ normal(0, 0.5);
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
+
+  w0_pr ~ normal(0, 1);
+  w1_pr ~ normal(0, 1);
+  w_pos_pr ~ normal(0, 1);
+  w_neg_pr ~ normal(0, 1);
+  gam_pr ~ normal(0, 1);
+  sig_pr ~ normal(0, 1);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+
+    for (t in 1:Tsubj[i]) {
+      Response_H[i, t] ~ normal(
+        w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum + beta_Age * Age[i],sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+generated quantities {
+  real mu_w0;
+  real mu_w1;
+  real mu_w_pos;
+  real mu_w_neg;
+  real<lower=0, upper=1> mu_gam;
+  real<lower=0> mu_sig;
+
+  real log_lik[N];
+  real y_pred[N, T];
+
+  mu_w0 = intercept;
+  mu_w1 = w1_mu;
+  mu_w_pos = w_pos_mu;
+  mu_w_neg = w_neg_mu;
+  mu_gam = Phi_approx(gam_mu);
+  mu_sig = exp(sig_mu);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+    log_lik[i] = 0;
+
+    for (t in 1:Tsubj[i]) {
+      real mu = w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum + beta_Age * Age[i];
+      log_lik[i] += normal_lpdf(Response_H[i, t] | mu, sig[i]);
+      y_pred[i, t] = normal_rng(mu, sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+"
+
+```
+
+```{r}
+
+# Compile and Fit the Model
+asymmPE_simple_Outcome_mood_Age_fit <- stan(model_code = asymmPE_simple_Outcome_mood_Age, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+  max_treedepth = 10))
+
+options(max.print = 9999)  # Set a higher limit
+
+# Print results
+print(asymmPE_simple_Outcome_mood_Age_fit)
+
+saveRDS(asymmPE_simple_Outcome_mood_Age_fit, "asymmPE_simple_Outcome_mood_Age_fit.rds")
+```
+
+```{r}
+asymmPE_simple_Outcome_mood_Age_fit <- readRDS("aasymmPE_simple_Outcome_mood_Age_fit.rds")
+# Plot results
+traceplot(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
+
+# Extract posterior samples
+posterior_samples <- rstan::extract(asymmPE_simple_Outcome_mood_Age_fit)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+# 2. Calculate the estimated Response_H for each participant
+# Generate the estimated Response_H from posterior predictive distribution
+y_pred <- posterior_samples$y_pred
+
+
+# Extract log-likelihood per participant (N-length vector)
+log_lik_vector <- rstan::extract(asymmPE_simple_Outcome_mood_Age_fit, pars = "log_lik")$log_lik  # Dimensions: [S, N] (S = posterior samples)
+
+# Compute LOO-CV
+library(loo)
+loo_result <- loo(log_lik_vector)
+print(loo_result)
+dim(log_lik_vector)
+library(loo)
+
+# Compute WAIC
+waic_result <- waic(log_lik_vector)
+print(waic_result)
+
+
+
+# Extract the posterior samples
+posterior_samples <- rstan::extract(asymmPE_simple_Outcome_mood_Age_fit)
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+# Load required package
+library(matrixStats)
+
+# Compute mean predicted values (posterior mean)
+y_pred_mean <- apply(y_pred, c(2,3), mean)  # Mean across posterior samples
+
+# Compute MSE
+mse <- mean((y_pred_mean - stan_data$Response_H)^2)
+
+# Compute MAE
+mae <- mean(abs(y_pred_mean -  stan_data$Response_H))
+
+print(paste("MSE:", mse))
+print(paste("MAE:", mae))
+
+
+y_pred_mean <- apply(posterior_samples$y_pred, c(2, 3), mean) 
+y_pred_df <- as.data.frame(y_pred_mean)
+colnames(y_pred_df) <- paste0("Trial_", 1:T)
+y_pred_df$Random_ID <- unique(data$Random_ID)
+
+
+# Convert Response_H to matrix and then to a data frame
+Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+Response_H_df <- as.data.frame(Response_H_matrix)
+colnames(Response_H_df) <- paste0("Trial_", 1:T)
+Response_H_df$Random_ID <- unique(data$Random_ID)
+
+# Reshape data into long format
+y_pred_long <- pivot_longer(y_pred_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Predicted_Response")
+Response_H_long <- pivot_longer(Response_H_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Actual_Response")
+
+# Merge actual and predicted data
+plot_data <- left_join(Response_H_long, y_pred_long, by = c("Random_ID", "Trial"))
+
+# Convert Trial to numeric
+plot_data$Trial <- as.numeric(gsub("Trial_", "", plot_data$Trial))
+
+
+
+# Plot individual real data and fitted curve for each participant using ggplot2
+ggplot(plot_data, aes(x = Trial)) +
+  geom_line(aes(y = Actual_Response), color = "blue", size = 1) + 
+  geom_line(aes(y = Predicted_Response), color = "red", size = 1) +
+  facet_wrap(~ Random_ID, scales = "free_y") +
+  labs(title = "Real Data and Fitted Curve per Participant",
+       x = "Trial Number",
+       y = "Mood") +
+  ylim(-3,3)
+  theme_minimal()
+
+  
+library(bayesplot)
+y_obs <- stan_data$Response_H
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+# Now plot
+color_scheme_set("blue")
+ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
+
+```
