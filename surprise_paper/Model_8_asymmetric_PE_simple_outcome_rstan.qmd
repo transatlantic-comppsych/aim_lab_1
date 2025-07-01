@@ -190,7 +190,7 @@ saveRDS(asymmPE_simple_Outcome_anx_fit, "asymmPE_simple_Outcome_anx_fit.rds")
 
 ```{r}
 
-asymmPE_simple_Outcome_anx_fit<- readRDS("asymmPE_simple_Outcome_anx_fit.rds")
+asymmPE_simple_Outcome_anx_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_anx_fit)
 
@@ -298,11 +298,22 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
+hdi(posterior$w1_mu
+    , ci = 0.95)
+hdi(posterior$w_pos_mu
+    , ci = 0.95)
+hdi(posterior$w_neg_mu
+    , ci = 0.95)
+hdi(posterior$gam_mu
+    , ci = 0.95)
+hdi(posterior$sigma
+    , ci = 0.95)
+
 ```
 
 ```{r}
 
-asymmPE_simple_Outcome_anx_fit <- readRDS("asymmPE_simple_Outcome_anx_fit.rds")
+asymmPE_simple_Outcome_anx_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_fit.rds")
 
 unique(plot_data$Random_ID)
 plot_data_1_pt<- plot_data %>%
@@ -319,22 +330,30 @@ plot_long <- plot_data_1_pt %>%
   pivot_longer(cols = c(Actual_Response, Predicted_Response),
                names_to = "Type",
                values_to = "Anxiety")
-
-# Create the plot with larger text
 ggplot(plot_long, aes(x = Trial, y = Anxiety, color = Type)) +
   geom_line(size = 1.5) + 
   facet_wrap(~ Random_ID, scales = "free_y") +
-  scale_color_manual(values = c(
-    "Actual_Response" = "#FF9999",   # Light orange
-    "Predicted_Response" = "red" # Dark orange
-  ),
-  labels = c("Reported Anxiety", "Predicted Anxiety"),
-  name = "Response Type") +
-  labs(title = "Real Data and Fitted Curve per Participant",
-       x = "Trial Number",
-       y = "Anxiety") +
+  scale_color_manual(
+    values = c(
+      "Actual_Response" = "#FF9999",   # Light orange
+      "Predicted_Response" = "red"     # Dark orange
+    ),
+    labels = c("Reported Anxiety", "Predicted Anxiety"),
+    name = ""
+  ) +
+  labs(
+    title = "Real Data and Fitted Curve per Participant",
+    x = "Trial Number",
+    y = "Anxiety"
+  ) +
   ylim(-3, 3) +
-  theme_minimal(base_size = 18)  # Increase base font size
+  theme_minimal(base_size = 18) +
+  theme(
+    legend.position = c(0.85, 0.15),        # Legend inside the plot (x, y from bottom-left)
+    legend.background = element_rect(fill = "white", "white"),  # Optional: improve readability
+    panel.grid.major = element_line(size = 0.2),
+    panel.grid.minor = element_blank()
+  )
 
 ```
 
@@ -614,11 +633,25 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
+
+
+library(bayestestR)
+
+hdi(posterior$w1_mu
+    , ci = 0.95)
+hdi(posterior$w_pos_mu
+    , ci = 0.95)
+hdi(posterior$w_neg_mu
+    , ci = 0.95)
+hdi(posterior$gam_mu
+    , ci = 0.95)
+hdi(posterior$sigma
+    , ci = 0.95)
 ```
 
 ```{r}
 
-asymmPE_simple_Outcome_mood_fit <- readRDS("asymmPE_simple_Outcome_mood_fit.rds")
+asymmPE_simple_Outcome_mood_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_fit.rds")
 
 
 unique(plot_data$Random_ID)
@@ -637,21 +670,33 @@ plot_long_mood <- plot_data_1_pt %>%
                names_to = "Type",
                values_to = "Mood")
 
-# Create the plot with larger text
+
 ggplot(plot_long_mood, aes(x = Trial, y = Mood, color = Type)) +
   geom_line(size = 1.5) + 
   facet_wrap(~ Random_ID, scales = "free_y") +
-  scale_color_manual(values = c(
-    "Actual_Response" = "#FDBF6F",   # Light orange
-    "Predicted_Response" = "#FF7F00" # Dark orange
-  ),
-  labels = c("Reported Mood", "Predicted Mood"),
-  name = "Response Type") +
-  labs(title = "Real Data and Fitted Curve per Participant",
-       x = "Trial Number",
-       y = "Mood") +
+  scale_color_manual(
+    values = c(
+      "Actual_Response" = "#FDBF6F",   # Light orange
+      "Predicted_Response" = "#FF7F00"     # Dark orange
+    ),
+    labels = c("Reported Mood", "Predicted Mood"),
+    name = ""
+  ) +
+  labs(
+    title = "Real Data and Fitted Curve per Participant",
+    x = "Trial Number",
+    y = "Mood"
+  ) +
   ylim(-3, 3) +
-  theme_minimal(base_size = 18)  # Increase base font size
+  theme_minimal(base_size = 18) +
+  theme(
+    legend.position = c(0.85, 0.15),        # Legend inside the plot (x, y from bottom-left)
+    legend.background = element_rect(fill = "white", "white"),  # Optional: improve readability
+        legend.spacing.y = unit(1, "lines"),   # Reduce vertical spacing between items
+    panel.grid.major = element_line(size = 0.2),
+    panel.grid.minor = element_blank()
+  )
+
 
 ```
 

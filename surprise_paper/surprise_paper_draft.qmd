@@ -1,0 +1,136 @@
+---
+title: "Computational mechanisms of subjective momentary mood and anxiety during social interactions"
+author:
+  - name: Elena Bagdades
+    orcid: 0009-0002-1971-5607
+    affiliations:
+    - ref: 1
+  - name: Marjan Biria
+    orcid: 0000-0003-2671-0150
+    affiliations:
+    - ref: 1
+    - ref: 6
+ - name: Charlotte Burman
+    orcid: 
+    affiliations:
+    - ref: 2
+ - name: Jessica Norman
+    orcid: 
+    affiliations:
+    - ref: 1
+    - ref: 2
+ - name: Raphaelle Delpech
+    orcid: 0000-0003-3098-5077
+    affiliations:
+    - ref: 2
+ - name: Madeleine Moses-Payne
+    orcid: 0000-0001-7837-1096
+    affiliations:
+    - ref: 2
+ - name: Naomi Tromans
+    orcid: 
+    affiliations:
+    - ref: 2
+    - ref: 3
+ - name: Lucienne Spencer
+    orcid: 0000-0002-4929-5300
+    affiliations:
+    - ref: 3
+ - name: Ilina Singh
+    orcid: 0000-0003-4497-3587
+    affiliations:
+    - ref: 3
+ - name: Eleanor Leigh
+    orcid: 0000-0003-2756-3770
+    affiliations:
+    - ref: 3
+    - ref: 5
+  - name: Georgina Krebs
+    orcid: 0000-0002-5353-5645
+    affiliation:
+    - ref: 1
+  - name: Argyris Stringaris
+    orcid: 0000-0002-6264-8377
+    affiliations:
+    - ref: 1
+    - ref: 2
+    - ref: 4
+date: '`r paste("Date:", format(Sys.Date(), "%d.%m.%Y"))`'
+format: docx
+bibliography: 
+csl: apa.csl
+tbl-cap-location: top
+fig-cap-location: top
+fig-dpi: 300
+affiliations:
+  - id: 1
+    name: Department of Clinical, Educational & Health Psychology, Division of Psychology and Language Sciences, University College London
+  - id: 2
+    name: Department of Mental Health Neuroscience, Division of Psychiatry, University College London
+  - id: 3
+    name: Department of Experimental Psychology, University of Oxford, Oxford, UK
+  - id: 4
+    name: Department of Psychiatry, National and Kapodistrian University of Athens, Greece
+  - id: 5
+    name: Oxford Health NHS Foundation Trust, Oxford, UK
+  - id: 6
+    name: Department of Psychology, Institute of Psychiatry, Psychology & Neuroscience, King's College London, UK
+---
+
+## Abstract
+
+## Introduction
+
+Humans are inherently social beings, and our daily interactions profoundly shape our affect. A single encounter, whether a harsh critique in an interview or an unexpectedly warm conversation, can significantly impact how we feel. Despite the central role social experiences play in our emotional lives, the mechanisms underlying the relationship between social feedback momentary mood remain vastly underexplored. In this study, we investigate the hypothesis that social surprises, the gap between what we expect from a social interaction and the actual outcome, play a key role in shaping momentary mood. We reverse-translate clinical theory and observation by introducing a novel experimental and computational framework to test this theory in adolescents and adults, including individuals at heightened risk for social anxiety.
+
+This centrality of social experiences in shaping our affective lives is rooted in our evolutionary history. Human survival has long depended on our ability to navigate complex social environments. Several evolutionary theories suggest that traits such as cooperation, altruism, and culture emerged because they provided advantages in group living, such as cooperative foraging and shared child-rearing (Trivers, 1971; Tomasello, 2014). In line with this, human emotions are believed to have evolved to help us address social challenges and promote cohesion and cooperation, ultimately enhancing our chances of survival (e.g., Nesse, 1990). Given the role of social behaviour in human evolution, it is unsurprising that interpersonal relationships have a profound impact on people’s quality of life and overall mental and physical health (Kuczynski et al., 2020; Wickramaratne et al., 2022; Cacioppo & Cacioppo, 2014). Indeed, many psychopathologies are closely linked to deficits in social cognition and behaviour, especially during adolescence (Fett et al., 2015; Weightman et al., 2014; Lamblin et al., 2017). Exploring how social interactions influence affect can thus provide crucial insights into human functioning, both in mental health and in disorder.
+
+One promising approach to unpacking this relationship is through computational modelling. Recent advances in this field have begun to uncover the mechanisms of self-reported momentary mood. More specifically, research has highlighted a central role for reward prediction errors (RPEs), in shaping momentary fluctuations in mood (Rutledge et al., 2014; Keren et al., 2021). According to this framework, mood can be explained by integrating over the history of events, especially RPEs, that occur in our environment. Positive RPEs, where outcomes exceed expectations, tend to elevate mood, while negative RPEs, where outcomes fall short, tend to suppress it. For example, an unexpected bonus at work might boost mood, whereas receiving the same bonus after expecting more could lead to disappointment and to a lower mood. Extending this research into the social domain is essential as it will allow us to examine whether similar computational mechanisms underlie mood dynamics across different reward types.
+
+Much of the computational literature on momentary mood has focused on the happy–unhappy spectrum, while other types of mood are largely understudied. Specifically, while the cognitive processes involved in pathological anxiety, such as in SAD or Generalized Anxiety Disorder (GAD) have been extensively studied, the computations involved in anxious mood remain poorly understood. This is a significant gap, especially given the evidence for a dimensional continuum between normative and clinical anxiety (Dillon et al., 2014). A deeper understanding of the computations driving momentary anxious mood could illuminate how these processes become dysregulated in anxiety disorders, and may help identify subtle, early markers of risk.
+
+While computational approaches have advanced our understanding of momentary mood in adults, an equally pressing but underexplored question is how these mechanisms unfold across development. This is particularly crucial during adolescence; a developmental window characterized by heightened emotional reactivity (Vijayakumar et al., 2019), increased mood variability (Toenders et al., 2022), and elevated risk for the onset of psychiatric disorders (Solmi et al., 2021). Adolescence also brings a marked shift in social orientation, with individuals spending more time with peers and less time with parents. Notably, adolescents show heightened sensitivity to both social rewards and punishments (Foulkes & Blakemore, 2016), which may intensify affective responses and contribute to mood instability. Given that mood variability itself is a risk factor for internalizing symptoms such as anxiety and depression (Gruber et al., 2013; Toenders et al., 2023), understanding the computational mechanisms that shape normative momentary affect is critical. Investigating mood dynamics in response to social feedback across the lifespan could shed light on the origins of mood instability and the increased vulnerability to psychopathology observed during adolescence.
+
+In this article, we address these gaps by investigating the computational mechanisms underlying self-reported momentary happy and anxious mood in response to social prediction errors (PEs), across different age groups and recruitment sources (schools, the local community, and Prolific). To do so, we developed a novel experimental paradigm designed to elicit social PEs in which participants interacted with virtual players and were asked to report their momentary happy and anxious mood in response to social feedback. This task was co-designed with a youth advisory group to ensure clarity and engagement for younger participants. We preregistered the hypothesis (<https://osf.io/73zsg/>) that social PEs would be central to affective responses and, more specifically, would be positively associated with happy mood and negatively with anxious mood. To test this, we fit and compared eight hierarchical Bayesian computational models, each a variant of the model by Rutledge et al. (2014), that systematically varied in their inclusion and specification of social PEs, expectations, and outcomes. Crucially, this included a model without social PEs, allowing us to directly evaluate the added explanatory value of social PEs relative to a plausible alternative. Cross-validated model comparisons revealed that self-reported happy and anxious mood in our task was best captured by a model incorporating social feedback alongside both positive and negative social PEs. In exploratory analyses, we extended the best-fitting model to assess how social anxiety, depressive symptoms, and age modulated these computational parameters.
+
+-Add summary of results from exploratory analyses
+
+-Mention importance and potential implications of resultsResults
+
+## Discussion
+
+## Methods
+
+### Participants
+
+#### Online Participants
+
+We recruited 106 online participants between the ages of 18-45 using Prolific ([www.prolific.com](https://prolific.com/)). Nine participants were excluded due to poor engagement with the task, as evidenced by their video recordings. We required that our participants be adults living in the United Kingdom or the United States, that they speak fluent English, have no cognitive impairment or dementia, and that over 90% of their previous jobs have been approved. We also required that participants had not taken part in any of our pilot studies (which were similar to this one). Participants were paid at a rate of £9/hr as compensation for their time.
+
+-   p18-25: 30, 1 excluded
+
+-   p26-45: 39, 3 excluded
+
+-   pilot 21: 37, 4 excluded
+
+#### UCL Community Participants
+
+We recruited 47 participants between the ages of 18-25 from the University College London (UCL) community, using posters and through the UCL psychology subject pool (SONA). Four participants were excluded due to poor engagement with the task, as evidenced by their video recordings. Upon registration, participants were invited to book a testing session, which they were instructed to complete in a quiet and private space. At the time of the testing session, they received a link to the online task. Participants were compensated with a £10 Love2shop or Amazon voucher for their time.
+
+-   47, 4 excluded
+
+#### School Participants
+
+We recruited 49 participants between the ages of 14-25 through schools (via physical flyers or via school newletters). Five participants were excluded due to poor engagement with the task, as evidenced by their video recordings.Schools were recruited either by direct contact or by advertising through the Anna Freud school network newsletter. For students under the age of 16, parental opt-out consent was required. Upon registration, participants were invited to book a testing session, which they were instructed to complete in a quiet and private space. At the time of the testing session, they received a link to the online task. Participants were compensated with a £10 Love2shop voucher for their time. As an additional incentive, schools were also offered talks on mental health, careers in psychology or related topics.
+
+-   49, 5 excluded
+
+**data exclusion?**
+
+### Experimental task
+
+### Computational modelling
+
+### 
+
+-   rstan and r versions = make sure you state the right one (cluster or locally?)
