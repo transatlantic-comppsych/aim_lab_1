@@ -93,6 +93,7 @@ library("gt")
 
 ```
 
+
 ## Abstract
 
 ## Introduction
@@ -117,6 +118,7 @@ We analysed data from 185 participants aged 14–45 years, recruited from three 
 
 Participants first completed questionnaires assessing social anxiety and depressive symptoms. Depending on their age group, these included the Liebowitz Social Anxiety Scale – Self-Report (LSAS; @fresco2001), the Centre for Epidemiologic Studies Depression Scale (CES-D; @radloff1977), the LSAS for Children and Adolescents – Self-Report (LSAS-CA; @leigh2022), and the Revised Child Anxiety and Depression Scale (RCADS; @chorpita2000). They then completed an online task simulating socially evaluative interactions (see Fig.1). They were told that four different “virtual players” would rate them after they described images aloud while being video recorded. Each trial began with the presentation of the virtual player assigned to that trial, followed by the participant’s prediction of how well they expected to be rated. Participants then described the image for 15 seconds and received feedback from the virtual player on a scale from 0 to 100. Afterward, they reported their momentary mood and anxiety. The virtual players varied in their level of criticality, and feedback was manipulated to generate a range of social prediction errors (PEs), including negative (PE^−^), moderate positive (PE^+^), strong positive (PE^++^), and neutral (PE^N^), based on each player’s typical rating behaviour. Trial order, feedback, and stimuli were randomized.
 
+
 ```{r experimental set up figure}
 #| label: fig-experimental-setup
 #| echo: false
@@ -129,6 +131,7 @@ Participants first completed questionnaires assessing social anxiety and depress
 include_graphics("experimental task design.pdf")
 
 ```
+
 
 ### Momentary anxiety and mood were best explained by asymmetric PEs and social feedback amount.
 
@@ -144,6 +147,7 @@ $$ {#eq-model_8_anxiety}
 
 where $\beta_{0i}$ represents the individual-specific baseline of mood or anxiety, and $\beta_{1i}$ and $\beta_{2i}$ capture the sensitivity of individual $i$ to the history of positive and negative PEs, respectively. The parameter $\gamma_i^{t - j}$ is a forgetting factor that determines the influence of prior trials on affect. $O_t$ represents the social feedback on trial t, and $\beta_{3i}$ captures its immediate effect on momentary affect for participant $i$.
 
+
 ```{r Mood and anxiety model fits for two participants. }
 #| label: fig-predicted-vs-reported
 #| echo: false
@@ -156,6 +160,7 @@ where $\beta_{0i}$ represents the individual-specific baseline of mood or anxiet
 include_graphics("predicted_vs_reported_affect.pdf")
 
 ```
+
 
 ### Group-Level Parameter Estimates
 
@@ -186,6 +191,7 @@ To complement the model-based findings, we computed the posterior distribution o
 To assess whether depression symptoms (DEP), as measured by the RCADS in the student sample and the CES-D in all other samples (z-scored within each sample prior to modelling), moderated any of the model parameters, we examined interaction terms from the hierarchical Bayesian models predicting momentary anxiety and mood. For both mood and anxiety models, the interaction terms between DEP and the intercept ($\beta_{0 \cdot SA}$), positive PEs ($\beta_{1 \cdot SA}$), negative PEs ($\beta_{2 \cdot SA}$), social feedback ($\beta_{3 \cdot SA}$) and the forgetting factor ($\beta_{\gamma \cdot SA}$ )had credible intervals that overlapped zero, suggesting inconclusive or negligible moderation effects. Similarly, the main effects of DEP on momentary anxiety (mean = 0.17, 95% HDI \[–0.49, 0.87\]) and mood (mean = –0.10, 95% HDI \[–0.85, 0.53\]) were also uncertain.
 
 We also computed the posterior distribution of Pearson correlations between each participant-level parameter estimates and DEP scores. According to this analysis, the parameter for social feedback ($\beta_2$ ) showed a moderate negative correlation with DEP in predicting mood (mean r = –0.18, 95% CI \[–0.35, –0.01\], Pr(r \< 0) = 97.9%). This suggest that individuals with higher DEP, exhibited a stronger negative effect of negative PEs on their mood. Correlations for all other parameters were weaker and had posterior intervals that included zero.
+
 
 ```{r parameter distributions by SA and DEP group}
 #| label: param_distributions
@@ -517,6 +523,7 @@ combined_plot <- (
 combined_plot
 ```
 
+
 ## Discussion
 
 -   notes: Interaction effect for Social Feedback x SA can be interpreted as a susceptibility to PE and a target opportunity for treatment.
@@ -536,6 +543,7 @@ We recruited 47 participants between the ages of 18-25 from the University Colle
 #### School Participants
 
 We recruited 49 participants between the ages of 14-25 through schools (via physical flyers or via school newsletters). Five participants were excluded due to poor engagement with the task, as evidenced by their video recordings. Schools were recruited either by direct contact or by advertising through the Anna Freud school network newsletter. For students under the age of 16, parental opt-out consent was required. Upon registration, participants were invited to book a testing session, which they were instructed to complete in a quiet and private space. At the time of the testing session, they received a link to the online task. Participants were compensated with a £10 Love2shop voucher for their time. As an additional incentive, schools were also offered talks on mental health, careers in psychology or related topics.
+
 
 ```{r summary demographics tables}
 #| label: tbls-demographics-summary
@@ -621,6 +629,7 @@ demographics_summary %>%
 
 ```
 
+
 ### Questionnaires and Experimental Task
 
 The online questionnaires and experimental task were created and hosted on Gorilla Experiment Builder ([www.gorilla.sc](http://www.gorilla.sc/)). The experiment took approximately 50 minutes to complete. Participants first provided informed consent as approved by UCL’s Research Ethics Committee. Participants then completed a series of questionnaires. First, they completed a survey about their demographics, mental health diagnoses and psychotropic medication use.  Then, participants completed the Mini-Social Phobia Inventory (Mini-SPIN; @connor2001), the Generalized Anxiety Disorder 7-item Scale (GAD-7; @spitzer2006), and the Affective Reactivity Index (ARI; @stringaris2012). School participants additionally completed the Lebowitz Social Anxiety Scale for Children and Adolescents – Self-Report (LSAS-CA; @leigh2022) and the Revised Child Anxiety and Depression Scale (RCADS; @chorpita2000). Online and UCL community participants completed the adult version of the Lebowitz Social Anxiety Scale – Self-Report (LSAS; @fresco2001), the Centre for Epidemiologic Studies Depression Scale (CES-D; @radloff1977), the Adult ADHD Self-Report Scale (ASRS; @kessler2005), the Drug Use Disorders Identification Test (DUDIT; @berman2002), the Alcohol Use Disorders Identification Test (AUDIT; @saunders1993), and the Body Image Questionnaire (BIQ; @cash1995). In the present study, we report analyses only from the Mini-SPIN and CES-D and the low mood RCADS subscale.
@@ -679,14 +688,17 @@ Model estimation was performed via Hamiltonian Monte Carlo, using four independe
 
 The hierarchical structure of the models relied on partial pooling, where individual-level parameters were assumed to be drawn from group-level normal distributions whose means and standard deviations were estimated from the data. This allowed for individual variation while also leveraging population-level structure. For example, individual parameters were specified as follows:
 
+
 ```{=tex}
 \begin{align}\beta_{0i} &= \mu_{\beta_0} + \epsilon_{\beta_{0i}}  \\\beta_{1i} &= \mu_{\beta_1} + \epsilon_{\beta_{1i}}  \\&\vdots \notag \\\beta_{ni} &= \mu_{\beta_n} + \epsilon_{\beta_{ni}} \\\gamma_i &= \Phi(\mu_{\gamma} + \epsilon_{\gamma_i})  \\\sigma_i &= \exp(\mu_{\sigma} + \epsilon_{\sigma_i}) \end{align}
 ```
+
 where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations. Parameters bounded to specific intervals were sampled in an unconstrained latent space and transformed accordingly. Specifically, the forgetting factor γ, which is bounded between 0 and 1, was transformed using a probit link function to ensure it remained within this interval. Standard deviation parameters were constrained to be positive through exponential transformations. Weakly informative priors were applied to all group-level parameters.
 
 #### Summary of Fitted Models
 
 For our first aim, we fit and compared eight different computational models for mood and anxiety, respectively. The models differed in their inclusion and specification of social appraisals, expectations, PEs and Outcomes. Notably, Models 7 and 8 incorporated asymmetric effects for positive and negative PEs. Models 1 and 2 were modified versions of the standard model proposed by @rutledge2014 and the primacy model by @keren2021, respectively, adapted to fit our task-specific data.
+
 
 ```{r models fitted summary table}
 #| label: tbl-models-fitted
@@ -737,6 +749,7 @@ models_table <- add_footer_lines(models_table, "Note. E = reported expectation; 
 models_table
 ```
 
+
 ### Aim 1: Identify the computations underlying momentary mood and anxiety in our social task
 
 #### Model Comparison and Evaluation
@@ -758,6 +771,7 @@ $$
 where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations.
 
 ## Supplement
+
 
 ```{r mood model comp}
 #| label: tbl-mood-models
@@ -939,6 +953,7 @@ ethnicity_summary %>%
 
 ```
 
+
 to be added:
 
 -   full coefficient results tables (for aim 1 and aim 2)
@@ -946,3 +961,4 @@ to be added:
 -   (in methods) Paragraph on transparency (will create gorilla links where people can preview experiment ;e.g. <https://app.gorilla.sc/openmaterials/1080493> (will need to publish)
 
 ## References
+

@@ -230,7 +230,7 @@ saveRDS(asymmPE_simple_Outcome_anx_DEP_fit, "asymmPE_simple_Outcome_anx_DEP_fit.
 ```
 
 ```{r}
-asymmPE_simple_Outcome_anx_DEP_fit <- readRDS("asymmPE_simple_Outcome_anx_DEP_fit.rds")
+asymmPE_simple_Outcome_anx_DEP_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_DEP_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_anx_DEP_fit)
 
@@ -338,6 +338,20 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
+
+posterior<- rstan::extract(asymmPE_simple_Outcome_anx_DEP_fit)
+hdi(posterior$beta_w0
+    , ci = 0.95)
+hdi(posterior$beta_w1
+    , ci = 0.95)
+hdi(posterior$beta_w_pos
+    , ci = 0.95)
+hdi(posterior$beta_w_neg
+    , ci = 0.95)
+hdi(posterior$beta_gam
+    , ci = 0.95)
+hdi(posterior$beta_Dep
+    , ci = 0.95)
 ```
 
 ```{r}
@@ -546,6 +560,59 @@ rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg","gamma", "sigma")
 
 # View results
 print(corr_results)
+
+
+
+
+
+
+library(HDInterval)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, Dep_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, Dep_vector)
+  }
+  
+  hdi_r <- hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gamma = posterior$gam,
+  sigma = posterior$sig
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, Dep_vector = Dep_info$Dep)
+
+# Name the rows for clarity
+posterior_r_df <- do.call(rbind, posterior_r_results)
+rownames(posterior_r_df) <- names(param_list)
+
+# Show results
+print(posterior_r_df)
+
 
 
 ```
@@ -871,7 +938,7 @@ ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 ```
 
 ```{r}
-asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("asymmPE_simple_Outcome_mood_DEP_fit.rds")
+asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_DEP_fit.rds")
 posterior <- rstan::extract(asymmPE_simple_Outcome_mood_DEP_fit)
 Dep_info <- data %>%
   group_by(Random_ID) %>%
@@ -1077,53 +1144,106 @@ rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg","gamma", "sigma")
 print(corr_results)
 
 
+posterior<- rstan::extract(asymmPE_simple_Outcome_mood_DEP_fit)
+hdi(posterior$beta_w0
+    , ci = 0.95)
+hdi(posterior$beta_w1
+    , ci = 0.95)
+hdi(posterior$beta_w_pos
+    , ci = 0.95)
+hdi(posterior$beta_w_neg
+    , ci = 0.95)
+hdi(posterior$beta_gam
+    , ci = 0.95)
+hdi(posterior$beta_Dep
+    , ci = 0.95)
+
+
+
+
+
+library(HDInterval)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, Dep_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, Dep_vector)
+  }
+  
+  hdi_r <- hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gamma = posterior$gam,
+  sigma = posterior$sig
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, Dep_vector = Dep_info$Dep)
+
+# Name the rows for clarity
+posterior_r_df <- do.call(rbind, posterior_r_results)
+rownames(posterior_r_df) <- names(param_list)
+
+# Show results
+print(posterior_r_df)
+
 ```
 
 ```{r}
 
 asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("asymmPE_simple_Outcome_mood_DEP_fit.rds")
-library(ggplot2)
 
-plot_gamma_DEP <- function(df, color = "#FF7F00", filename = "plot_gamma_DEP.png") {
-  # Compute Pearson correlation
-  test <- cor.test(df$Dep, df$gamma, method = "pearson")
-  r_value <- round(test$estimate, 2)
-  p_value <- round(test$p.value, 2)
+# Filter for w1 and gamma, rename w1 to Feedback
+plot_data_focus <- plot_data %>%
+  filter(param_clean %in% c("w_neg")) 
 
-  # Create plot
-  p <- ggplot(df, aes(x = Dep, y = gamma)) +
-    geom_point(color = color, alpha = 0.4, size = 3) +
-    geom_smooth(method = "lm", se = TRUE, 
-                color = color,         # Line color
-                fill = color,          # Ribbon fill color
-                alpha = 0.2,           # Ribbon transparency
-                linetype = "dashed") +
-    annotate("text",
-             x = Inf, y = -Inf,
-             label = paste0("r = ", r_value, ", p = ", p_value),
-             hjust = 1.1, vjust = -1.2, size = 5, fontface = "italic") +
-    labs(
-      x = "Depression Score",
-      y = "Mean Posterior of gamma",
-      title = "DEP vs gamma"
-    ) +
-    theme_minimal(base_size = 14)
+plot_data_focus <- plot_data_focus %>%
+  mutate(param_clean = recode(param_clean, "w_neg" = "Negative PE"))
 
-  # Save the plot
-  ggsave(
-    filename = filename,
-    plot = p,
-    width = 6,
-    height = 4,
-    dpi = 300
+# Compute means for vertical lines
+vlines_focus <- plot_data_focus %>%
+  group_by(param_clean, group) %>%
+  summarise(mean_val = mean(value), .groups = "drop")
+
+ggplot(plot_data_focus, aes(x = value, fill = group, color = group)) +
+  geom_density(alpha = 0.8, size = 0.8) +
+  geom_vline(data = vlines_focus, aes(xintercept = mean_val, color = group),
+             linetype = "dashed", size = 0.7) +
+  scale_fill_manual(values = c("Low Dep" = "#FDBF6F", "High Dep" = "#FF7F00")) +
+  scale_color_manual(values = c("Low Dep" = "#FDBF6F", "High Dep" = "#FF7F00")) +
+  facet_wrap(~ param_clean, scales = "free", ncol = 1) +
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold", size = 18),      # Facet strip title
+    legend.text = element_text(size = 16),                    # Legend text
+    legend.title = element_blank()                            # No legend title
+  ) +
+  labs(
+    title = "Posterior Distributions by SA Group",
+    x = "Parameter Value",
+    y = "Density"
   )
-
-  return(p)
-}
-
-# Example usage
-plot_gamma_DEP <- plot_gamma_DEP(param_df)
-
-
-
 ```

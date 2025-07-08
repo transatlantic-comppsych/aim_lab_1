@@ -229,7 +229,7 @@ saveRDS(asymmPE_simple_Outcome_anx_SA_LSAS_fit, "asymmPE_simple_Outcome_anx_SA_L
 
 ```{r}
 
-asymmPE_simple_Outcome_anx_SA_LSAS_fit <- readRDS("asymmPE_simple_Outcome_anx_SA_LSAS_fit.rds")
+asymmPE_simple_Outcome_anx_SA_LSAS_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_SA_LSAS_fit.rds")
 
 # Plot results
 traceplot(asymmPE_simple_Outcome_anx_SA_LSAS_fit)
@@ -337,6 +337,20 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 # Now plot
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
+
+posterior<- rstan::extract(asymmPE_simple_Outcome_anx_SA_LSAS_fit)
+hdi(posterior$beta_w0
+    , ci = 0.95)
+hdi(posterior$beta_w1
+    , ci = 0.95)
+hdi(posterior$beta_w_pos
+    , ci = 0.95)
+hdi(posterior$beta_w_neg
+    , ci = 0.95)
+hdi(posterior$beta_gam
+    , ci = 0.95)
+hdi(posterior$beta_SA
+    , ci = 0.95)
 
 ```
 
@@ -543,6 +557,58 @@ rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg", "gamma", "sigma")
 
 # View results
 print(corr_results)
+
+
+
+
+
+
+library(HDInterval)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, sa_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, sa_vector)
+  }
+  
+  hdi_r <- hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gamma = posterior$gam,
+  sigma = posterior$sig
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, sa_vector = SA_scores$SA)
+
+# Name the rows for clarity
+posterior_r_df <- do.call(rbind, posterior_r_results)
+rownames(posterior_r_df) <- names(param_list)
+
+# Show results
+print(posterior_r_df)
 
 
 ```
@@ -791,7 +857,7 @@ saveRDS(asymmPE_simple_Outcome_mood_SA_LSAS_fit, "asymmPE_simple_Outcome_mood_SA
 ```
 
 ```{r}
-asymmPE_simple_Outcome_mood_SA_LSAS_fit <- readRDS("asymmPE_simple_Outcome_mood_SA_LSAS_fit.rds")
+asymmPE_simple_Outcome_mood_SA_LSAS_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_SA_LSAS_fit.rds")
 # Plot results
 traceplot(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
 
@@ -899,6 +965,20 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
+
+posterior<- rstan::extract(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
+hdi(posterior$beta_w0
+    , ci = 0.95)
+hdi(posterior$beta_w1
+    , ci = 0.95)
+hdi(posterior$beta_w_pos
+    , ci = 0.95)
+hdi(posterior$beta_w_neg
+    , ci = 0.95)
+hdi(posterior$beta_gam
+    , ci = 0.95)
+hdi(posterior$beta_SA
+    , ci = 0.95)
 ```
 
 ```{r}
@@ -1103,6 +1183,59 @@ rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg", "gamma", "sigma")
 
 # View results
 print(corr_results)
+
+
+
+
+
+
+library(HDInterval)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, sa_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, sa_vector)
+  }
+  
+  hdi_r <- hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gamma = posterior$gam,
+  sigma = posterior$sig
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, sa_vector = SA_scores$SA)
+
+# Name the rows for clarity
+posterior_r_df <- do.call(rbind, posterior_r_results)
+rownames(posterior_r_df) <- names(param_list)
+
+# Show results
+print(posterior_r_df)
+
 
 
 ```

@@ -26,9 +26,7 @@ library(dplyr)
 library(ggplot2)
 
 # Load Data
-#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
-
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_w_demographics.csv")
 
 # Ensure data is sorted by Random_ID and trial within each participant
 data <- data[order(data$Random_ID), ]
@@ -227,7 +225,7 @@ options(max.print = 9999)
 print(asymmPE_simple_Outcome_anx_Age_fit)
 
 
-saveRDS(asymmPE_simple_Outcome_anx_Age_fit, "aasymmPE_simple_Outcome_anx_Age_fit.rds")
+saveRDS(asymmPE_simple_Outcome_anx_Age_fit, "asymmPE_simple_Outcome_anx_Age_fit.rds")
 ```
 
 ```{r}
@@ -258,7 +256,7 @@ library(loo)
 loo_result <- loo(log_lik_vector)
 print(loo_result)
 dim(log_lik_vector)
-library(loo)
+
 
 # Compute WAIC
 waic_result <- waic(log_lik_vector)
@@ -344,10 +342,89 @@ ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 ```
 
 ```{r}
+library(tidyverse)
+library(posterior)
 
-```
+asymmPE_simple_Outcome_anx_Age_fit <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_Age_fit.rds")
+Age_vals <- stan_data$Age  # Vector of length N
+posterior <- rstan::extract(asymmPE_simple_Outcome_anx_Age_fit)
 
-```{r}
+# Compute means per participant
+w0_mean   <- apply(posterior$w0, 2, mean)
+w1_mean   <- apply(posterior$w1, 2, mean)
+w_pos_mean   <- apply(posterior$w_pos, 2, mean)
+w_neg_mean   <- apply(posterior$w_neg, 2, mean)
+gam_mean  <- apply(posterior$gam, 2, mean)
+sig_mean  <- apply(posterior$sig, 2, mean)
+
+# Assuming SA scores are stored like this:
+Age_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(Age = first(Age), 
+    dataset = first(Dataset)  # Add dataset here
+  ) %>%
+  arrange(Random_ID)
+
+
+param_df <- data.frame(
+  ID = unique(data$Random_ID),
+  Age = Age_scores$Age,
+  dataset = Age_scores$dataset,  # Add this line
+  w0 = w0_mean,
+  w1 = w1_mean,
+  w_pos = w_pos_mean,
+  w_neg = w_neg_mean,
+  gamma = gam_mean,
+  sigma = sig_mean
+)
+
+library(ggplot2)
+
+plot_correlation <- function(df, param) {
+  ggplot(df, aes_string(x = "Age", y = param, color = "dataset")) +
+    geom_point(alpha = 0.7, size = 3) +
+    geom_smooth(method = "lm", se = TRUE, color = "black", linetype = "dashed") +
+    labs(
+      x = "Age",
+      y = paste0("Mean Posterior of ", param),
+      title = paste("Age vs", param)
+    ) +
+    theme_minimal(base_size = 14)
+}
+
+
+# Plot examples
+plot_correlation(param_df, "w0")
+plot_correlation(param_df, "w1")
+plot_correlation(param_df, "w_pos")
+plot_correlation(param_df, "w_neg")
+plot_correlation(param_df, "gamma")
+plot_correlation(param_df, "sigma")
+
+# Function to compute r and p for each parameter
+get_corr_stats <- function(x, y) {
+  test <- cor.test(x, y, method = "pearson")
+  data.frame(
+    r = round(test$estimate, 3),
+    p_value = round(test$p.value, 4)
+  )
+}
+
+# Apply to each parameter vs SA
+corr_results <- rbind(
+  get_corr_stats(param_df$Age, param_df$w0),
+  get_corr_stats(param_df$Age, param_df$w1),
+  get_corr_stats(param_df$Age, param_df$w_pos),
+    get_corr_stats(param_df$Age, param_df$w_neg),
+  get_corr_stats(param_df$Age, param_df$gamma),
+  get_corr_stats(param_df$Age, param_df$sigma)
+)
+
+# Label the rows
+rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg", "gamma", "sigma")
+
+# View results
+print(corr_results)
 
 ```
 
@@ -359,11 +436,8 @@ library(dplyr)
 library(ggplot2)
 
 # Load Data
-#data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
 
-
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Extracted_data/pilot_21_variables.csv")
-
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_w_demographics.csv")
 
 # Ensure data is sorted by Random_ID and trial within each participant
 data <- data[order(data$Random_ID), ]
@@ -567,7 +641,7 @@ saveRDS(asymmPE_simple_Outcome_mood_Age_fit, "asymmPE_simple_Outcome_mood_Age_fi
 ```{r}
 asymmPE_simple_Outcome_mood_Age_fit <- readRDS("aasymmPE_simple_Outcome_mood_Age_fit.rds")
 # Plot results
-traceplot(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
+traceplot(asymmPE_simple_Outcome_mood_Age_fit)
 
 # Extract posterior samples
 posterior_samples <- rstan::extract(asymmPE_simple_Outcome_mood_Age_fit)
@@ -672,5 +746,91 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 # Now plot
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
+
+```
+
+```{r}
+library(tidyverse)
+library(posterior)
+
+Age_vals <- stan_data$Age  # Vector of length N
+posterior <- rstan::extract(asymmPE_simple_Outcome_mood_Age_fit)
+
+# Compute means per participant
+w0_mean   <- apply(posterior$w0, 2, mean)
+w1_mean   <- apply(posterior$w1, 2, mean)
+w_pos_mean   <- apply(posterior$w_pos, 2, mean)
+w_neg_mean   <- apply(posterior$w_neg, 2, mean)
+gam_mean  <- apply(posterior$gam, 2, mean)
+sig_mean  <- apply(posterior$sig, 2, mean)
+
+# Assuming SA scores are stored like this:
+Age_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(Age = first(Age), 
+    dataset = first(Dataset)  # Add dataset here
+  ) %>%
+  arrange(Random_ID)
+
+
+param_df <- data.frame(
+  ID = unique(data$Random_ID),
+  Age = Age_scores$Age,
+  dataset = Age_scores$dataset,  # Add this line
+  w0 = w0_mean,
+  w1 = w1_mean,
+  w_pos = w_pos_mean,
+  w_neg = w_neg_mean,
+  gamma = gam_mean,
+  sigma = sig_mean
+)
+
+library(ggplot2)
+
+plot_correlation <- function(df, param) {
+  ggplot(df, aes_string(x = "Age", y = param, color = "dataset")) +
+    geom_point(alpha = 0.7, size = 3) +
+    geom_smooth(method = "lm", se = TRUE, color = "black", linetype = "dashed") +
+    labs(
+      x = "Age",
+      y = paste0("Mean Posterior of ", param),
+      title = paste("Age vs", param)
+    ) +
+    theme_minimal(base_size = 14)
+}
+
+
+# Plot examples
+plot_correlation(param_df, "w0")
+plot_correlation(param_df, "w1")
+plot_correlation(param_df, "w_pos")
+plot_correlation(param_df, "w_neg")
+plot_correlation(param_df, "gamma")
+plot_correlation(param_df, "sigma")
+
+# Function to compute r and p for each parameter
+get_corr_stats <- function(x, y) {
+  test <- cor.test(x, y, method = "pearson")
+  data.frame(
+    r = round(test$estimate, 3),
+    p_value = round(test$p.value, 4)
+  )
+}
+
+# Apply to each parameter vs SA
+corr_results <- rbind(
+  get_corr_stats(param_df$Age, param_df$w0),
+  get_corr_stats(param_df$Age, param_df$w1),
+  get_corr_stats(param_df$Age, param_df$w_pos),
+    get_corr_stats(param_df$Age, param_df$w_neg),
+  get_corr_stats(param_df$Age, param_df$gamma),
+  get_corr_stats(param_df$Age, param_df$sigma)
+)
+
+# Label the rows
+rownames(corr_results) <- c("w0", "w1", "w_pos", "w_neg", "gamma", "sigma")
+
+# View results
+print(corr_results)
 
 ```

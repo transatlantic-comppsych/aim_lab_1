@@ -180,7 +180,7 @@ generated quantities {
 asymmPE_simple_Outcome_anx_fit <- stan(model_code = asymmPE_simple_Outcome_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
-options(max.print = 9999)  # Set a higher limit
+options(max.print = 99999)  # Set a higher limit
 
 # Print results
 print(asymmPE_simple_Outcome_anx_fit)
@@ -298,13 +298,14 @@ y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
 color_scheme_set("blue")
 ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
+posterior<- rstan::extract(asymmPE_simple_Outcome_anx_fit)
 hdi(posterior$w1_mu
     , ci = 0.95)
 hdi(posterior$w_pos_mu
     , ci = 0.95)
 hdi(posterior$w_neg_mu
     , ci = 0.95)
-hdi(posterior$gam_mu
+hdi(posterior$mu_gam
     , ci = 0.95)
 hdi(posterior$sigma
     , ci = 0.95)
@@ -637,13 +638,14 @@ ppc_hist(y_obs_flat, y_pred_matrix[1:8, ])  # show 8 histograms for example
 
 library(bayestestR)
 
+posterior <- rstan::extract(asymmPE_simple_Outcome_mood_fit)
 hdi(posterior$w1_mu
     , ci = 0.95)
 hdi(posterior$w_pos_mu
     , ci = 0.95)
 hdi(posterior$w_neg_mu
     , ci = 0.95)
-hdi(posterior$gam_mu
+hdi(posterior$mu_gam
     , ci = 0.95)
 hdi(posterior$sigma
     , ci = 0.95)
