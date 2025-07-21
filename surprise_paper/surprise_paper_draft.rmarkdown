@@ -90,6 +90,9 @@ library("tibble")
 library("forcats")
 library("scales")
 library("gt")
+library("rstan")
+library("bayestestR")
+library("kableExtra")
 
 ```
 
@@ -112,7 +115,7 @@ In this article, we address key gaps in the literature by examining the computat
 
 ### Participants
 
-We analysed data from 185 participants aged 14–45 years, recruited from three different sources: online participants (n = 97), university students (n = 43), and school students (n = 44).
+We analysed data from 185 participants aged 14–45 years, recruited from three different sources: an online platform (n = 97), the University College London community (n = 43), and from schools (n = 44).
 
 ### Experimental setup 
 
@@ -376,7 +379,7 @@ w_neg_samples <- sapply(1:nrow(posterior_DEP_mood$w_neg), function(i) {
 w_neg_df <- data.frame(r = w_neg_samples)
 
 # Compute summary stats
-hdi_w_neg <- hdi(w_neg_samples, credMass = 0.95)
+hdi_w_neg <- HDInterval::hdi(w_neg_samples, credMass = 0.95)
 mean_r <- mean(w_neg_samples)
 pr_less_than_zero <- mean(w_neg_samples < 0)
 
@@ -391,7 +394,7 @@ w1_samples_anx <- sapply(1:nrow(posterior_SA_anx$w1), function(i) {
 w1_SA_df_anx <- data.frame(r = w1_samples_anx)
 
 # Compute summary stats
-hdi_w1_anx <- hdi(w1_samples_anx, credMass = 0.95)
+hdi_w1_anx <- HDInterval::hdi(w1_samples_anx, credMass = 0.95)
 mean_r_w1_anx <- mean(w1_samples_anx)
 pr_less_than_zero_w1_anx <- mean(w1_samples_anx < 0)
 
@@ -405,7 +408,7 @@ w1_samples_mood <- sapply(1:nrow(posterior_SA_mood$w1), function(i) {
 w1_SA_df_mood <- data.frame(r = w1_samples_mood)
 
 # Compute summary stats
-hdi_w1_mood <- hdi(w1_samples_mood, credMass = 0.95)
+hdi_w1_mood <- HDInterval::hdi(w1_samples_mood, credMass = 0.95)
 mean_r_w1_mood <- mean(w1_samples_mood)
 pr_less_than_zero_w1_mood <- mean(w1_samples_mood < 0)
 
@@ -447,7 +450,6 @@ p_SA_anx_labeled <- ggplot(w1_SA_df_anx, aes(x = r)) +
 p_SA_mood_labeled <- ggplot(w1_SA_df_mood, aes(x = r)) +
   geom_density(fill = "#0072B2", alpha = 0.8, color = NA) +
   geom_vline(xintercept = mean_r_w1_mood, linetype = "dashed", color = "black", size = 0.6) +
-  geom_vline(xintercept = hdi_w1_mood, linetype = "dotted", color = "gray30", size = 0.5) +
   annotate("text", x = mean_r_w1_mood, y = 15, label = paste0("r = ", round(mean_r_w1_mood, 2)),
            vjust = -0.5, hjust = -0.1, size = 4.5) +
   labs(
@@ -531,6 +533,8 @@ combined_plot
 ## **Methods**
 
 ### Participants
+
+We recruited 185 participants aged 14–45 years from three different sources: an online platform, UCL community, and schools. Based on our preregistered power analyses using pilot data, which included parametric simulations for detecting the effect of social prediction errors on mood and anxiety and bootstrapping for Bayesian model comparison, both conducted to ensure at least 80% power, our final sample of 185 participants exceeds the required sample sizes (n ≈ 30), indicating that the study is well powered.
 
 #### Online Participants
 
@@ -688,10 +692,9 @@ Model estimation was performed via Hamiltonian Monte Carlo, using four independe
 
 The hierarchical structure of the models relied on partial pooling, where individual-level parameters were assumed to be drawn from group-level normal distributions whose means and standard deviations were estimated from the data. This allowed for individual variation while also leveraging population-level structure. For example, individual parameters were specified as follows:
 
-
-```{=tex}
+$$
 \begin{align}\beta_{0i} &= \mu_{\beta_0} + \epsilon_{\beta_{0i}}  \\\beta_{1i} &= \mu_{\beta_1} + \epsilon_{\beta_{1i}}  \\&\vdots \notag \\\beta_{ni} &= \mu_{\beta_n} + \epsilon_{\beta_{ni}} \\\gamma_i &= \Phi(\mu_{\gamma} + \epsilon_{\gamma_i})  \\\sigma_i &= \exp(\mu_{\sigma} + \epsilon_{\sigma_i}) \end{align}
-```
+$$
 
 where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations. Parameters bounded to specific intervals were sampled in an unconstrained latent space and transformed accordingly. Specifically, the forgetting factor γ, which is bounded between 0 and 1, was transformed using a probit link function to ensure it remained within this interval. Standard deviation parameters were constrained to be positive through exponential transformations. Weakly informative priors were applied to all group-level parameters.
 
@@ -770,193 +773,7 @@ $$
 
 where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations.
 
-## Supplement
-
-
-```{r mood model comp}
-#| label: tbl-mood-models
-#| tbl-cap: "Model comparison results for Mood models"
-#| tbl-cap-location: top
-#| echo: false
-#| warning: false
-#| message: false
-
-mood_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_mood.csv")
-mood_models_results <- mood_models_results[, c("Model", "LOOIC", "WAIC")]
-mood_models_results$Rank <- rank(mood_models_results$LOOIC, ties.method = "min")
-mood_models_results$LOOIC <- round(mood_models_results$LOOIC, 1)
-mood_models_results$WAIC <- round(mood_models_results$WAIC, 1)
-
-mood_models_table <- flextable::flextable(mood_models_results)
-mood_models_table <- flextable::bold(mood_models_table, i = which(mood_models_results$Rank == 1))
-mood_models_table <- flextable::bold(mood_models_table, part = "header")
-mood_models_table
-
-```
-
-```{r anx model comparison}
-#| label: tbl-anx-models
-#| tbl-cap: "Model comparison results for Anxiety models"
-#| tbl-cap-location: top
-#| echo: false
-#| warning: false
-#| message: false
-
-anx_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_anx.csv")
-anx_models_results <- anx_models_results[, c("Model", "LOOIC", "WAIC")]
-anx_models_results$Rank <- rank(anx_models_results$LOOIC, ties.method = "min")
-anx_models_results$LOOIC <- round(anx_models_results$LOOIC, 1)
-anx_models_results$WAIC <- round(anx_models_results$WAIC, 1)
-
-anx_models_table <- flextable::flextable(anx_models_results)
-anx_models_table <- flextable::bold(anx_models_table, i = which(anx_models_results$Rank == 1))
-anx_models_table <- flextable::bold(anx_models_table, part = "header")
-anx_models_table
-
-```
-
-```{r full demographics tables}
-#| label: tbls-demographics-full
-#| tbl-cap: "Full demographics tables"
-#| tbl-cap-location: top
-#| echo: false
-#| warning: false
-#| message: false
-
-df <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
-# --- STEP 1: Prepare and clean dataset ---
-df <- df %>%
-  mutate(
-    dataset_group = case_when(
-      dataset %in% c("Pilot_21", "pro_18_25") ~ "Prolific participants aged 18–25",
-      dataset == "pro_26_45" ~ "Prolific participants aged 26–45",
-      dataset == "school" ~ "School participants aged 14-18",
-      dataset == "local_com" ~ "Local Community aged 18–25",
-      TRUE ~ "Other"
-    ),
-    
-    # Flag gender identity differing from sex
-    Gender_differs = ifelse(!is.na(Gender_other) & Gender_other != "", 1, 0),
-    
-    # Clean sex and ethnicity
-    Sex = factor(Sex),
-    Ethnicity_combined = case_when(
-      !is.na(ethnicity_other) & ethnicity_other != ""  ~ paste0("Other: ", ethnicity_other),
-      TRUE ~ as.character(Ethnicity)
-    )
-    
-  )
-
-# Set the order of dataset groups
-df$dataset_group <- factor(df$dataset_group,
-                           levels = c(
-                             "Prolific participants aged 18–25",
-                             "Prolific participants aged 26–45",
-                             "Local Community aged 18–25",
-                             "School participants aged 14-18"
-                           ))
-
-
-# Group low-frequency ethnicities into "Other"
-df$Ethnicity_combined <- fct_lump(factor(df$Ethnicity_combined), n = 5)
-
-# Ensure diagnosis variables only counted if prior question was "Yes"
-df <- df %>%
-  mutate(
-    Depression = ifelse(Mental_health_diagnosis == "Yes", Depression, NA),
-    Anxiety = ifelse(Mental_health_diagnosis == "Yes", Anxiety, NA),
-    ADHD = ifelse(Mental_health_diagnosis == "Yes", ADHD, NA),
-    ASD = ifelse(Mental_health_diagnosis == "Yes", ASD, NA)
-  )
-
-# --- STEP 2: Main demographics table ---
-
-demographics_summary <- df %>%
-  group_by(dataset_group) %>%
-  summarise(
-    N = n(),
-    Age = paste0(round(mean(Age, na.rm = TRUE), 1), " (", round(sd(Age, na.rm = TRUE), 1), ")"),
-    
-    Female = paste0(sum(Sex == "Female", na.rm = TRUE), " (", percent(mean(Sex == "Female", na.rm = TRUE), accuracy = 0.1), ")"),
-    Male = paste0(sum(Sex == "Male", na.rm = TRUE), " (", percent(mean(Sex == "Male", na.rm = TRUE), accuracy = 0.1), ")"),
-    Gender_diff = paste0(sum(Gender_differs == 1, na.rm = TRUE), " (", percent(mean(Gender_differs == 1, na.rm = TRUE), accuracy = 0.1), ")"),
-    
-    Depression = paste0(sum(Depression == 1, na.rm = TRUE), " (", percent(sum(Depression == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")"),
-    Anxiety = paste0(sum(Anxiety == 1, na.rm = TRUE), " (", percent(sum(Anxiety == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")"),
-    ADHD = paste0(sum(ADHD == 1, na.rm = TRUE), " (", percent(sum(ADHD == 1, na.rm = TRUE) / n(), accuracy =0.1), ")"),
-    ASD = paste0(sum(ASD == 1, na.rm = TRUE), " (", percent(sum(ASD == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")")
-  
-  ) %>%
-  ungroup()
-
-# Display demographics table
-demographics_summary %>%
-  gt() %>%
-  tab_header(title = "Demographic Characteristics by Dataset Group") %>%
-  cols_label(
-    dataset_group = "Dataset Group",
-    N = "N",
-    Age = "Age (Mean ± SD)",
-    Female = "Female (Sex)",
-    Male = "Male (Sex)",
-    Gender_diff = "Gender Non-Conforming",
-    Depression = "Depression",
-    Anxiety = "Anxiety",
-    ADHD = "ADHD",
-    ASD = "ASD"
-  ) %>%
-  cols_label(
-    Gender_diff = "Gender Non-Conforming")
-
-
-
-# --- STEP 3: Ethnicity summary table ---
-# Group low-frequency ethnicities into "Other"
-df$Ethnicity_combined <- fct_lump(factor(df$Ethnicity_combined), n = 5)
-
-# Reorder so "White – English, Scottish, Welsh, Northern Irish or British" is first
-df$Ethnicity_combined <- fct_relevel(
-  df$Ethnicity_combined,
-  "White – English, Scottish, Welsh, Northern Irish or British"
-)
-
-# Create a complete list of all combinations of dataset_group and Ethnicity_combined
-all_combinations <- expand.grid(
-  dataset_group = unique(df$dataset_group),
-  Ethnicity_combined = unique(df$Ethnicity_combined),
-  stringsAsFactors = FALSE
-)
-
-# Summarise counts per group
-ethnicity_summary <- df %>%
-  group_by(dataset_group, Ethnicity_combined) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  right_join(all_combinations, by = c("dataset_group", "Ethnicity_combined")) %>%
-  mutate(
-    n = replace_na(n, 0)
-  ) %>%
-  group_by(dataset_group) %>%
-  mutate(
-    total = sum(n),
-    pct = ifelse(total > 0, percent(n / total, accuracy = 0.1), "0.0%"),
-    formatted = paste0(n, " (", pct, ")")
-  ) %>%
-  select(dataset_group, Ethnicity_combined, formatted) %>%
-  pivot_wider(names_from = dataset_group, values_from = formatted) %>%
-  replace(is.na(.), "0 (0.0%)")  # Replace remaining NAs from pivoting
-
-# Display ethnicity table
-ethnicity_summary %>%
-  gt() %>%
-  tab_header(title = "Ethnicity by Dataset Group") %>%
-  cols_label(Ethnicity_combined = "Ethnicity")
-
-```
-
-
 to be added:
-
--   full coefficient results tables (for aim 1 and aim 2)
 
 -   (in methods) Paragraph on transparency (will create gorilla links where people can preview experiment ;e.g. <https://app.gorilla.sc/openmaterials/1080493> (will need to publish)
 

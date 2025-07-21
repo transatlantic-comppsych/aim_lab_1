@@ -1,0 +1,2237 @@
+---
+title: "Surprise Paper Supplement"
+format: docx
+editor: visual
+tbl-cap-location: top
+fig-cap-location: bottom
+fig-dpi: 300
+bibliography: "Surprise paper.bib"
+csl: apa.csl
+---
+
+# Supplement
+
+```{r load-packages}
+#| include: false
+library("knitr")
+library("flextable")
+library("tidyverse")
+library("HDInterval")
+library("cowplot")
+library("patchwork")
+library("tibble")
+library("forcats")
+library("scales")
+library("gt")
+library("rstan")
+library("bayestestR")
+library("kableExtra")
+library("bayesplot")
+library("purrr") 
+```
+
+## Experimental Task
+
+Participants were told that the task involves learning how to speak to others, either through practice or observation. They were informed that they were in the first group (learning by doing), and that a second group would rate their performance based on the following criteria:
+
+-   How loud and clear their voice was
+
+-   How nervous they appeared
+
+-   Whether they stumbled over their words
+
+-   How clever they seemed
+
+-   How interesting they were
+
+-   How much they blushed
+
+These criteria were adapted from the Observer Rating Questionnaires by @cartwright-hatton2003 and are relevant for assessing performance and communication in socially anxious individuals.
+
+Before each trial, participants were shown information about how critical or easy-going each virtual player had been in the past. This was displayed using a histogram, presented only once per virtual player to avoid over-reliance on these values. Additionally, virtual players' profile photos showed either a neutral or a smiling (closed-lip) expression, based on findings from one of our pilot studies showing that neutral faces were perceived as more critical.To generate the virtual player profile picture stimuli we gave the following instructions to the volunteers:
+
+*"Please take at least 3 photographs using your computer webcam. Ensure that the background is relatively simple, such as a bedroom, living room, or kitchen, and that no other people or identifiable information (student ID, passport, workplace logo etc.) are visible in the frame. In each photograph, please depict a neutral, happy, or threatening facial expression (ensuring the mouth is closed in all instances—i.e., smiling with a closed mouth). Maintain a comfortable posture as if you are engaged in a task on your computer. Feel free to send us multiple versions of each facial expression if you are uncertain about which ones are most appropriate.”*
+
+Before each trial, participants also shared their expectations about how they think they will perform and received feedback from each virtual player after their performance (both were ratings between 0-100, from worst to best performance). In the first 4 trials, participants were presented the following:
+
+1.  The picture of a virtual player paired with a histogram, showing how they had previously rated others. There were 4 different virtual players in total, paired only once with their corresponding histograms on trials 1 to 4.
+
+2.  They were asked to predict how they think they will perform on a scale of 0-100 (from ‘Minimum’ to ‘Maximum’).
+
+3.  A picture they had to describe to the virtual player in 15 seconds while being video recorded. There was also a count down on the screen to help participants track the time. The picture of the virtual player was also presented on top of the screen.
+
+4.  They were then presented with feedback from the virtual player, which was on a scale of 0-100 (from ‘Minimum’ to ‘Maximum’).
+
+5.  They were asked to rate their anxiety and mood on a scale of 0-100 (from ‘Very relaxed’ to ‘Very nervous/uncomfortable’ for anxiety, and from ‘Very unhappy’ to ‘Very happy’ for mood).
+
+For the remaining 44 trials, the same procedure was followed, except that virtual players were reintroduced using only their photo and name, no histogram was shown again.
+
+Two practice trials were included before the main task. These trials were structurally identical but involved cartoon images instead of virtual player.
+
+After completing all trials, participants answered the following questions (items 2–5 were open-ended):
+
+1.  “How stressful was this as a social situation?” on a scale of 0-100 (from ‘Not at all stressful’ to ‘Very stressful’)
+
+2.  “How did you feel during the task?”
+
+3.  “What was difficult and/or easy about this task?”
+
+4.  “How was the experience of being observed by the virtual players?
+
+5.  “What did you think of the virtual players and the scores they gave you?”
+
+The following aspects were randomized between participants:
+
+-   Order of virtual player/histogram presentation in trials 1–4
+
+-   Order of mood and anxiety ratings
+
+-   Order of virtual player feedback across trials (while keeping the number and size of each PE constant across the task for all participants)
+
+The final version of the task was informed by several pilot studies and a meta-analysis conducted prior to data collection. Details of these pilot studies, the meta-analytic findings, and additional task information are available in the preregistration document (<https://osf.io/73zsg/>).
+
+## Participant Demographics
+
+```{r full demographics tables}
+#| label: tbls-demographics-full
+#| tbl-cap: "Full demographics tables"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+df <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
+
+# --- STEP 1: Prepare and clean dataset ---
+
+df <- df %>%
+
+  mutate(
+
+    dataset_group = case_when(
+
+      dataset %in% c("Pilot_21", "pro_18_25") ~ "Prolific participants aged 18–25",
+
+      dataset == "pro_26_45" ~ "Prolific participants aged 26–45",
+
+      dataset == "school" ~ "School participants aged 14-18",
+
+      dataset == "local_com" ~ "Local Community aged 18–25",
+
+      TRUE ~ "Other"
+
+    ),
+
+    
+
+    # Flag gender identity differing from sex
+
+    Gender_differs = ifelse(!is.na(Gender_other) & Gender_other != "", 1, 0),
+
+    
+
+    # Clean sex and ethnicity
+
+    Sex = factor(Sex),
+
+    Ethnicity_combined = case_when(
+
+      !is.na(ethnicity_other) & ethnicity_other != ""  ~ paste0("Other: ", ethnicity_other),
+
+      TRUE ~ as.character(Ethnicity)
+
+    )
+
+    
+
+  )
+
+# Set the order of dataset groups
+
+df$dataset_group <- factor(df$dataset_group,
+
+                           levels = c(
+
+                             "Prolific participants aged 18–25",
+
+                             "Prolific participants aged 26–45",
+
+                             "Local Community aged 18–25",
+
+                             "School participants aged 14-18"
+
+                           ))
+
+# Group low-frequency ethnicities into "Other"
+
+df$Ethnicity_combined <- fct_lump(factor(df$Ethnicity_combined), n = 5)
+
+# Ensure diagnosis variables only counted if prior question was "Yes"
+
+df <- df %>%
+
+  mutate(
+
+    Depression = ifelse(Mental_health_diagnosis == "Yes", Depression, NA),
+
+    Anxiety = ifelse(Mental_health_diagnosis == "Yes", Anxiety, NA),
+
+    ADHD = ifelse(Mental_health_diagnosis == "Yes", ADHD, NA),
+
+    ASD = ifelse(Mental_health_diagnosis == "Yes", ASD, NA)
+
+  )
+
+# --- STEP 2: Combined Demographics and Ethnicity Summary Table ---
+
+# 1. Create Ethnicity summary in wide format (top 5 categories)
+ethnicity_wide <- df %>%
+  count(dataset_group, Ethnicity_combined) %>%
+  group_by(dataset_group) %>%
+  mutate(
+    pct = paste0(n, " (", percent(n / sum(n), accuracy = 0.1), ")")
+  ) %>%
+  ungroup() %>%
+  select(-n) %>%
+  pivot_wider(
+    names_from = Ethnicity_combined,
+    values_from = pct,
+    values_fill = "0 (0.0%)"
+  )
+
+
+```
+
+## Aim 1: Identify the computations underlying momentary mood and anxiety in our social task
+
+### Model comparison results
+
+#### Mood models
+
+```{r mood model comp}
+#| label: tbl-mood-models
+#| tbl-cap: "Model comparison results for Mood models"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+mood_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_mood.csv")
+
+mood_models_results <- mood_models_results[,-1]
+
+mood_models_results$Rank <- rank(mood_models_results$LOOIC, ties.method = "min")
+
+mood_models_results$LOOIC <- round(mood_models_results$LOOIC, 1)
+
+mood_models_results$WAIC <- round(mood_models_results$WAIC, 1)
+
+mood_models_results$MAE <- round(mood_models_results$MAE, 2)
+
+mood_models_results$MSE <- round(mood_models_results$MSE, 2)
+
+mood_models_results$R2 <- round(mood_models_results$R2, 2)
+
+mood_models_results <- rename(mood_models_results, "R²" = "R2")
+
+mood_models_table <- flextable::flextable(mood_models_results)
+
+mood_models_table <- flextable::bold(mood_models_table, i = which(mood_models_results$Rank == 1))
+
+mood_models_table <- flextable::bold(mood_models_table, part = "header")
+
+mood_models_table
+```
+
+#### Anxiety models
+
+```{r anx model comparison}
+#| label: tbl-anx-models
+#| tbl-cap: "Model comparison results for Anxiety models"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+anx_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_anx.csv")
+
+anx_models_results <- anx_models_results[,-1]
+
+anx_models_results$Rank <- rank(anx_models_results$LOOIC, ties.method = "min")
+
+anx_models_results$LOOIC <- round(anx_models_results$LOOIC, 1)
+
+anx_models_results$WAIC <- round(anx_models_results$WAIC, 1)
+
+anx_models_results$MAE <- round(anx_models_results$MAE, 2)
+
+anx_models_results$MSE <- round(anx_models_results$MSE, 2)
+
+anx_models_results$R2 <- round(anx_models_results$R2, 2)
+
+anx_models_results <- rename(anx_models_results, "R²" = "R2")
+
+anx_models_table <- flextable::flextable(anx_models_results)
+
+anx_models_table <- flextable::bold(anx_models_table, i = which(anx_models_results$Rank == 1))
+
+anx_models_table <- flextable::bold(anx_models_table, part = "header")
+
+anx_models_table
+
+
+```
+
+#### Parameter recovery 
+
+To assess the recoverability of model parameters, we conducted a parameter recovery simulation using the same model structure and priors specified in our main analysis. We simulated data for 50 synthetic participants across 48 trials each. The model was then re-fit to this synthetic dataset, and we compared the recovered posterior means and 95% credible intervals against the true generating values for each parameter. All parameters showed good to excellent recoverability (Pearson’s r: Intercept = 0.93, 95% CI \[0.88, 0.96\]; Social Feedback = 0.98, 95% CI \[0.96, 0.99\]; Positive PE = 0.95, 95% CI \[0.91, 0.97\]; Negative PE = 0.95, 95% CI \[0.92, 0.97\]; $\gamma$ = 0.69, 95% CI \[0.50, 0.81\].
+
+```{r parameter recovery plot}
+#| label: param-recovery-figure
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Simulated and recovered posterior values"
+#| fig-title: "Parameter recovery plots"
+#| fig-cap-location: bottom
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+
+# Stan Model
+asymmPE_simple_Outcome_anx <- "data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1, upper=T> Tsubj[N]; 
+  array[N, T] real Response_fdbk;
+  array[N, T] real Response_Ax;
+  array[N, T] real Response_PosPE;
+  array[N, T] real Response_NegPE;
+}
+parameters {
+  real intercept;
+  real w1_mu;
+  real w_pos_mu;
+  real w_neg_mu;
+  real gam_mu;
+  real sig_mu;
+
+  real<lower=0> sigma_w0;
+  vector<lower=0>[5] sigma;
+
+  vector[N] w0_pr;
+  vector[N] w1_pr;
+  vector[N] w_pos_pr;
+  vector[N] w_neg_pr;
+  vector[N] gam_pr;
+  vector[N] sig_pr;
+}
+transformed parameters {
+  vector[N] w0;
+  vector[N] w1;
+  vector[N] w_pos;
+  vector[N] w_neg;
+  vector<lower=0, upper=1>[N] gam;
+  vector<lower=0>[N] sig;
+
+  w0 = intercept + sigma_w0 * w0_pr;
+  w1 = w1_mu + sigma[1] * w1_pr;
+  w_pos = w_pos_mu + sigma[2] * w_pos_pr;
+  w_neg = w_neg_mu + sigma[3] * w_neg_pr;
+
+  for (i in 1:N) {
+    gam[i] = Phi_approx(gam_mu + sigma[4] * gam_pr[i]);
+  }
+  sig = exp(sig_mu + sigma[5] * sig_pr);
+}
+model {
+  intercept ~ normal(0, 0.5);
+  w1_mu ~ normal(0, 0.5);
+  w_pos_mu ~ normal(0, 0.5);
+  w_neg_mu ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
+
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
+
+  w0_pr ~ normal(0, 1);
+  w1_pr ~ normal(0, 1);
+  w_pos_pr ~ normal(0, 1);
+  w_neg_pr ~ normal(0, 1);
+  gam_pr ~ normal(0, 1);
+  sig_pr ~ normal(0, 1);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+
+    for (t in 1:Tsubj[i]) {
+      Response_Ax[i, t] ~ normal(
+        w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum,
+        sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+generated quantities {
+  real mu_w0;
+  real mu_w1;
+  real mu_w_pos;
+  real mu_w_neg;
+  real<lower=0, upper=1> mu_gam;
+  real<lower=0> mu_sig;
+
+  real log_lik[N];
+  real y_pred[N, T];
+
+  mu_w0 = intercept;
+  mu_w1 = w1_mu;
+  mu_w_pos = w_pos_mu;
+  mu_w_neg = w_neg_mu;
+  mu_gam = Phi_approx(gam_mu);
+  mu_sig = exp(sig_mu);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+    log_lik[i] = 0;
+
+    for (t in 1:Tsubj[i]) {
+      real mu = w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum;
+      log_lik[i] += normal_lpdf(Response_Ax[i, t] | mu, sig[i]);
+      y_pred[i, t] = normal_rng(mu, sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+"
+
+# Settings
+set.seed(123)
+N <- 50
+T <- 48
+
+# Hyperparameters (posterior means from previous fit)
+intercept <- 0.25
+w1_mu     <- -0.09
+w_pos_mu  <- -0.04
+w_neg_mu  <-  0.04
+gam_mu    <- 1.5
+sig_mu    <- -0.97
+
+sigma_w0 <- 0.86
+sigma <- c(
+  0.5,  # sigma[1] for w1
+  0.5,  # sigma[2] for w_pos
+  0.5,  # sigma[3] for w_neg
+  0.5,  # sigma[4] for gam
+  0.5   # sigma[5] for sig
+)
+
+
+# Simulate raw parameters
+w0_pr    <- rnorm(N)
+w1_pr    <- rnorm(N)
+w_pos_pr <- rnorm(N)
+w_neg_pr <- rnorm(N)
+gam_pr   <- rnorm(N)
+sig_pr   <- rnorm(N)
+
+# Transform using model structure
+true_params <- tibble(
+  w0    = intercept + sigma_w0    * w0_pr,
+  w1    = w1_mu    + sigma[1]     * w1_pr,
+  w_pos = w_pos_mu + sigma[2]     * w_pos_pr,
+  w_neg = w_neg_mu + sigma[3]     * w_neg_pr,
+  gam   = pnorm(gam_mu + sigma[4] * gam_pr),
+  sig   = exp(sig_mu + sigma[5]   * sig_pr)
+)
+
+# Generate  predictors 
+set.seed(123)
+# Use empirical mean and SD from real PE data
+real_pe_mean <- 4.7
+real_pe_sd   <- 24
+
+# Simulate base PE values using real data characteristics
+pe_base <- matrix(rnorm(N * T, mean = real_pe_mean, sd = real_pe_sd), nrow = N)
+
+# Split into asymmetric PE matrices
+negpe_mat <- ifelse(pe_base < 0, pe_base, 0)
+pospe_mat <- ifelse(pe_base > 0, pe_base, 0)
+
+# Normalize all predictors (z-scoring across subjects/trials)
+normalize <- function(mat) {
+  scale(mat, center = TRUE, scale = TRUE)
+}
+
+fdbk_mat  <- normalize(matrix(rnorm(N * T, mean = 60, sd = 15), nrow = N))  # Feedback stays unchanged
+pospe_mat <- normalize(pospe_mat)
+negpe_mat <- normalize(negpe_mat)
+
+
+
+simulate_subject_recursive <- function(w0, w1, w_pos, w_neg, gam, sig, fdbk, pospe, negpe) {
+  T <- length(fdbk)
+  y <- numeric(T)
+  pos_sum <- 0
+  neg_sum <- 0
+  
+  for (t in 1:T) {
+    pos_sum <- gam * pos_sum + pospe[t]
+    neg_sum <- gam * neg_sum + negpe[t]
+    
+    mu <- w0 + w1 * fdbk[t] + w_pos * pos_sum + w_neg * neg_sum
+    y[t] <- rnorm(1, mu, sig)
+  }
+  
+  y
+}
+
+
+
+Ax_mat <- matrix(0, nrow = N, ncol = T)
+for (i in 1:N) {
+  Ax_mat[i, ] <- simulate_subject_recursive(
+    true_params$w0[i], true_params$w1[i], true_params$w_pos[i],
+    true_params$w_neg[i], true_params$gam[i], true_params$sig[i],
+    fdbk_mat[i, ], pospe_mat[i, ], negpe_mat[i, ]
+  )
+}
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(T, N),
+  Response_fdbk = fdbk_mat,
+  Response_Ax = Ax_mat,
+  Response_PosPE = pospe_mat,
+  Response_NegPE = negpe_mat
+)
+
+compiled_model <- stan_model(model_code = asymmPE_simple_Outcome_anx)
+
+fit_sim <- sampling(compiled_model, data = stan_data,
+                    iter = 1000, warmup = 500, chains = 4, seed = 123)
+posterior <- as.data.frame(fit_sim)
+
+check_coverage <- function(posterior_samples, true_values, param_name) {
+  label_map <- list(
+    w0    = "Intercept",
+    w1    = "Social Feedback",
+    w_pos = "Positive PE",
+    w_neg = "Negative PE",
+    gam   = substitute(gamma),
+    sig   = substitute(sigma)
+  )
+  
+  means  <- apply(posterior_samples, 2, mean)
+  lower  <- apply(posterior_samples, 2, quantile, probs = 0.025)
+  upper  <- apply(posterior_samples, 2, quantile, probs = 0.975)
+  covered <- (true_values >= lower) & (true_values <= upper)
+  
+  df <- tibble(
+    subject = 1:length(true_values),
+    true = true_values,
+    mean = means,
+    lower = lower,
+    upper = upper,
+    covered = covered
+  )
+  
+  pearson_r <- round(cor(df$true, df$mean), 2)
+  
+  # Build plot title and labels dynamically
+  if (param_name %in% c("gam", "sig")) {
+    label_expr <- label_map[[param_name]]
+    
+    p <- ggplot(df, aes(x = true, y = mean)) +
+      annotate("text", x = min(df$true), y = max(df$mean),
+               label = paste0("r = ", pearson_r), hjust = 0, size = 5) +
+      geom_point(size = 2) +
+      geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+      geom_errorbar(aes(ymin = lower, ymax = upper), alpha = 0.4) +
+      labs(
+        title = bquote("Parameter Recovery:" ~ .(label_expr)),
+        x = bquote("True " ~ .(label_expr)),
+        y = bquote("Estimated " ~ .(label_expr))
+      ) +
+      theme_minimal(base_size = 14)
+  } else {
+    label_text <- label_map[[param_name]]
+    
+    p <- ggplot(df, aes(x = true, y = mean)) +
+      annotate("text", x = min(df$true), y = max(df$mean),
+               label = paste0("r = ", pearson_r), hjust = 0, size = 5) +
+      geom_point(size = 2) +
+      geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+      geom_errorbar(aes(ymin = lower, ymax = upper), alpha = 0.4) +
+      labs(
+        title = paste("Parameter Recovery:", label_text),
+        x = paste("True", label_text),
+        y = paste("Estimated", label_text)
+      ) +
+      theme_minimal(base_size = 14)
+  }
+  
+  return(list(df = df, plot = p))
+}
+
+
+results <- list()
+plots <- list()
+
+results$w0    <- check_coverage(posterior[, grep("^w0\\[", names(posterior))],    true_params$w0,    "w0")
+results$w1    <- check_coverage(posterior[, grep("^w1\\[", names(posterior))],    true_params$w1,    "w1")
+results$w_pos <- check_coverage(posterior[, grep("^w_pos\\[", names(posterior))], true_params$w_pos, "w_pos")
+results$w_neg <- check_coverage(posterior[, grep("^w_neg\\[", names(posterior))], true_params$w_neg, "w_neg")
+results$gam   <- check_coverage(posterior[, grep("^gam\\[", names(posterior))],   true_params$gam,   "gam")
+#results$sig   <- check_coverage(posterior[, grep("^sig\\[", names(posterior))],   true_params$sig,   "sig")
+
+# Extract plots
+plots <- map(results, "plot")
+
+
+# Combine and display all plots
+wrap_plots(plots, ncol = 2)
+
+
+
+pearson_r_ci <- function(x, y, conf.level = 0.95) {
+  n <- length(x)
+  r <- cor(x, y)
+  z <- atanh(r)  # Fisher's z
+  se <- 1 / sqrt(n - 3)
+  z_crit <- qnorm(1 - (1 - conf.level) / 2)
+  ci_lower_z <- z - z_crit * se
+  ci_upper_z <- z + z_crit * se
+  ci_lower <- tanh(ci_lower_z)
+  ci_upper <- tanh(ci_upper_z)
+  return(c(r = r, lower = ci_lower, upper = ci_upper))
+}
+
+coverage_summary <- map_df(results, function(res) {
+  df <- res$df
+  r_ci <- pearson_r_ci(df$true, df$mean)
+  tibble(
+    covered        = mean(df$covered, na.rm = TRUE),
+    corr           = r_ci["r"],
+    corr_lower     = r_ci["lower"],
+    corr_upper     = r_ci["upper"]
+  )
+}, .id = "param")
+
+print(coverage_summary)
+
+
+
+
+```
+
+### Group-level Posterior Parameter Estimates for Model 8
+
+#### Mood
+
+```{r model 8 estimated parameter table mood}
+#| label: tbl-model-8-param-mood
+#| tbl-cap: "Group-level Posterior Parameter Estimates - Mood"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load model
+
+model_8_mood <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_fit.rds")
+
+# Summary
+
+stan_summary_df <- summary(model_8_mood)$summary %>%
+
+  as.data.frame() %>%
+
+  rownames_to_column("Parameter")
+
+# HDI
+
+hdi_df <- hdi(model_8_mood) %>%
+
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+
+param_labels <- c(
+
+  mu_w0 = "Intercept",
+
+  mu_w1 = "Social Feedback",
+
+  mu_w_pos = "Positive PE",
+
+  mu_w_neg = "Negative PE",
+
+  mu_gam = "\u03B3",   # γ
+
+  mu_sig = "\u03C3"    # σ
+
+)
+
+# Prepare and round data
+
+final_table <- stan_summary_df %>%
+
+  filter(Parameter %in% names(param_labels)) %>%
+
+  select(Parameter, mean, se_mean, Rhat) %>%
+
+  left_join(hdi_df, by = "Parameter") %>%
+
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+
+  mutate(
+
+    Parameter_label = param_labels[Parameter],
+
+    across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~round(.x, 2))
+
+  ) %>%
+
+  select(Parameter_label, mean, se_mean, HDI_low, HDI_high, Rhat)
+
+# Create flextable
+
+table_mood <- flextable(final_table) %>%
+
+  italic(j = "Parameter_label") %>%
+
+  set_header_labels(
+
+    Parameter_label = "Parameter",
+
+    mean = "Mean",
+
+    se_mean = "SE",
+
+    HDI_low = "HDI Low",
+
+    HDI_high = "HDI High",
+
+    Rhat = "Rhat"
+
+  ) %>%
+
+  bold(part = "header") %>%
+
+  autofit()
+
+table_mood
+
+```
+
+#### Anxiety
+
+```{r model 8 estimated parameter table anxiety}
+#| label: tbl-model-8-param-anx
+#| tbl-cap: "Group-level Posterior Parameter Estimates - Anxiety"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+model_8_anx<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_fit.rds")
+
+# Summary
+
+stan_summary_df <- summary(model_8_anx)$summary %>%
+
+  as.data.frame() %>%
+
+  rownames_to_column("Parameter")
+
+# HDI
+
+hdi_df <- hdi(model_8_anx) %>%
+
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+
+param_labels <- c(
+
+  mu_w0 = "Intercept",
+
+  mu_w1 = "Social Feedback",
+
+  mu_w_pos = "Positive PE",
+
+  mu_w_neg = "Negative PE",
+
+  mu_gam = "\u03B3",   # γ
+
+  mu_sig = "\u03C3"    # σ
+
+)
+
+# Prepare and round data
+
+final_table <- stan_summary_df %>%
+
+  filter(Parameter %in% names(param_labels)) %>%
+
+  select(Parameter, mean, se_mean, Rhat) %>%
+
+  left_join(hdi_df, by = "Parameter") %>%
+
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+
+  mutate(
+
+    Parameter_label = param_labels[Parameter],
+
+    across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~round(.x, 2))
+
+  ) %>%
+
+  select(Parameter_label, mean, se_mean, HDI_low, HDI_high, Rhat)
+
+# Create flextable
+
+table_anx <- flextable(final_table) %>%
+
+  italic(j = "Parameter_label") %>%
+
+  set_header_labels(
+
+    Parameter_label = "Parameter",
+
+    mean = "Mean",
+
+    se_mean = "SE",
+
+    HDI_low = "HDI Low",
+
+    HDI_high = "HDI High",
+
+    Rhat = "Rhat"
+
+  ) %>%
+
+  bold(part = "header") %>%
+
+  autofit()
+
+table_anx
+```
+
+### Model fits for 16 randomly-chosen participants
+
+#### Mood
+
+```{r Mood model fits for 16 randomly-chosen participants. }
+#| label: fig-predicted-vs-reported-mood
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Reported and predicted mood  across trials for 16 randomly-chosen participants. Each panel shows z-scored values across trials. Reported mood is shown in grey and predicted mood in blue. Predicted values are derived from the posterior mean of a hierarchical Bayesian model."
+#| fig-title: "Mood model fits for 16 participants."
+#| fig-cap-location: bottom
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data$Response_H <- scale(data$Response_H)[, 1]
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_mood)
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+# Compute mean predicted values (posterior mean)
+y_pred_mean <- apply(y_pred, c(2,3), mean)  # Mean across posterior samples
+y_pred_df <- as.data.frame(y_pred_mean)
+colnames(y_pred_df) <- paste0("Trial_", 1:T)
+y_pred_df$Random_ID <- unique(data$Random_ID)
+
+
+# Convert Response_Ax to matrix and then to a data frame
+Response_H_matrix <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+Response_H_df <- as.data.frame(Response_H_matrix)
+colnames(Response_H_df) <- paste0("Trial_", 1:T)
+Response_H_df$Random_ID <- unique(data$Random_ID)
+
+# Reshape data into long format
+y_pred_long <- pivot_longer(y_pred_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Predicted_Response")
+Response_H_long <- pivot_longer(Response_H_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Actual_Response")
+
+# Merge actual and predicted data
+plot_data <- left_join(Response_H_long, y_pred_long, by = c("Random_ID", "Trial"))
+
+# Convert Trial to numeric
+plot_data$Trial <- as.numeric(gsub("Trial_", "", plot_data$Trial))
+
+
+# Set seed for reproducibility (optional)
+set.seed(123)
+
+# Sample 10 unique participants
+random_participants <- sample(unique(plot_data$Random_ID), 16)
+# Create a named vector to map IDs to letters
+id_labels <- letters[1:16]
+id_mapping <- setNames(id_labels, random_participants)
+
+# Filter the data and replace Random_ID with the letter labels
+plot_data_subset <- plot_data %>% 
+  filter(Random_ID %in% random_participants) %>%
+  mutate(Random_ID = id_mapping[as.character(Random_ID)])
+
+
+# Plot for the selected participants
+ggplot(plot_data_subset, aes(x = Trial)) +
+  geom_line(aes(y = Actual_Response), color = "grey", size = 1) + 
+  geom_line(aes(y = Predicted_Response), color = "#0072B2", size = 1) +
+  facet_wrap(~ Random_ID, scales = "free_y") +
+  labs(title = "Real Data and Fitted Curve (16 Random Participants)",
+       x = "Trial Number",
+       y = "Mood") +
+  ylim(-3, 3) +
+  theme_minimal()
+
+```
+
+#### Anxiety
+
+```{r Anxiety model fits for 16 randomly-chosen participants. }
+#| label: fig-predicted-vs-reported-anx
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Reported and predicted anxiety  across trials for 16 randomly-chosen participants. Each panel shows z-scored values across trials. Reported anxiety is shown in grey and predicted mood in red. Predicted values are derived from the posterior mean of a hierarchical Bayesian model."
+#| fig-title: "Anxiety model fits for 16 participants."
+#| fig-cap-location: bottom
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_anx)
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+# Compute mean predicted values (posterior mean)
+y_pred_mean <- apply(y_pred, c(2,3), mean)  # Mean across posterior samples
+y_pred_df <- as.data.frame(y_pred_mean)
+colnames(y_pred_df) <- paste0("Trial_", 1:T)
+y_pred_df$Random_ID <- unique(data$Random_ID)
+
+
+# Convert Response_Ax to matrix and then to a data frame
+Response_Ax_matrix <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+Response_Ax_df <- as.data.frame(Response_Ax_matrix)
+colnames(Response_Ax_df) <- paste0("Trial_", 1:T)
+Response_Ax_df$Random_ID <- unique(data$Random_ID)
+
+# Reshape data into long format
+y_pred_long <- pivot_longer(y_pred_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Predicted_Response")
+Response_Ax_long <- pivot_longer(Response_Ax_df, cols = starts_with("Trial_"), names_to = "Trial", values_to = "Actual_Response")
+
+# Merge actual and predicted data
+plot_data <- left_join(Response_Ax_long, y_pred_long, by = c("Random_ID", "Trial"))
+
+# Convert Trial to numeric
+plot_data$Trial <- as.numeric(gsub("Trial_", "", plot_data$Trial))
+
+
+# Set seed for reproducibility (optional)
+set.seed(123)
+
+# Sample 10 unique participants
+random_participants <- sample(unique(plot_data$Random_ID), 16)
+# Create a named vector to map IDs to letters
+id_labels <- letters[1:16]
+id_mapping <- setNames(id_labels, random_participants)
+
+# Filter the data and replace Random_ID with the letter labels
+plot_data_subset <- plot_data %>% 
+  filter(Random_ID %in% random_participants) %>%
+  mutate(Random_ID = id_mapping[as.character(Random_ID)])
+
+
+# Plot for the selected participants
+ggplot(plot_data_subset, aes(x = Trial)) +
+  geom_line(aes(y = Actual_Response), color = "grey", size = 1) + 
+  geom_line(aes(y = Predicted_Response), color = "#C44E52", size = 1) +
+  facet_wrap(~ Random_ID, scales = "free_y") +
+  labs(title = "Real Data and Fitted Curve (16 Random Participants)",
+       x = "Trial Number",
+       y = "Anxiety") +
+  ylim(-3, 3) +
+  theme_minimal()
+
+
+```
+
+### Posterior Predictive Checks for Model 8
+
+We conducted posterior predictive checks (PPCs) to evaluate the fit of Model 8 to participants' mood and anxiety ratings. Using the posterior predictive distribution generated from the fitted Stan model, we compared reported mood and anxiety responses with model-generated predictions across multiple posterior draws. As shown in the histograms, the observed data fall within the range of simulated data, indicating that the models adequately capture key features of the mood and anxiety response distributions across trials. This visual inspection supports the plausibility of the model’s assumptions and predictive performance.
+
+#### Mood
+
+```{r model 8 PPC Model 8 mood}
+#| label: fig-PPC-Model8-mood
+#| fig-cap: "Posterior Predictive Checks Model 8 - Mood"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_mood)
+
+data$Response_H <- scale(data$Response_H)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Mood Model",
+    caption = "Reported mood responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+ppc_plot
+
+```
+
+#### Anxiety
+
+```{r model 8 PPC Model 8 anx}
+#| label: fig-PPC-Model8-anx
+#| fig-cap: "Posterior Predictive Checks Model 8 - Anxiety"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_anx)
+
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Anxiety Model",
+    caption = "Reported anxiety responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+
+ppc_plot
+
+
+```
+
+## Aim 2: Explore how these computations vary with individual differences in mental health symptoms
+
+### Distributions of Social Anxiety (SA) Symptoms
+
+```{r SA distribution}
+#| label: tbl-SA-distribution
+#| tbl-cap: "Distribution of LSAS scores by participant group. LSAS scores were categorized into severity bands based on age group: adolescent-specific thresholds were applied to school participants aged 14–18, and adult-specific thresholds were used for all other groups. Severity categories range from 'No Social Anxiety' to 'Very Severe.' The histogram displays the distribution of total LSAS scores within each group, with color indicating the corresponding severity category."
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+
+# Recode and group the Dataset variable
+data_clean <- data %>%
+  mutate(Group = case_when(
+    Dataset %in% c("Pilot_21", "18_25_Pro") ~ "Prolific participants 18-25",
+    Dataset == "18_25_Com" ~ "Local community participants 18-25 yo",
+    Dataset == "14_18" ~ "School participants 14-18 yo",
+    Dataset == "26_45_Pro" ~ "Prolific participants 26-45",
+    TRUE ~ Dataset  # fallback to original name if unmatched
+  ))
+
+# Define LSAS severity bands for adults
+lsas_adult_bands <- data.frame(
+  min = c(0, 30, 50, 65, 80, 95),
+  max = c(29, 49, 64, 79, 94, Inf),
+  category = c("No SA", "Mild", "Moderate", "Marked", "Severe", "Very Severe")
+)
+
+# Define LSAS severity bands for adolescents
+lsas_adol_bands <- data.frame(
+  min = c(0, 55, 66, 81, 96),
+  max = c(54, 65, 80, 95, Inf),
+  category = c("Mild", "Moderate", "Marked", "Severe", "Very Severe")
+)
+
+# Function to categorize LSAS scores
+categorize_lsas <- function(score, group) {
+  if (group == "School participants 14-18 yo") {
+    bands <- lsas_adol_bands
+  } else {
+    bands <- lsas_adult_bands
+  }
+  cat <- bands$category[findInterval(score, bands$min)]
+  return(cat)
+}
+
+# Apply LSAS categories
+data_clean <- data_clean %>%
+  rowwise() %>%
+  mutate(LSAS_Category = categorize_lsas(LSAS_Total, Group)) %>%
+  ungroup()
+
+# Ensure LSAS_Category is a factor with correct order
+lsas_levels <- c("No SA", "Mild", "Moderate", "Marked", "Severe", "Very Severe")
+lsas_levels_adol <- c("Mild", "Moderate", "Marked", "Severe", "Very Severe")
+
+
+data_clean <- data_clean %>%
+  group_split(Group) %>%
+  map_dfr(function(df) {
+    lvls <- if (unique(df$Group) == "School participants 14-18 yo") {
+      lsas_levels_adol
+    } else {
+      lsas_levels
+    }
+    df$LSAS_Category <- factor(df$LSAS_Category, levels = lvls)
+    df
+  })
+
+
+# Plot: Histogram of LSAS_Total by Group, colored by LSAS_Category
+ggplot(data_clean, aes(x = LSAS_Total, fill = LSAS_Category)) +
+  geom_histogram(binwidth = 10, color = "black", alpha = 0.8) +
+  scale_fill_manual(
+    values = c(
+      "No SA" = "#d9f0a3",
+      "Mild" = "#addd8e",
+      "Moderate" = "#78c679",
+      "Marked" = "#41ab5d",
+      "Severe" = "#238443",
+      "Very Severe" = "#005a32"
+    ),
+    drop = FALSE
+  ) +
+  facet_wrap(~ Group, scales = "free_y") +
+  labs(
+    title = "LSAS Total Score Distribution by Participant Group",
+    x = "LSAS Total Score",
+    y = "Count",
+    fill = "LSAS Category"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 13)
+  )
+
+```
+
+### Distributions of Depression (DEP) Symptoms
+
+```{r DEP distribution}
+#| label: tbl-DEP-distribution
+#| tbl-cap: "Distribution of depression scores by participant group. Depression symptoms were assessed using the CES-D for all groups except school participants aged 14–18, who were assessed using the RCADS. The CES-D scores range from 0 to 60, while RCADS scores range from 0 to 30. Depression categories were determined using standard cutoffs: scores ≥16 on the CES-D and gender- and age-specific thresholds on the RCADS."
+#| tbl-cap-location: bottom
+#| echo: false
+#| warning: false
+#| message: false
+
+# --- Create depression category based on age group and method ---
+data_clean <- data_clean %>%
+  mutate(Depression_Category = case_when(
+    Group == "School participants 14-18 yo" & Depression_Threshold == 1 ~ "Likely Depression",
+    Group == "School participants 14-18 yo" & Depression_Threshold == 0 ~ "No Depression",
+    Group != "School participants 14-18 yo" & Depression_score >= 16 ~ "Likely Depression",
+    Group != "School participants 14-18 yo" & Depression_score < 16 ~ "No Depression",
+    TRUE ~ NA_character_
+  ))
+
+# Update group labels to include measurement instrument
+data_clean <- data_clean %>%
+  mutate(Group = case_when(
+    Group == "School participants 14-18 yo" ~ "School participants 14–18 yo (RCADS)",
+    TRUE ~ paste0(Group, " (CES-D)")
+  ))
+
+# Set factor levels for consistent plotting if desired (optional)
+data_clean <- data_clean %>%
+  mutate(Group = factor(Group))
+
+# Set factor levels for consistent plotting of depression category
+data_clean <- data_clean %>%
+  mutate(Depression_Category = factor(Depression_Category, levels = c("No Depression", "Likely Depression")))
+
+# --- Plot ---
+ggplot(data_clean, aes(x = Depression_score, fill = Depression_Category)) +
+  geom_histogram(binwidth = 4, color = "black", alpha = 0.8) +
+  scale_fill_manual(
+    values = c(
+      "No Depression" = "#a6bddb",         # light blue
+      "Likely Depression" = "#045a8d"      # dark blue
+    ),
+    drop = FALSE
+  ) +
+  facet_wrap(~ Group, scales = "free_x") +  # <--- Change here
+  labs(
+    title = "Depression Score Distribution by Participant Group",
+    x = "Depression Score",
+    y = "Count",
+    fill = "Depression Status"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 13)
+  )
+
+```
+
+### Group-level Posterior Parameter Estimates for Model 8 with SA effects.
+
+The following tables show the group-level parameters estimated from the modified model that includes a main effect for SA, as well as interaction effects of SA for all parameters.
+
+#### Mood
+
+```{r model 8 estimated parameter table SA mood}
+#| label: tbl-model-8-param-SA-mood
+#| tbl-cap: "Group-level Posterior Parameter Estimates for Model 8 with SA effects - Mood"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load model
+
+model_8_SA_mood <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_SA_fit.rds")
+
+# Summary
+stan_summary_df <- summary(model_8_SA_mood)$summary %>%
+ as.data.frame() %>%
+rownames_to_column("Parameter")
+
+# HDI
+hdi_df <- hdi(model_8_SA_mood) %>%
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+param_labels <- c(
+ mu_w0 = "Intercept",
+ mu_w1 = "Social Feedback",
+ mu_w_pos = "Positive PE",
+ mu_w_neg = "Negative PE",
+ mu_gam = "\u03B3",   # γ
+ mu_sig = "\u03C3",   # σ
+ beta_SA = "SA",
+ beta_w0 = "Intercept x SA",
+ beta_w1 = "Social Feedback x SA",
+ beta_w_pos = "Positive PE x SA",
+ beta_w_neg = "Negative PE x SA",
+ beta_gam = "\u03B3 x SA",
+ beta_sig = "\u03C3 x SA")
+
+# Prepare and round data
+
+final_table <- stan_summary_df %>%
+  filter(Parameter %in% names(param_labels)) %>%
+  select(Parameter, mean, se_mean, Rhat) %>%
+  left_join(hdi_df, by = "Parameter") %>%
+  # Round BEFORE selecting/dropping
+ mutate(
+  across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~formatC(.x, format = "f", digits = 2))) %>%
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+  mutate(
+    Parameter = factor(Parameter, levels = names(param_labels)),
+    Parameter_label = param_labels[as.character(Parameter)]
+  ) %>%
+  arrange(Parameter) %>%
+  select(Parameter_label, mean, HDI_low, HDI_high, Rhat)
+
+
+# Create flextable
+
+table_mood <- flextable(final_table) %>%
+ italic(j = "Parameter_label") %>%
+ set_header_labels(
+ Parameter_label = "Parameter",
+ mean = "Mean",
+ HDI_low = "HDI Low",
+ HDI_high = "HDI High",
+ Rhat = "Rhat" ) %>%
+ bold(part = "header") %>%
+ autofit()
+
+table_mood
+
+```
+
+#### Anxiety
+
+```{r model 8 estimated parameter table SA anxiety}
+#| label: tbl-model-8-param-SA-anx
+#| tbl-cap: "Group-level Posterior Parameter Estimates for Model 8 with SA effects - Anxiety"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load model
+
+model_8_SA_anx <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_SA_fit.rds")
+
+# Summary
+
+stan_summary_df <- summary(model_8_SA_anx, digits=2)$summary %>%
+
+  as.data.frame() %>%
+
+  rownames_to_column("Parameter")
+
+# HDI
+
+hdi_df <- hdi(model_8_SA_anx) %>%
+
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+
+param_labels <- c(
+ mu_w0 = "Intercept",
+ mu_w1 = "Social Feedback",
+ mu_w_pos = "Positive PE",
+ mu_w_neg = "Negative PE",
+ mu_gam = "\u03B3",   # γ
+ mu_sig = "\u03C3",   # σ
+ beta_SA = "SA",
+ beta_w0 = "Intercept x SA",
+ beta_w1 = "Social Feedback x SA",
+ beta_w_pos = "Positive PE x SA",
+ beta_w_neg = "Negative PE x SA",
+ beta_gam = "\u03B3 x SA",
+ beta_sig = "\u03C3 x SA"
+
+)
+
+# Prepare and round data
+
+final_table <- stan_summary_df %>%
+  filter(Parameter %in% names(param_labels)) %>%
+  select(Parameter, mean, se_mean, Rhat) %>%
+  left_join(hdi_df, by = "Parameter") %>%
+  # Round BEFORE selecting/dropping
+ mutate(
+  across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~formatC(.x, format = "f", digits = 2))) %>%
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+  mutate(
+    Parameter = factor(Parameter, levels = names(param_labels)),
+    Parameter_label = param_labels[as.character(Parameter)]
+  ) %>%
+  arrange(Parameter) %>%
+  select(Parameter_label, mean, HDI_low, HDI_high, Rhat)
+
+
+# Create flextable
+
+
+table_anx <- flextable(final_table) %>%
+ italic(j = "Parameter_label") %>%
+ set_header_labels(
+ Parameter_label = "Parameter",
+ mean = "Mean",
+ HDI_low = "HDI Low",
+ HDI_high = "HDI High",
+ Rhat = "Rhat" ) %>%
+ bold(part = "header") %>%
+ autofit()
+
+table_anx
+```
+
+### Posterior distributions of Pearson correlations between participant-level parameter estimates and SA scores
+
+To assess the relationship between each model parameter and the SA scores, we computed the posterior distribution of Pearson correlation coefficients ($r$) between each parameter's posterior samples and participants’ SA scores. For each parameter, we report the mean correlation, the 95% highest density interval (HDI), and the probability of direction (i.e., the proportion of the posterior supporting a positive or negative effect). This analysis provides a Bayesian estimate of the strength and certainty of the association between each parameter and SA scores.
+
+#### Mood
+
+```{r model 8 posterior correlation distributions with SA moos}
+#| label: tbl-posterior-corr-distributions-SA-mood
+#| tbl-cap: "Posterior correlations distributions between participant-level parameters and SA scores - Mood"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+# Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+
+# Scale relevant variables
+data$LSAS_Total <- scale(data$LSAS_Total)[, 1]
+
+# Extract SA scores
+SA_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(SA = first(LSAS_Total)) %>%
+  arrange(Random_ID)
+
+# Extract posterior samples
+posterior <- rstan::extract(model_8_SA_mood)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, sa_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, sa_vector)
+  }
+  
+  hdi_r <- HDInterval::hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gam = posterior$gam,
+  sig = posterior$sig
+)
+
+# Labels for the parameters
+param_labels <- c(
+  w0 = "Intercept x SA",
+  w1 = "Social Feedback x SA",
+  w_pos = "Positive PE x SA",
+  w_neg = "Negative PE x SA",
+  gam = "\u03B3 x SA",   # γ
+  sig = "\u03C3 x SA"    # σ
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, sa_vector = SA_scores$SA)
+posterior_r_df <- do.call(rbind, posterior_r_results)
+
+# Add parameter labels
+posterior_r_df$Parameter_label <- param_labels[rownames(posterior_r_df)]
+posterior_r_df <- posterior_r_df[, c("Parameter_label", "mean_r", "hdi_lower", "hdi_upper", "prob_direction")]
+
+# Format table with flextable
+table_mood <- flextable(posterior_r_df) %>%
+  italic(j = "Parameter_label") %>%
+  set_header_labels(
+    Parameter_label = "Correlation",
+    mean_r = "Mean r",
+    hdi_lower = "HDI Low",
+    hdi_upper = "HDI High",
+    prob_direction = "P(Direction)"
+  ) %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_mood
+
+
+```
+
+#### Anxiety
+
+```{r model 8 posterior correlation distributions with SA anxiety}
+#| label: tbl-posterior-corr-distributions-SA-anx
+#| tbl-cap: "Posterior correlations distributions between participant-level parameters and SA scores - Anxiety"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+# Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+
+# Scale relevant variables
+data$LSAS_Total <- scale(data$LSAS_Total)[, 1]
+
+# Extract SA scores
+SA_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(SA = first(LSAS_Total)) %>%
+  arrange(Random_ID)
+
+# Extract posterior samples
+posterior <- rstan::extract(model_8_SA_anx)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, sa_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, sa_vector)
+  }
+  
+  hdi_r <- HDInterval::hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gam = posterior$gam,
+  sig = posterior$sig
+)
+
+# Labels for the parameters
+param_labels <- c(
+  w0 = "Intercept x SA",
+  w1 = "Social Feedback x SA",
+  w_pos = "Positive PE x SA",
+  w_neg = "Negative PE x SA",
+  gam = "\u03B3 x SA",   # γ
+  sig = "\u03C3 x SA"    # σ
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, sa_vector = SA_scores$SA)
+posterior_r_df <- do.call(rbind, posterior_r_results)
+
+# Add parameter labels
+posterior_r_df$Parameter_label <- param_labels[rownames(posterior_r_df)]
+posterior_r_df <- posterior_r_df[, c("Parameter_label", "mean_r", "hdi_lower", "hdi_upper", "prob_direction")]
+
+# Format table with flextable
+table_anx <- flextable(posterior_r_df) %>%
+  italic(j = "Parameter_label") %>%
+  set_header_labels(
+    Parameter_label = "Correlation",
+    mean_r = "Mean r",
+    hdi_lower = "HDI Low",
+    hdi_upper = "HDI High",
+    prob_direction = "P(Direction)"
+  ) %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_anx
+
+```
+
+### Posterior Predictive Checks for Model 8 with SA effects
+
+We performed PPCs to assess the fit of the modified winning model incorporating SA as both a main effect and in interaction terms. As before, we compared observed mood and anxiety responses with model-generated predictions across multiple posterior draws. The checks confirm that the inclusion of SA terms does not compromise model fit and continues to capture key distributional features of the observed data.
+
+#### Mood
+
+```{r model 8 PPC Model 8 w SA mood}
+#| label: fig-PPC-Model8-SA-mood
+#| fig-cap: "Posterior Predictive Checks Model 8 with SA effects - Mood"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_SA_mood)
+
+data$Response_H <- scale(data$Response_H)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Mood Model with SA Effects",
+    caption = "Reported mood responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+
+ppc_plot
+
+
+```
+
+#### Anxiety
+
+```{r model 8 PPC Model 8 w SA anx}
+#| label: fig-PPC-Model8-SA-anx
+#| fig-cap: "Posterior Predictive Checks Model 8 with SA effects - Anxiety"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_SA_anx)
+
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Anxiety Model with SA Effects",
+    caption = "Reported anxiety responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+
+ppc_plot
+
+
+
+```
+
+### Group-level Posterior Parameter Estimates for Model 8 with DEP effects.
+
+The following tables show the group-level parameters estimated from the modified model that includes a main effect for Depression Symptoms (DEP), as well as interaction effects of DEP for all parameters.
+
+#### Mood
+
+```{r model 8 estimated parameter table DEP mood}
+#| label: tbl-model-8-param-DEP-mood
+#| tbl-cap: "Group-level Posterior Parameter Estimates for Model 8 with DEP effects - Mood"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+# Load model
+
+model_8_DEP_mood <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_DEP_fit.rds")
+
+# Summary
+
+stan_summary_df <- summary(model_8_DEP_mood)$summary %>%
+
+  as.data.frame() %>%
+
+  rownames_to_column("Parameter")
+
+# HDI
+
+hdi_df <- hdi(model_8_DEP_mood) %>%
+
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+
+param_labels <- c(
+
+  mu_w0 = "Intercept",
+
+  mu_w1 = "Social Feedback",
+
+  mu_w_pos = "Positive PE",
+
+  mu_w_neg = "Negative PE",
+
+  mu_gam = "\u03B3",   # γ
+
+  mu_sig = "\u03C3",   # σ
+
+  beta_Dep = "DEP",
+
+  beta_w0 = "Intercept x DEP",
+
+  beta_w1 = "Social Feedback x DEP",
+
+  beta_w_pos = "Positive PE x DEP",
+
+  beta_w_neg = "Negative PE x DEP",
+
+  beta_gam = "\u03B3 x DEP",
+
+  beta_sig = "\u03C3 x DEP"
+
+)
+
+# Prepare and round data
+
+final_table <- stan_summary_df %>%
+
+  filter(Parameter %in% names(param_labels)) %>%
+
+  select(Parameter, mean, se_mean, Rhat) %>%
+
+  left_join(hdi_df, by = "Parameter") %>%
+
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+
+  mutate(
+
+    Parameter = factor(Parameter, levels = names(param_labels)),  # order by param_labels
+
+    Parameter_label = param_labels[as.character(Parameter)],
+
+    across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~round(.x, 2))
+
+  ) %>%
+
+  arrange(Parameter) %>%  # enforce row order
+
+  select(Parameter_label, mean, se_mean, HDI_low, HDI_high, Rhat)
+
+# Create flextable
+
+table_mood <- flextable(final_table) %>%
+
+  italic(j = "Parameter_label") %>%
+
+  set_header_labels(
+
+    Parameter_label = "Parameter",
+
+    mean = "Mean",
+
+    HDI_low = "HDI Low",
+
+    HDI_high = "HDI High",
+
+    Rhat = "Rhat"
+
+  ) %>%
+
+  bold(part = "header") %>%
+
+  autofit()
+
+table_mood
+```
+
+#### Anxiety
+
+```{r model 8 estimated parameter table DEP anx}
+#| label: tbl-model-8-param-DEP-anx
+#| tbl-cap: "Group-level Posterior Parameter Estimates for Model 8 with DEP effects - Anxiety"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+
+# Load model
+model_8_DEP_anx <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_DEP_fit.rds")
+
+# Summary
+stan_summary_df <- summary(model_8_DEP_anx)$summary %>%
+  as.data.frame() %>%
+  rownames_to_column("Parameter")
+
+# HDI
+hdi_df <- hdi(model_8_DEP_anx) %>%
+  rename(HDI_low = CI_low, HDI_high = CI_high)
+
+# Parameter labels
+param_labels <- c(
+  mu_w0 = "Intercept",
+  mu_w1 = "Social Feedback",
+  mu_w_pos = "Positive PE",
+  mu_w_neg = "Negative PE",
+  mu_gam = "\u03B3",   # γ
+  mu_sig = "\u03C3",   # σ
+  beta_Dep = "DEP",
+  beta_w0 = "Intercept x DEP",
+  beta_w1 = "Social Feedback x DEP",
+  beta_w_pos = "Positive PE x DEP",
+  beta_w_neg = "Negative PE x DEP",
+  beta_gam = "\u03B3 x DEP",
+  beta_sig = "\u03C3 x DEP"
+)
+
+# Prepare and round data
+final_table <- stan_summary_df %>%
+  filter(Parameter %in% names(param_labels)) %>%
+  select(Parameter, mean, se_mean, Rhat) %>%
+  left_join(hdi_df, by = "Parameter") %>%
+  select(Parameter, mean, se_mean, HDI_low, HDI_high, Rhat) %>%
+  mutate(
+    Parameter = factor(Parameter, levels = names(param_labels)),  # order by param_labels
+    Parameter_label = param_labels[as.character(Parameter)],
+    across(c(mean, se_mean, HDI_low, HDI_high, Rhat), ~round(.x, 2))
+  ) %>%
+  arrange(Parameter) %>%  # enforce row order
+  select(Parameter_label, mean, se_mean, HDI_low, HDI_high, Rhat)
+
+# Create flextable
+table_anx <- flextable(final_table) %>%
+  italic(j = "Parameter_label") %>%
+  set_header_labels(
+    Parameter_label = "Parameter",
+    mean = "Mean",
+    HDI_low = "HDI Low",
+    HDI_high = "HDI High",
+    Rhat = "Rhat"
+  ) %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_anx
+```
+
+### Posterior distributions of Pearson correlations between participant-level parameter estimates and DEP scores
+
+To assess the relationship between each model parameter and the DEP scores, we computed the posterior distribution of Pearson correlation coefficients ($r$) between each parameter's posterior samples and participants’ DEP scores.
+
+#### Mood
+
+```{r model 8 posterior correlation distributions with DEP mood}
+#| label: tbl-posterior-corr-distributions-DEP-mood
+#| tbl-cap: "Posterior correlations distributions between participant-level parameters and DEP scores - Mood"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+# Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+
+# Scale relevant variables
+data$Depression_score_scaled <- scale(data$Depression_score_scaled)[, 1]
+
+# Extract SA scores
+DEP_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(DEP = first(Depression_score_scaled)) %>%
+  arrange(Random_ID)
+
+# Extract posterior samples
+posterior <- rstan::extract(model_8_DEP_mood)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, DEP_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, DEP_vector)
+  }
+  
+  hdi_r <- HDInterval::hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gam = posterior$gam,
+  sig = posterior$sig
+)
+
+# Labels for the parameters
+param_labels <- c(
+  w0 = "Intercept x DEP",
+  w1 = "Social Feedback x DEP",
+  w_pos = "Positive PE x DEP",
+  w_neg = "Negative PE x DEP",
+  gam = "\u03B3 x DEP",   # γ
+  sig = "\u03C3 x DEP"    # σ
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, DEP_vector = DEP_scores$DEP)
+posterior_r_df <- do.call(rbind, posterior_r_results)
+
+# Add parameter labels
+posterior_r_df$Parameter_label <- param_labels[rownames(posterior_r_df)]
+posterior_r_df <- posterior_r_df[, c("Parameter_label", "mean_r", "hdi_lower", "hdi_upper", "prob_direction")]
+
+# Format table with flextable
+table_mood <- flextable(posterior_r_df) %>%
+  italic(j = "Parameter_label") %>%
+  set_header_labels(
+    Parameter_label = "Correlation",
+    mean_r = "Mean r",
+    hdi_lower = "HDI Low",
+    hdi_upper = "HDI High",
+    prob_direction = "P(Direction)"
+  ) %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_mood
+
+
+```
+
+#### Anxiety
+
+```{r model 8 posterior correlation distributions with DEP anx}
+#| label: tbl-posterior-corr-distributions-DEP-anx
+#| tbl-cap: "Posterior correlations distributions between participant-level parameters and DEP scores - Anxiety"
+#| tbl-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+# Load Data
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+
+# Ensure data is sorted by Random_ID and trial within each participant
+data <- data[order(data$Random_ID), ]
+
+# Extract unique participant IDs in order
+participant_ids <- unique(data$Random_ID)
+
+# Scale relevant variables
+data$Depression_score_scaled <- scale(data$Depression_score_scaled)[, 1]
+
+# Extract SA scores
+DEP_scores <- data %>%
+  group_by(Random_ID) %>%
+  summarise(DEP = first(Depression_score_scaled)) %>%
+  arrange(Random_ID)
+
+# Extract posterior samples
+posterior <- rstan::extract(model_8_DEP_anx)
+
+# Function to compute posterior distribution of r for a parameter
+compute_posterior_r <- function(param_matrix, DEP_vector) {
+  n_samples <- nrow(param_matrix)
+  r_vals <- numeric(n_samples)
+  
+  for (i in 1:n_samples) {
+    param_sample <- param_matrix[i, ]
+    r_vals[i] <- cor(param_sample, DEP_vector)
+  }
+  
+  hdi_r <- HDInterval::hdi(r_vals, credMass = 0.95)
+  direction_prob <- if (mean(r_vals) < 0) {
+    mean(r_vals < 0)
+  } else {
+    mean(r_vals > 0)
+  }
+  
+  data.frame(
+    mean_r = round(mean(r_vals), 3),
+    hdi_lower = round(hdi_r[1], 3),
+    hdi_upper = round(hdi_r[2], 3),
+    prob_direction = round(direction_prob * 100, 1)
+  )
+}
+
+# List of parameters to check
+param_list <- list(
+  w0 = posterior$w0,
+  w1 = posterior$w1,
+  w_pos = posterior$w_pos,
+  w_neg = posterior$w_neg,
+  gam = posterior$gam,
+  sig = posterior$sig
+)
+
+# Labels for the parameters
+param_labels <- c(
+  w0 = "Intercept x DEP",
+  w1 = "Social Feedback x DEP",
+  w_pos = "Positive PE x DEP",
+  w_neg = "Negative PE x DEP",
+  gam = "\u03B3 x DEP",   # γ
+  sig = "\u03C3 x DEP"    # σ
+)
+
+# Apply function to each parameter
+posterior_r_results <- lapply(param_list, compute_posterior_r, DEP_vector = DEP_scores$DEP)
+posterior_r_df <- do.call(rbind, posterior_r_results)
+
+# Add parameter labels
+posterior_r_df$Parameter_label <- param_labels[rownames(posterior_r_df)]
+posterior_r_df <- posterior_r_df[, c("Parameter_label", "mean_r", "hdi_lower", "hdi_upper", "prob_direction")]
+
+# Format table with flextable
+table_anx <- flextable(posterior_r_df) %>%
+  italic(j = "Parameter_label") %>%
+  set_header_labels(
+    Parameter_label = "Correlation",
+    mean_r = "Mean r",
+    hdi_lower = "HDI Low",
+    hdi_upper = "HDI High",
+    prob_direction = "P(Direction)"
+  ) %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_anx
+
+
+
+```
+
+### Posterior Predictive Checks for Model 8 with DEP effects
+
+We performed PPCs to assess the fit of the modified winning model incorporating DEP as both a main effect and in interaction terms. The checks confirm that the inclusion of DEP terms does not compromise model fit and continues to capture key distributional features of the observed data.
+
+#### Mood
+
+```{r model 8 PPC Model 8 w DEP mood}
+#| label: fig-PPC-Model8-DEP-mood
+#| fig-cap: "Posterior Predictive Checks Model 8 with DEP effects - Mood"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_DEP_mood)
+
+data$Response_H <- scale(data$Response_H)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Mood Model with DEP Effects",
+    caption = "Reported mood responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+
+ppc_plot
+
+```
+
+#### Anxiety
+
+```{r model 8 PPC Model 8 w DEP anx}
+#| label: fig-PPC-Model8-DEP-anx
+#| fig-cap: "Posterior Predictive Checks Model 8 with DEP effects - Anxiety"
+#| fig-cap-location: top
+#| echo: false
+#| warning: false
+#| message: false
+
+data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+posterior_samples <- rstan::extract(model_8_DEP_anx)
+
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+
+# Predicted values (posterior predictive distribution)
+y_pred <- posterior_samples$y_pred
+
+library(bayesplot)
+y_obs <- matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE)
+# Select a subset of posterior draws for plotting
+set.seed(123)
+draws_to_plot <- sample(1:dim(y_pred)[1], 20)  # e.g. 20 random posterior draws
+y_pred_subset <- y_pred[draws_to_plot,,]        # Subset of y_rep
+
+# Flatten y_obs for histogram comparison
+y_obs_flat <- as.vector(y_obs)
+
+# Convert y_rep_subset into a matrix: draws x (N*T)
+y_pred_matrix <- apply(y_pred_subset, 1, function(mat) as.vector(t(mat)))
+y_pred_matrix <- t(y_pred_matrix)  # make it draws x obs
+
+
+
+# Set a custom color scheme
+color_scheme_set("blue") 
+# Create the PPC histogram
+ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
+  labs(
+    title = "Posterior Predictive Check: Anxiety Model with DEP Effects",
+    caption = "Reported anxiety responses (dark blue) vs. replicated responses from 8 posterior draws (light blue)."
+  ) +
+  theme_minimal(base_size = 12)
+
+
+ppc_plot
+
+
+```
+
+To be added:
+
+-   traceplots
+
+-   parameter recovery?
+
+## References
