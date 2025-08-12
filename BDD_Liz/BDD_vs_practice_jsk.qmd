@@ -1,0 +1,655 @@
+---
+title: "BDD_vs_practice.qmd"
+format: html
+editor: visual
+---
+
+[**Practice analyses of vignette data (ran chi-square and power calculations) with Isobel and independently 04/06/2025**]{.underline}
+
+**Summary of steps below:**
+
+For prelim power analysis, only need vignette data (as don't need to look at other variables, diagnoses rankings, gender, order etc).
+
+-   Merged all v2 OCD cvs files together into one file and all v2 BDD csv files together
+
+-   For all columns where OCD/BDD compared to another diagnosis - use these and create variable in which IF (forced choice comparison e.g. BDD v dep) and (forced choice comparison e.g. BDD v GAD and (forced choice comparison e.g. BDD v SAD) etc. for all where OCD/BDD named = OCD/BDD then 'correct diagnosis' (0=incorrect; 1=correct)
+
+-   We created the BDD/OCD correct variable for OCD and BDD data set v2
+
+    After meeting I independently:
+
+-   Merged all OCD cvs files together into one file, and all BDD csv files together into R for version 1 (OCD/BDD_v1)
+
+-   As above, for all columns where OCD/BDD compared to another diagnosis - created a variable in which IF X AND X AND X … all = OCD/BDD then ‘correct diagnosis’ (factor variables - 0 incorrect; 1 correct)
+
+-   Created the BDD/OCD correct (y=1/n=0) variable for OCD and BDD data set v1
+
+-   Merged BDD V1 and V2 data, and OCD V1 and V2 data 
+
+-   Merged BDD v1 and v2 and OCD v1 and v2 by participant ID; so have BDD vignette data and OCD vignette data for each participant in one row
+
+-   Randomly selected data for 32 participants (20%) for chi-square and power calculations
+
+-   Created 2x2 contingency table (BDD y/n; OCD y/n - using top ranking) and conducted chi-square test 
+
+-   Did power calculation based on our current effect size in chi-square with 20% sample, and power calculations with different small/small-medium/medium effect sizes
+
+**11/06/2025 - McNemar's test and power calculation for this - see end of script below, got stuck as couldn't find function**
+
+**16/06/2025 - analyses on the random sample n=32 using unprocessed variables (list response, and each pairwise comparison for OCD/BDD)**
+
+*note: to create R script \`\`\`{r} and then press enter\
+\
+*
+
+```{r}
+
+library(here)
+library(tidyverse)
+library(BradleyTerry2)
+
+# Loading in V2 BDD and OCD data 
+
+here::i_am("BDD_vs_practice_jsk.qmd") #setting working directory 
+data_pathBDD <- here("BDD_vs_v2/BDD")
+data_pathOCD <- here("BDD_vs_v2/OCD")
+
+# get a list of all BDD csv files 
+csv_filesBDD <- list.files(path = data_pathBDD, pattern = "*.csv")
+
+# get a list of all OCD csv files 
+csv_filesOCD <- list.files(path = data_pathOCD, pattern = "*.csv")
+
+# read in all BDD files together into one big dataframe
+all_BDD <- csv_filesBDD %>% 
+  map_df(~read_csv(here(data_pathBDD, .)))
+
+# read in OCD files together into one big dataframe
+all_OCD <- csv_filesOCD %>% 
+  map_df(~read_csv(here(data_pathOCD, .)))
+
+# remove end of file and NA responses
+all_BDD <- all_BDD %>% filter(`Event Index` != "END OF FILE", !is.na(`Event Index`))
+# remove end of file and NA responses
+all_OCD <- all_OCD %>% filter(`Event Index` != "END OF FILE", !is.na(`Event Index`))
+
+
+# create new variable based on BDD ranking all correct
+all_BDD <- all_BDD %>% 
+  mutate(BDD_correct = case_when(
+    `BDD v Dep object-30   Quantised` == 1 & `BDD vs ED object-75   Quantised` == 1 & `GAD v BDD object-46   Quantised` == 2 & `OCD vs BDD object-67   Quantised` == 2 & `SAD vs BDD object-58   Quantised` == 2 ~ 1,
+    TRUE ~ 0))
+
+# merge two cols in OCD data set where you need to collapse them into eachother because NAs due to diff wording
+all_OCD <- all_OCD %>% mutate(ED_v_OCD_71_Quantised_Merged = coalesce(`ED v OCD object-71   Quantised`, `ED v OCD object-71    Quantised`)) %>% 
+  select(-c(`ED v OCD object-71   Quantised`, `ED v OCD object-71    Quantised`))
+
+# create new variable based on OCD ranking all correct
+all_OCD <- all_OCD %>% 
+  mutate(OCD_correct = case_when(
+    `OCD v dep object-26   Quantised` == 1 & `OCD v SAD object-54   Quantised` == 1 & `OCD vs BDD object-67   Quantised` == 1 & ED_v_OCD_71_Quantised_Merged == 2 & `GAD vs OCD object-42   Quantised` == 2 ~ 1,
+    TRUE ~ 0)) 
+
+
+# test <- read_csv(here(data_pathBDD, "BDD_vs_v2_BDDmale_2nd.csv"))
+# test2 <- read_csv(here(data_pathBDD, "BDD_vs_v2_BDDmale_1st.csv"))
+# test3 <- read_csv(here(data_pathBDD, "BDD_vs_v2_BDDfemale_2nd.csv"))
+# test4 <- read_csv(here(data_pathBDD, "BDD_vs_v2_BDDfemale_1st.csv"))
+# 
+# # check which column names are different
+# all_BDD %>% 
+#   select(which(!(colnames(all_BDD) %in% colnames(test2))))
+
+
+# Now loading in v1 OCD and BDD data 
+
+here::i_am("BDD_vs_practice_jsk.qmd") #setting working directory 
+data_pathBDD <- here("BDD_vs_v1/BDD_v1")
+data_pathOCD <- here("BDD_vs_v1/OCD_v1")
+
+# get a list of all BDD csv files 
+csv_filesBDD <- list.files(path = data_pathBDD, pattern = "*.csv")
+
+# get a list of all OCD csv files 
+csv_filesOCD <- list.files(path = data_pathOCD, pattern = "*.csv")
+
+# read in all v1 BDD files together into one big dataframe
+all_BDD_v1 <- csv_filesBDD %>% 
+  map_df(~read_csv(here(data_pathBDD, .)))
+
+# read in OCD v1 files together into one big dataframe
+all_OCD_v1 <- csv_filesOCD %>% 
+  map_df(~read_csv(here(data_pathOCD, .)))
+
+# remove end of file and NA responses
+all_BDD_v1 <- all_BDD_v1 %>% filter(`Event Index` != "END OF FILE", !is.na(`Event Index`))
+# remove end of file and NA responses
+all_OCD_v1 <- all_OCD_v1 %>% filter(`Event Index` != "END OF FILE", !is.na(`Event Index`))
+
+# create new variable based on BDD ranking all correct in BDD v1
+all_BDD_v1 <- all_BDD_v1 %>% 
+  mutate(BDD_correct = case_when(
+    `BDD v Dep object-30   Quantised` == 1 & `BDD vs ED object-75   Quantised` == 1 & `GAD v BDD object-46   Quantised` == 2 & `OCD vs BDD object-67   Quantised` == 2 & `SAD vs BDD object-58   Quantised` == 2 ~ 1,
+    TRUE ~ 0))
+
+# merge two cols in OCD v1 data set where you need to collapse them into eachother because NAs due to diff wording
+all_OCD_v1 <- all_OCD_v1 %>% mutate(ED_v_OCD_71_Quantised_Merged = coalesce(`ED v OCD object-71   Quantised`, `ED v OCD object-71    Quantised`)) %>% 
+  select(-c(`ED v OCD object-71   Quantised`, `ED v OCD object-71    Quantised`))
+
+# create new variable based on OCD ranking all correct in OCD v1
+all_OCD_v1 <- all_OCD_v1 %>% 
+  mutate(OCD_correct = case_when(
+    `OCD v dep object-26   Quantised` == 1 & `OCD v SAD object-54   Quantised` == 1 & `OCD vs BDD object-67   Quantised` == 1 & ED_v_OCD_71_Quantised_Merged == 2 & `GAD vs OCD object-42   Quantised` == 2 ~ 1,
+    TRUE ~ 0)) 
+
+# merging BDD v1 and v2 data frames 
+BDD_v1_and_v2 <- rbind(all_BDD, all_BDD_v1)
+
+# merging OCD v1 and v2 data frames 
+OCD_v1_and_v2 <- rbind(all_OCD, all_OCD_v1)
+OCD_v1_and_v2 <- OCD_v1_and_v2[,colnames(OCD_v1_and_v2) != colnames(OCD_v1_and_v2)[55]]
+OCD_v1_and_v2 <- OCD_v1_and_v2[,colnames(OCD_v1_and_v2) != colnames(OCD_v1_and_v2)[70]]
+                              
+OCD_v1_and_v2 <- OCD_v1_and_v2 %>% 
+  # recode since the SAD-BDD comparison didn't work correctly and data vor ED v OCD seems to be missing
+  mutate(
+    `SAD vs BDD object-58   Quantised` = ifelse(substring(`SAD vs BDD object-58`,  1, 3) == "Soc", as.character(1), as.character(2))
+  )
+
+# merging BDD and OCD v1 and v2 data frames using participant public ID 
+merged_BDD_OCD_both_versions <- merge(BDD_v1_and_v2, OCD_v1_and_v2, by = "Participant Public ID")
+
+# selecting random sample of 20% of participants to run chi-square for power analysis. 
+
+set.seed(123)  # For reproducibility so selects same 20% if rerun 
+
+# Calculate 20% of 161 participants
+sample_size <- floor(0.2 * 161)  # = 32
+
+# Randomly select 32 participants (rows)
+BDD_OCD_random_20_percent <- merged_BDD_OCD_both_versions[sample(nrow(merged_BDD_OCD_both_versions), sample_size), ]
+
+# Create 2x2 contingency table in the 32 ps 
+contingency_table <- table(BDD_OCD_random_20_percent$BDD_correct, 
+                           BDD_OCD_random_20_percent$OCD_correct)
+rownames(contingency_table) <- c("BDD_Incorrect", "BDD_Correct")
+colnames(contingency_table) <- c("OCD_Incorrect", "OCD_Correct")
+
+# View the 2x2 table
+print(contingency_table)
+
+# Chi-square test using the 2x2 table
+chisq_result <- chisq.test(contingency_table)
+print(chisq_result)
+
+# intall power package
+
+#install.packages("pwr")
+library(pwr)
+
+# calculated power with actual 32 sample size and medium effect size
+pwr.chisq.test(w = 0.3, df = 1, N = 32, sig.level = 0.05)
+
+# our power was 0.3964384
+
+# calculated effect size with actual 32 sample size and medium effect size
+chisq_val <- 0.3401
+N <- 32
+
+w <- sqrt(chisq_val / N)
+w
+
+# our effect size was 0.1030928
+
+# based on this effect size, calculated sample size would need (using below it is 739)
+result <- pwr.chisq.test(w = w, df = 1, sig.level = 0.05, power = 0.8)
+total_N_needed <- ceiling(result$N)
+total_N_needed
+
+# given very high number of participants, I calculated sample size would need with 0.3 (medium effect size), 0.05 sig level and 0.8 power 
+pwr.chisq.test(w = 0.3, df = 1, sig.level = 0.05, power = 0.8)
+
+# would need 87 participants based on above
+
+# Calculated sample size would need with 0.2 (small-medium effect size), 0.05 sig level and 0.8 power 
+pwr.chisq.test(w = 0.2, df = 1, sig.level = 0.05, power = 0.8)
+
+# would need 196 participants based on above
+
+# Calculated sample size would need with 0.15 (small effect size), 0.05 sig level and 0.8 power 
+pwr.chisq.test(w = 0.15, df = 1, sig.level = 0.05, power = 0.8)
+
+# would need 349 participants based on above
+
+# McNemar's test below - as it is the same participants idetifying both BDD and OCD 
+
+mcnemar_result <- mcnemar.test(contingency_table)
+
+print(mcnemar_result)
+
+# McNemar's power calculation based on n=32 pilot
+#install.packages("powerMediation")
+library(powerMediation)
+
+# Calculate proportions of discordant pairs (p1 and p2)
+
+a <- 12 # BDD correct, OCD correct 
+b <- 7 # BDD correct, OCD incorrect
+c <- 6 # BDD incorrect, OCD correct
+d <- 7 # BDD incorrect, OCD incorrect 
+
+n_total <- a + b + c + d
+print (n_total)
+
+# Calculate p1 and p2
+
+p1 <- b / n_total # BDD correct, OCD incorrect
+p2 <- c / n_total # BDD incorrect, OCD correct
+
+print(p1)
+print(p2)
+
+
+# Calculate number of the 32 who selected BDD from list for BDD vignette
+
+sum(BDD_OCD_random_20_percent$`Diagnosis  object-79 Quantised.x`== 5)
+
+# Calculate number of the 32 who selected other diagnoses from list for BDD vignette
+
+sum(BDD_OCD_random_20_percent$`Diagnosis  object-79 Quantised.x`== 6)
+
+
+# Calculate number of the 32 who selected OCD from list for OCD vignette
+
+sum(BDD_OCD_random_20_percent$`Diagnosis  object-79 Quantised.y`== 4)
+
+
+# Calculate number of the 32 who selected other diagnoses from list for OCD vignette
+
+sum(BDD_OCD_random_20_percent$`Diagnosis  object-79 Quantised.y`== 6)
+
+
+
+# Calculate number of the 32 where BDD won against depression
+
+sum(BDD_OCD_random_20_percent$`BDD v Dep object-30   Quantised.x` == 1)
+
+# Calculate number of the 32 where BDD won against GAD
+
+sum(BDD_OCD_random_20_percent$`GAD v BDD object-46   Quantised.x`== 2)
+
+# Calculate number of the 32 where BDD won against SAD
+
+sum(BDD_OCD_random_20_percent$`SAD vs BDD object-58   Quantised.x`==2)
+
+# Calculate number of the 32 where BDD won against OCD
+
+sum(BDD_OCD_random_20_percent$`OCD vs BDD object-67   Quantised.x` == 2)
+
+# Calculate number of the 32 where BDD won against ED
+
+sum(BDD_OCD_random_20_percent$`BDD vs ED object-75   Quantised.x` == 1)
+
+# Calculate number of the 32 where OCD won against depression
+
+sum(BDD_OCD_random_20_percent$`OCD v dep object-26   Quantised.y`== 1)
+
+# Calculate number of the 32 where OCD won against GAD
+
+sum(BDD_OCD_random_20_percent$`GAD vs OCD object-42   Quantised.y` == 2)
+
+# Calculate number of the 32 where OCD won against SAD
+
+sum(BDD_OCD_random_20_percent$`OCD v SAD object-54   Quantised.y`== 1)
+
+# Calculate number of the 32 where OCD won against BDD
+
+sum(BDD_OCD_random_20_percent$`OCD vs BDD object-67   Quantised.y`== 1)
+
+# Calculate number of the 32 where OCD won against ED
+
+sum(BDD_OCD_random_20_percent$ED_v_OCD_71_Quantised_Merged == 2)
+
+```
+
+### Notes from Johannes
+
+It seems that in the above, you have defined 'correctness' as the correct item winning every contest that it is involved in. But this is a sufficient of winning, not a necessary condition, bringing a high standard of proof. In forced choice, people do and will make mistakes and create inconsistencies (e.g., "I think depression is more likely than BDD and anxiety is more likely than BDD, but BDD is more likely than anxiety"). Your code basically means that participants are never allowed to be inconsistent at all if the item you expect to win (i.e., BDD or OCD) is involved.
+
+For this reason, it might make more sense to count the number of 'wins' that any diagnosis received in forced choice, and then you score correct if BDD is the one with the highest number of wins. You do need to deal with ties though - I think, practically, a sensible solution for a chi-square test power analysis is to count each tie as a 'win', since the diagnosis would be among the most highly relevant ones to the clinician. Alternatively, you could use the number of wins assigned to BDD as a continuous dependent variable and run a (paired) t-test comparing this number between the BDD and OCD vignettes directly.
+
+```{r}
+
+# save the items assigned correct and incorrect by you above to see how our methods disagree
+correctness_liz <- BDD_v1_and_v2 %>%
+  select(`Participant Public ID`, BDD_correct) %>% 
+  merge(select(OCD_v1_and_v2, `Participant Public ID`, OCD_correct)) %>% 
+  rename("subj" = "Participant Public ID")
+
+# first, we want our data in 'long' format
+# one column for each item being compared, one for which item won.
+
+# determine all the relevant columns
+target_cols1 <- colnames(BDD_v1_and_v2)[grepl(" v", colnames(BDD_v1_and_v2)) & grepl("Quantised", colnames(BDD_v1_and_v2))]
+  
+out1 <- BDD_v1_and_v2 %>% 
+  # pivot into long format
+  pivot_longer(cols = all_of(target_cols1), names_to = 'item', values_to = 'win') %>% 
+  rename("subj" = "Participant Public ID") %>% 
+  # select subset for easier display
+  separate_wider_delim('item', delim = " ", names = c("item1", "vs", "item2"), too_many = "drop") %>% 
+  dplyr::select(subj, item1, item2, win, BDD_correct) %>% 
+  mutate(
+    winner_item = str_to_upper(paste(ifelse(win == 1, item1, item2), "_BDD", sep = "")))
+
+# repeat for OCD
+
+# determine all the relevant columns
+target_cols2 <- colnames(OCD_v1_and_v2)[(grepl(" v", colnames(OCD_v1_and_v2)) | grepl("_v", colnames(OCD_v1_and_v2))) & grepl("Quantised", colnames(OCD_v1_and_v2))]
+
+out2 <- OCD_v1_and_v2 %>% 
+  # pivot into long format
+  pivot_longer(cols = all_of(target_cols2), names_to = 'item', values_to = 'win') %>% 
+  rename("subj" = "Participant Public ID") %>% 
+  mutate(item = ifelse(item == "ED_v_OCD_71_Quantised_Merged", "ED v OCD", item)) %>% 
+  # select subset for easier display
+  separate_wider_delim('item', delim = " ", names = c("item1", "vs", "item2"), too_many = "drop") %>% 
+  dplyr::select(subj, item1, item2, win, OCD_correct) %>% 
+  mutate(
+    winner_item = str_to_upper(paste(ifelse(win == 1, item1, item2), "_OCD", sep = "")))
+
+out_BTM <- out1 %>% 
+  mutate(condition = "BDD") %>% 
+  select(-BDD_correct) %>% 
+  rbind(out2 %>% 
+          mutate(condition = "OCD") %>% 
+          select(-OCD_correct))
+
+# get a table of wins per item, per participant, for BDD
+t1 <- table(out1$subj, out1$winner_item) %>% 
+  as.data.frame.table() %>% 
+  pivot_wider(id_cols = Var1, names_from = Var2,values_from = Freq) %>% 
+  rename(subj = Var1)
+
+# same for OCD
+t2 <- table(out2$subj, out2$winner_item) %>% 
+  as.data.frame.table() %>% 
+  pivot_wider(id_cols = Var1, names_from = Var2,values_from = Freq) %>% 
+  rename(subj = Var1)
+
+# merge them together in one data frame
+# read the column names (e.g., ED_OCD) as 'the number of wins given to eating disorders in the OCD condition)
+wins_table <- merge(t1, t2)
+
+
+BDD_OCD_random_20_percent <- merged_BDD_OCD_both_versions[sample(nrow(merged_BDD_OCD_both_versions), sample_size), ]
+
+# Get only those participants that you selected above
+sampled_participants <- BDD_OCD_random_20_percent$`Participant Public ID`
+
+wins_table_subset <- wins_table[wins_table$subj %in% sampled_participants,]
+```
+
+Now, look at the table we have obtained of all wins:
+
+```{r}
+wins_table_subset
+
+# add a half to SAD and BDD in the OCD condition, since these values are NA and we need to ensure that the total number of ranks adds up to 15
+#wins_table_subset$SAD_OCD = wins_table_subset$SAD_OCD + .5
+#wins_table_subset$BDD_OCD = wins_table_subset$BDD_OCD + .5
+#wins_table_subset <- select(wins_table_subset, -NA_OCD)
+
+
+# A striking feature is that GAD seems to be doing very well regardless of condition, maybe even better than OCD or BDD.
+
+# get a plot of mean wins by column
+means = wins_table_subset %>% select(-subj) %>% colMeans()
+
+# get standard errors
+n = nrow(wins_table_subset)
+se = c()
+for(i in colnames(wins_table_subset)){
+  if(i != "subj"){
+    se = c(se, sd(wins_table_subset[,i]) / sqrt(n))
+  }
+}
+
+# there seems to be a pretty noticeable pattern here. In the BDD condition, BDD seems to be the winner mostly. For the OCD-condition, GAD actually outperforms OCD. This is interesting!
+
+ggplot() +
+  geom_point(aes(x = colnames(select(wins_table_subset, -subj)), y = means)) +
+  geom_errorbar(aes(x = colnames(select(wins_table_subset, -subj)), ymin = means - 2* se, ymax = means + 2*se)) +
+  xlab("Disorder/Condition")+
+  ylab("Mean Rank") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+Now, we have the mean ranks. However, we might ask if it isn't just easier to do the chi-square test? For this reason, we might want to compute the percentage of times that BDD is (a) winning clearly (i.e., 5 wins) or (b) winning loosely (BDD has more wins than any other items or (c) is tied for first place (BDD has more or equal to the number of wins as any other item).
+
+```{r}
+correctness <- wins_table_subset %>%
+  mutate(
+    # did BDD win all competitions?
+    BDD_win_strict = ifelse(BDD_BDD == 5, TRUE, FALSE),
+    # did BDD win more competitions than any other disorder?
+    BDD_win_loose = ifelse(
+      BDD_BDD > DEP_BDD & BDD_BDD > ED_BDD & BDD_BDD > GAD_BDD & BDD_BDD > SAD_BDD & BDD_BDD > OCD_BDD, TRUE, FALSE
+    ),
+    # did BDD tie for first place with something else?
+    BDD_win_tied= ifelse(
+      BDD_BDD >= DEP_BDD & BDD_BDD >= ED_BDD & BDD_BDD >= GAD_BDD & BDD_BDD >= SAD_BDD & BDD_BDD >= OCD_BDD, TRUE, FALSE
+    ),
+    # did OCD win all competitions?
+    OCD_win_strict = ifelse(OCD_OCD == 5, TRUE, FALSE),
+    # did OCD win more competitions than any other disorder?
+    OCD_win_loose = ifelse(
+      OCD_OCD > DEP_OCD & OCD_OCD > ED_OCD & OCD_OCD > GAD_OCD & OCD_OCD > SAD_OCD & OCD_OCD > BDD_OCD, TRUE, FALSE
+    ),
+    # did OCD tie for first place with something else?
+    OCD_win_tied= ifelse(
+      OCD_OCD >= DEP_OCD & OCD_OCD >= ED_OCD & OCD_OCD >= GAD_OCD & OCD_OCD >= SAD_OCD & OCD_OCD >= BDD_OCD, TRUE, FALSE
+    )
+)
+
+# get some stats:
+mean(correctness$BDD_win_strict)
+mean(correctness$BDD_win_loose)
+mean(correctness$BDD_win_tied)
+
+mean(correctness$OCD_win_strict)
+mean(correctness$OCD_win_loose)
+mean(correctness$OCD_win_tied)
+
+# make a contingency table
+contingency_table <- table(correctness$OCD_win_strict, correctness$BDD_win_strict)
+
+correctness_final <- merge(correctness, correctness_liz)
+```
+
+# Illustration: Predicting diagnosis from participant-level variables with logistic regression
+
+```{r}
+
+# we don't actually have all relevant variables available.
+# for this reason, start by using the dermatologist-variable as a predictor, just to illustrate.
+
+this_dat <- merged_BDD_OCD_both_versions %>% 
+  select(
+    `Participant Public ID`,
+    `Dermatologist object-90 Value`
+  ) %>% 
+  rename(
+    derm = `Dermatologist object-90 Value`,
+    subj = `Participant Public ID`
+  ) %>% 
+  filter(subj %in% sampled_participants) %>% 
+  mutate(derm = as.numeric(derm))
+
+correctness_final <- correctness_final %>% 
+  merge(this_dat)
+
+res1 <- glm(BDD_correct ~ derm, family=binomial(link='logit'),data=correctness_final)
+res2 <- glm(OCD_correct ~ derm, family=binomial(link='logit'),data=correctness_final)
+```
+
+# Illustration: Predicting the ranks/wins of individual items from participant level information
+
+Now, we'd like to think about ways to predict correctness from a series of participant-level variables (e.g., clinician skill). Here, implement two ways of doing this. First, a linear model looking at BDD/OCD only.
+
+```{r}
+
+# we don't actually have all relevant variables available.
+# for this reason, start by using the dermatologist-variable as a predictor, just to illustrate.
+
+this_dat <- merged_BDD_OCD_both_versions %>% 
+  select(
+    `Participant Public ID`,
+    `Dermatologist object-90 Value`
+  ) %>% 
+  rename(
+    derm = `Dermatologist object-90 Value`,
+    subj = `Participant Public ID`
+  ) %>% 
+  filter(subj %in% sampled_participants) %>% 
+  mutate(derm = as.numeric(derm))
+
+wins_table_subset <- wins_table_subset %>% 
+  merge(this_dat)
+
+res <- lm(BDD_BDD ~ derm, data = wins_table_subset)
+res <- lm(OCD_BDD ~ derm, data = wins_table_subset)
+```
+
+# Illustration: Predicting entire rankings from participant-level information with the BTM
+
+```{r}
+
+out_BTM <- out_BTM %>% 
+  filter(subj %in% sampled_participants) %>% 
+  mutate(
+    item1 = toupper(item1) %>% as.factor(),
+    item2 = toupper(item2) %>% as.factor(),
+    win1 = ifelse(win == 1, 1, 0),
+    win2 = ifelse(win == 2, 1, 0)
+)
+
+key <- list(
+  old = out_BTM$subj %>% unique(),
+  new = 1:length(unique(out_BTM$subj))
+)
+
+# provide a numeric key as needed for the BTM package
+for (i in 1:nrow(out_BTM)) {
+  out_BTM$subj[i] <- key$new[key$old == out_BTM$subj[i]]
+}
+
+out_BTM <- out_BTM %>% 
+  mutate(
+    subj = as.numeric(subj)
+  )
+
+# create an array storing participant-level information
+dat_subj <- this_dat
+
+for (i in 1:nrow(dat_subj)) {
+  dat_subj$subj[i] <- key$new[key$old == dat_subj$subj[i]]
+}
+
+rownames(dat_BTM$item) <- c("BDD", "OCD", "GAD", "ED", "DEP", "SAD") %>% as.factor()
+colnames(dat_BTM$item) <- c("BDD", "OCD", "GAD", "ED", "DEP", "SAD") %>% as.factor()
+
+# run the model
+# for now, just replicate that preferences differ by condition
+this_model <- BTm(outcome = cbind(win1, win2), formula = ~ item * condition, player1 = item1, player2 = item2, id = "item", refcat = "BDD", data = dat_BTM, na.action = na.omit)
+
+summary(this_model)
+
+# see whether preferences differ by whether participants thought that the client should see a dermatologist
+this_model2 <- BTm(outcome = cbind(win1, win2), formula = ~ item * condition + item*derm[subj], player1 = item1, player2 = item2, id = "item", refcat = "BDD", data = dat_BTM, na.action = na.omit)
+
+summary(this_model2)
+
+```
+
+# Data cleaning: Questionnaires
+
+```{r}
+
+folders <- c("/BDD_vs_v1/BDD_vs_v1_", "/BDD_vs_v2/BDD_vs_v2_")
+
+dat_complete = data.frame()
+
+data_path_general <- getwd()
+
+for (f in folders) {
+
+csv_files_general <- list.files(path = data_path_general, pattern = "*.csv")
+
+dat_exp <- read.csv(paste(data_path_general, f, "BDDexperience.csv", sep = "")) %>% 
+  rename(
+    subj = `Participant.Public.ID`,
+    exp_current = Current.direct.ax.tx.BDD.object.2.Response,
+    exp_current_activity = Current.ax.tx.BDD.details.object.29.Response,
+    exp_previous = Previous.direct.ax.tx.BDD.object.21.Response,
+    exp_previous_activity = Prev.ax.tx.BDD.details.object.30.Response,
+    exp_freq_label = Frequency.of.BDD.in.current.service.object.3.Response,
+    exp_freq_quantised = Frequency.of.BDD.in.current.service.object.3.Quantised,
+    exp_n_label = N.BDD.per.year.current.service.object.4.Response,
+    exp_n_quantised = N.BDD.per.year.current.service.object.4.Quantised,
+    exp_guidelines = Guidelines.for.BDD.object.15.Value,
+    exp_protocols = Protocols.for.BDD.object.17.Value,
+    exp_anything_else = Anything.else.to.tell.us.object.19.Value
+  ) %>% 
+  select(
+    subj, starts_with("exp"), 
+  ) %>% 
+  filter(!is.na(subj) & subj != "")
+
+dat_demo <- read.csv(paste(data_path_general, f, "Demo.csv", sep = "")) %>% 
+  rename(
+    subj = Participant.Public.ID,
+    age = Age.object.3.Response,
+    age_quant = Age.object.3.Quantised,
+    gender = Gender.object.6.Response,
+    ethnicity = Ethnicity.object.7.Response,
+    clinician = Clinician..object.24.Quantised,
+    professional_background = Professional.background.object.9.Response,
+    professional_background_other = Professional.background...other.object.10.Value,
+    professional_background_no_core = Professional.background...no.core.profession.object.11.Value,
+    professional_background_trainee = Professional.background...trainee.object.12.Value,
+    professional_background_training_stage = Professional.background...training.stage.object.13.Value
+  ) %>% 
+  select(
+    subj, age, age_quant, gender, ethnicity, clinician, starts_with("professional_background")
+  )
+
+dat_prev <- read.csv(paste(data_path_general, f, "prevalence.csv", sep = "")) %>% 
+  select(Participant.Public.ID, starts_with("Prevalence")) %>% 
+  rename(subj = Participant.Public.ID) %>% 
+  filter(!is.na(subj) & subj != "")
+
+colnames(dat_prev) <- colnames(dat_prev) %>% gsub("Prevalence.ranking.object.2.", "prev_", .)
+
+dat_train <- read.csv(paste(data_path_general, f, "Training.csv", sep = "")) %>% 
+  select(Participant.Public.ID, starts_with("BDD"), starts_with("OCD")) %>% 
+  rename(subj = Participant.Public.ID,
+         train_OCD = OCD.Training.object.2.Response,
+         train_BDD = BDD.Training.object.4.Response,
+         train_OCD_details = OCD.training.details.object.3.Response,
+         train_BDD_details = BDD.training.details.object.13.Response,
+         train_OCD_details_quantised = OCD.training.details.object.3.Response,
+         train_BDD_details_quantised = BDD.training.details.object.13.Response
+        ) %>% 
+  filter(!is.na(subj) & subj != "")
+
+
+dat_complete <- dat_complete %>% 
+  rbind(dat_demo %>% 
+    merge(dat_train) %>% 
+    merge(dat_exp) %>% 
+    merge(dat_prev)
+  )
+}
+```
