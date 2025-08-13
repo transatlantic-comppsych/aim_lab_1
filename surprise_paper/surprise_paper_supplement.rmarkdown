@@ -9,7 +9,9 @@ bibliography: "Surprise paper.bib"
 csl: apa.csl
 ---
 
+
 # Supplement
+
 
 ```{r load-packages}
 #| include: false
@@ -30,6 +32,7 @@ library("bayesplot")
 library("purrr") 
 library("posterior")
 ```
+
 
 ## Experimental Task
 
@@ -92,6 +95,7 @@ The following aspects were randomized between participants:
 The final version of the task was informed by several pilot studies and a meta-analysis conducted prior to data collection. Details of these pilot studies, the meta-analytic findings, and additional task information are available in the preregistration document (<https://osf.io/73zsg/>).
 
 ## Participant Demographics
+
 
 ```{r full demographics tables}
 #| label: tbls-demographics-full
@@ -203,11 +207,13 @@ ethnicity_wide <- df %>%
 
 ```
 
+
 ## Aim 1: Identify the computations underlying momentary mood and anxiety in our social task
 
 ### Model comparison results
 
 #### Mood models
+
 
 ```{r mood model comp}
 #| label: tbl-mood-models
@@ -244,7 +250,9 @@ mood_models_table <- flextable::bold(mood_models_table, part = "header")
 mood_models_table
 ```
 
+
 #### Anxiety models
+
 
 ```{r anx model comparison}
 #| label: tbl-anx-models
@@ -283,9 +291,11 @@ anx_models_table
 
 ```
 
+
 #### Parameter recovery
 
 To assess the recoverability of model parameters, we conducted a parameter recovery simulation using the same model structure and priors specified in our main analysis. We simulated data for 50 synthetic participants across 48 trials each. The model was then re-fit to this synthetic dataset, and we compared the recovered posterior means and 95% credible intervals against the true generating values for each parameter. All parameters showed good to excellent recoverability (Pearson’s r: Intercept = 0.93, 95% CI \[0.88, 0.96\]; Social Feedback = 0.98, 95% CI \[0.96, 0.99\]; Positive PE = 0.95, 95% CI \[0.91, 0.97\]; Negative PE = 0.95, 95% CI \[0.92, 0.97\]; $\gamma$ = 0.69, 95% CI \[0.50, 0.81\].
+
 
 ```{r parameter recovery plot}
 #| label: param-recovery-figure
@@ -729,9 +739,11 @@ wrap_plots(plots, ncol = 2)
 
 ```
 
+
 ### Group-level Posterior Parameter Estimates for Model 8
 
 #### Mood
+
 
 ```{r model 8 estimated parameter table mood}
 #| label: tbl-model-8-param-mood
@@ -829,7 +841,9 @@ table_mood
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 estimated parameter table anxiety}
 #| label: tbl-model-8-param-anx
@@ -924,9 +938,11 @@ table_anx <- flextable(final_table) %>%
 table_anx
 ```
 
+
 ### Posterior comparison of standardized coefficients
 
 We conducted exploratory Bayesian comparisons between the winning model (model 8) for anxiety and mood, respectively. We compared the posterior distributions of each standardized predictor coefficient across models to assess relative influence. To account for the fact that mood and anxiety were coded in opposite directions, the sign of the mood coefficients was inverted prior to computing differences.
+
 
 ```{r posterior comparisons of standardized coeffs}
 #| label: tbl-posterior-coeff-comparisons
@@ -1015,9 +1031,11 @@ diff_table <- flextable(results_df) %>%
 diff_table
 ```
 
+
 ### Model fits for 16 randomly-chosen participants
 
 #### Mood
+
 
 ```{r Mood model fits for 16 randomly-chosen participants. }
 #| label: fig-predicted-vs-reported-mood
@@ -1090,7 +1108,9 @@ ggplot(plot_data_subset, aes(x = Trial)) +
 
 ```
 
+
 #### Anxiety
+
 
 ```{r Anxiety model fits for 16 randomly-chosen participants. }
 #| label: fig-predicted-vs-reported-anx
@@ -1164,11 +1184,13 @@ ggplot(plot_data_subset, aes(x = Trial)) +
 
 ```
 
+
 ### Posterior Predictive Checks for Model 8
 
 We conducted posterior predictive checks (PPCs) to evaluate the fit of Model 8 to participants' mood and anxiety ratings. Using the posterior predictive distribution generated from the fitted Stan model, we compared reported mood and anxiety responses with model-generated predictions across multiple posterior draws. As shown in the histograms, the observed data fall within the range of simulated data, indicating that the models adequately capture key features of the mood and anxiety response distributions across trials. This visual inspection supports the plausibility of the model’s assumptions and predictive performance.
 
 #### Mood
+
 
 ```{r model 8 PPC Model 8 mood}
 #| label: fig-PPC-Model8-mood
@@ -1218,7 +1240,9 @@ ppc_plot
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 PPC Model 8 anx}
 #| label: fig-PPC-Model8-anx
@@ -1270,9 +1294,11 @@ ppc_plot
 
 ```
 
+
 ## Aim 2: Explore how these computations vary with individual differences in mental health symptoms
 
 ### Distributions of Social Anxiety (SA) Symptoms
+
 
 ```{r SA distribution}
 #| label: tbl-SA-distribution
@@ -1372,7 +1398,9 @@ ggplot(data_clean, aes(x = LSAS_Total, fill = LSAS_Category)) +
 
 ```
 
+
 ### Distributions of Depression (DEP) Symptoms
+
 
 ```{r DEP distribution}
 #| label: fig-DEP-distribution
@@ -1432,7 +1460,9 @@ ggplot(data_clean, aes(x = Depression_score, fill = Depression_Category)) +
 
 ```
 
+
 ### Distributions of Momentary Affect Responses by SA and DEP group
+
 
 ```{r Momentary affect distributions across SA and DEP groups}
 #| label: fig-affect-resposnse-distributions
@@ -1525,11 +1555,13 @@ ggplot(plot_data, aes(x = Group, y = Score, fill = FillCat, color = FillCat)) +
 
 ```
 
+
 ### Group-level Posterior Parameter Estimates for Model 8 with SA effects.
 
 The following tables show the group-level parameters estimated from the modified model that includes a main effect for SA, as well as interaction effects of SA for all parameters.
 
 #### Mood
+
 
 ```{r model 8 estimated parameter table SA mood}
 #| label: tbl-model-8-param-SA-mood
@@ -1603,7 +1635,9 @@ table_mood
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 estimated parameter table SA anxiety}
 #| label: tbl-model-8-param-SA-anx
@@ -1685,11 +1719,13 @@ table_anx <- flextable(final_table) %>%
 table_anx
 ```
 
+
 ### Posterior distributions of Pearson correlations between participant-level parameter estimates and SA scores
 
 To assess the relationship between each model parameter and the SA scores, we computed the posterior distribution of Pearson correlation coefficients ($r$) between each parameter's posterior samples and participants’ SA scores. For each parameter, we report the mean correlation, the 95% highest density interval (HDI), and the probability of direction (i.e., the proportion of the posterior supporting a positive or negative effect). This analysis provides a Bayesian estimate of the strength and certainty of the association between each parameter and SA scores.
 
 #### Mood
+
 
 ```{r model 8 posterior correlation distributions with SA moos}
 #| label: tbl-posterior-corr-distributions-SA-mood
@@ -1790,7 +1826,9 @@ table_mood
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 posterior correlation distributions with SA anxiety}
 #| label: tbl-posterior-corr-distributions-SA-anx
@@ -1890,11 +1928,13 @@ table_anx
 
 ```
 
+
 ### Posterior Predictive Checks for Model 8 with SA effects
 
 We performed PPCs to assess the fit of the modified winning model incorporating SA as both a main effect and in interaction terms. As before, we compared observed mood and anxiety responses with model-generated predictions across multiple posterior draws. The checks confirm that the inclusion of SA terms does not compromise model fit and continues to capture key distributional features of the observed data.
 
 #### Mood
+
 
 ```{r model 8 PPC Model 8 w SA mood}
 #| label: fig-PPC-Model8-SA-mood
@@ -1945,7 +1985,9 @@ ppc_plot
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 PPC Model 8 w SA anx}
 #| label: fig-PPC-Model8-SA-anx
@@ -1998,11 +2040,13 @@ ppc_plot
 
 ```
 
+
 ### Group-level Posterior Parameter Estimates for Model 8 with DEP effects.
 
 The following tables show the group-level parameters estimated from the modified model that includes a main effect for Depression Symptoms (DEP), as well as interaction effects of DEP for all parameters.
 
 #### Mood
+
 
 ```{r model 8 estimated parameter table DEP mood}
 #| label: tbl-model-8-param-DEP-mood
@@ -2115,7 +2159,9 @@ table_mood <- flextable(final_table) %>%
 table_mood
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 estimated parameter table DEP anx}
 #| label: tbl-model-8-param-DEP-anx
@@ -2185,11 +2231,13 @@ table_anx <- flextable(final_table) %>%
 table_anx
 ```
 
+
 ### Posterior distributions of Pearson correlations between participant-level parameter estimates and DEP scores
 
 To assess the relationship between each model parameter and the DEP scores, we computed the posterior distribution of Pearson correlation coefficients ($r$) between each parameter's posterior samples and participants’ DEP scores.
 
 #### Mood
+
 
 ```{r model 8 posterior correlation distributions with DEP mood}
 #| label: tbl-posterior-corr-distributions-DEP-mood
@@ -2290,7 +2338,9 @@ table_mood
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 posterior correlation distributions with DEP anx}
 #| label: tbl-posterior-corr-distributions-DEP-anx
@@ -2392,11 +2442,13 @@ table_anx
 
 ```
 
+
 ### Posterior Predictive Checks for Model 8 with DEP effects
 
 We performed PPCs to assess the fit of the modified winning model incorporating DEP as both a main effect and in interaction terms. The checks confirm that the inclusion of DEP terms does not compromise model fit and continues to capture key distributional features of the observed data.
 
 #### Mood
+
 
 ```{r model 8 PPC Model 8 w DEP mood}
 #| label: fig-PPC-Model8-DEP-mood
@@ -2448,7 +2500,9 @@ ppc_plot
 
 ```
 
+
 #### Anxiety
+
 
 ```{r model 8 PPC Model 8 w DEP anx}
 #| label: fig-PPC-Model8-DEP-anx
@@ -2499,4 +2553,6 @@ ppc_plot <- ppc_hist(y_obs_flat, y_pred_matrix[1:8, ]) +
 ppc_plot
 ```
 
+
 ## References
+

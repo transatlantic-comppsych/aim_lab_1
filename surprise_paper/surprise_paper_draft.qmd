@@ -1,5 +1,5 @@
 ---
-title: "Social Surprises and Social Feedback Shape Momentary Mood in Humans"
+title: "Momentary Affect in the Social Domain: Social feedback and surprise explain fluctuations in mood and anxiety"
 author:
   - name: Elena Bagdades
     orcid: 0009-0002-1971-5607
@@ -93,32 +93,37 @@ library("gt")
 library("rstan")
 library("bayestestR")
 library("kableExtra")
+library("officer")  
 
 ```
 
 ## Abstract
 
+Social interactions are central to human affect, yet the mechanisms linking these experiences to momentary mood and anxiety remain poorly understood. Building on literature showing that reward appraisals, particularly prediction errors (PEs), shape mood, we extend this framework to the social domain. 185 participants (14–45 years) completed a novel task involving a series of social interactions. Computational models were compared to assess the contributions of social feedback, expectations, and PEs to momentary affect. Results indicated that social feedback and PEs best explained fluctuations in affect. Social PEs had a stronger influence on momentary anxiety, whereas social feedback had a bigger effect on mood. Exploratory analyses revealed that higher social anxiety amplified responses to social feedback, and higher depressive symptoms increased sensitivity to negative PEs for mood. These findings provide a computational account of affect across development and highlight potential risk markers and treatment targets for mood and anxiety disorders.
+
 ## Introduction
 
-Humans are inherently social beings, and our daily interactions with others profoundly shape our affect. A single encounter, whether a harsh critique in an interview or an unexpectedly warm conversation, can significantly impact how we feel. Despite the central role social experiences play in our emotional lives, the mechanisms underlying the relationship between these experiences and momentary mood remain vastly underexplored. In this study, we investigate the hypothesis that social surprises, the discrepancy between what we expect from a social interaction and the actual outcome, play a key role in shaping momentary mood. We reverse-translate elements of clinical theory and observation by introducing a novel experimental and computational framework to test this hypothesis in adolescents and adults, including individuals with elevated symptoms of social anxiety and depression.
+Humans are inherently social beings, and our daily interactions with others profoundly shape our affect. A single encounter, whether a harsh critique in an interview or an unexpectedly warm conversation, can significantly impact how we feel. Despite the central role social experiences play in our emotional lives, the mechanisms underlying the relationship between these experiences and momentary mood remain surprisingly underexplored. In this study, we investigate the hypothesis that social surprises, the discrepancy between what we expect from a social interaction and the actual outcome, play a key role in shaping momentary mood. We reverse-translate elements of clinical theory and observation by introducing a novel experimental and computational framework to test the role that surprises during social interaction play for momentary affect in adolescents and adults, including individuals with elevated symptoms of social anxiety and depression.
 
-This centrality of social experiences in shaping our affective lives is rooted in our evolutionary history. Human survival has long depended on our ability to navigate complex social environments. Several evolutionary theories suggest that traits such as cooperation, altruism, and culture emerged because they provided advantages in group living, such as cooperative foraging and shared child-rearing [@trivers1971; @tomasello2014]. In line with this, human emotions are believed to have evolved to help us address social challenges and promote cohesion and cooperation, ultimately enhancing our chances of survival [e.g., @nesse1990]. Given the role of social behaviour in human evolution, it is unsurprising that social relationships have a profound impact on people’s quality of life and overall mental and physical health [@kuczynski2020; @wickramaratne2022; @cacioppo2014]. Notably, many psychopathologies are closely tied to interpersonal difficulties, particularly during adolescence [@fett2015; @lamblin2017]. Impairments in social functioning are especially evident in mood and anxiety disorders, with Social Anxiety Disorder (SAD) being a key example [@saris2017; @wittchen2000]. Exploring how social interactions shape affect can thus yield valuable insights into human functioning, both in mental health and in disorder.
+This centrality of social experiences in shaping our affective lives is rooted in our evolutionary history. Human survival has long depended on our ability to navigate complex social environments. Several evolutionary theories suggest that traits such as cooperation, altruism, and culture emerged because they provided advantages in group living, such as cooperative foraging and shared child-rearing [@trivers1971; @tomasello2014]. In line with this, human emotions are believed to have evolved to help us address social challenges and promote cohesion and cooperation, ultimately enhancing the chances of species survival [e.g., @nesse1990]. Given the role of social behaviour in human evolution, it is unsurprising that social relationships have a profound impact on people’s quality of life and overall mental and physical health [@kuczynski2020; @wickramaratne2022; @cacioppo2014]. Notably, many psychopathologies are closely tied to interpersonal difficulties, particularly during adolescence [@fett2015; @lamblin2017]. Impairments in social functioning are especially evident in mood and anxiety disorders, with Social Anxiety Disorder (SAD) being a key example [@saris2017; @wittchen2000]. Exploring how social interactions shape affect can thus yield valuable insights into human functioning, both in mental health and in disorder.
 
-One promising approach to unpacking this relationship is through computational modelling. Recent advances in this field have begun to uncover the mechanisms of self-reported momentary mood. More specifically, research has highlighted a central role for reward prediction errors (RPEs), in shaping momentary fluctuations in mood [@rutledge2014; @keren2021]. According to this framework, mood can be explained by integrating over the history of events, especially RPEs, that occur in our environment. Positive RPEs, where outcomes exceed expectations, tend to elevate mood, while negative RPEs, where outcomes fall short, tend to suppress it. For example, an unexpected bonus at work might boost mood, whereas receiving the same bonus when expecting a bigger one, could lead to disappointment and to a lower mood. Computational modelling provides a powerful tool for capturing how past experiences shape current mood, including formalising the extent to which past events continue to exert influence over time. For instance, incorporating a forgetting factor allows models to account for the greater weight often given to more recent experiences; known as the recency bias. Extending this research into the social domain is essential as it will allow us to examine whether similar computational mechanisms underlie mood dynamics across different reward types.
+One promising approach to unpacking this relationship is through computational modelling. Recent advances in this field have begun to uncover the mechanisms of self-reported momentary mood. More specifically, research has highlighted a central role for reward prediction errors (RPEs), in shaping momentary fluctuations in mood [@rutledge2014; @keren2021]. According to this framework, mood can be explained by integrating over the history of events, especially RPEs, that occur in our environment. Positive RPEs, where outcomes exceed expectations, tend to elevate mood, while negative RPEs, where outcomes fall short, tend to suppress it. For example, an unexpected bonus at work might boost mood, whereas receiving the same bonus when expecting a bigger one, could lead to disappointment and to a lower mood. The literature is mixed, however, on what the effect of RPEs are, over and above that of other appraisals, such as reward magnitude or reward expectation [@rutledge2014; @keren2021; @forbes2023]. Computational modelling provides a powerful tool for capturing how such appraisals shape current mood, including formalising the extent to which past events continue to exert influence over time. For instance, incorporating a forgetting factor allows models to account for the greater weight often given to more recent experiences; a phenomenon known as the recency bias. Extending this research into the social domain is essential, as it will allow us to examine whether similar computational mechanisms underlie mood dynamics across different reward types.
 
-Much of the computational literature on momentary mood has focused on the happy–unhappy spectrum, while other types of mood are largely understudied. Specifically, while the processes involved in pathological anxiety, such as in SAD have been extensively studied, the computations involved in anxious mood remain poorly understood. Clinical theory offers valuable insight here. The notion of belief disconfirmation, closely related to prediction error, is foundational in cognitive therapy for anxiety disorders [@clark1995; @salkovskis2007]. For example, treatment for SAD involves generating positive prediction errors that arise when individuals are asked to track their expectations against the outcomes of social interactions during therapy [@clark1999]. This therapeutic principle can be ‘reverse-translated’ to guide experimental investigations into the mechanisms of momentary anxiety, particularly within social contexts.
+Much of the computational literature on momentary mood has focused on the happy–unhappy spectrum, while other types of mood are largely understudied. Specifically, while the processes involved in pathological anxiety, such as in SAD have been extensively studied, the computations involved in anxious mood remain poorly understood. Clinical theory offers valuable insight here. The notion of belief disconfirmation, closely related to prediction error, is foundational in both exposure and cognitive therapies for anxiety disorders [@clark1995; @salkovskis2007; @craske2014]. For example, cognitive therapy for SAD involves generating positive prediction errors that arise when individuals are asked to track their expectations against the outcomes of social interactions during therapy [@clark1999; @leigh2023]. This therapeutic principle can be ‘reverse-translated’ to guide experimental investigations into the mechanisms of momentary anxiety, particularly within social contexts. Furthermore, computational modelling of momentary affect provides a powerful framework for examining whether these mechanisms are influenced by internalizing symptoms—such as depression and social anxiety—and for determining the specificity of such effects, that is, whether they are uniquely associated with one symptom profile or shared across both.
 
-In this article, we address key gaps in the literature by examining the computations underlying momentary happy and anxious mood in the context of social interactions. Specifically, we extend computational models of mood into the social domain, incorporate anxious affect, and investigate how these processes vary across symptom dimensions. Given the heightened salience of social rewards and punishments in adolescents [@foulkes2016], as well as the rise in mental health problems related to interpersonal difficultiles in this age group [@lamblin2017], we recruited adolescents aged 14-18 through schools, as well as adults aged 18-45 through the local community and Prolific. We developed a novel experimental paradigm designed to elicit social PEs in which participants interacted with virtual players and were asked to report their momentary happy and anxious mood in response to social feedback. This task was co-designed with a youth advisory group to ensure clarity and engagement for younger participants. We preregistered the hypothesis (<https://osf.io/73zsg/>) that social PEs would be central to affective responses and, more specifically, would be positively associated with happy mood and negatively with anxious mood. To test this, we fitted and compared a series of hierarchical Bayesian computational models that systematically varied in their inclusion and specification of social PEs, expectations, and outcomes. Crucially, this included a model without social PEs, allowing us to directly evaluate the added explanatory value of social PEs relative to a plausible alternative. Our findings suggest that both happy and anxious mood are shaped by immediate social feedback, as well as by the history positive and negative social PEs. In exploratory analyses, we extended the best-fitting model to assess how social anxiety and depressive symptoms modulated these computational parameters. Our results showed that people with higher social anxiety symptoms exhibit a stronger influence of social feedback on their momentary mood and anxiety. Further, individuals with higher depressive symptoms showed a bigger effect of negative social PEs on their mood. This could suggest that individuals at risk for social anxiety and depression are more susceptible to social appraisals when reporting their momentary affect. These findings offer insight into how affective dynamics may become dysregulated in psychopathology and point to potential early markers of risk.
+In this article, we address key gaps in the literature by examining the computations underlying momentary happy and anxious mood in the context of social interactions. Specifically, we create a novel experimental setup emulating socially demanding situations, we extend computational models of mood into the social domain and incorporate the measurement of anxious affect in addition to mood. Finally we investigate how these processes vary across symptom dimensions. Given the heightened salience of social rewards and punishments in adolescents [@foulkes2016], as well as the rise in mental health problems related to interpersonal difficultiles in this age group [@collishaw2015; @lamblin2017], we recruited adolescents aged 14-18 through schools, as well as adults aged 18-45 through the local community and Prolific. This task was co-designed with a youth advisory group to ensure clarity and engagement for younger participants. We preregistered the hypothesis (<https://osf.io/73zsg/>) that social PEs would be central to affective responses and, more specifically, would be positively associated with happy mood and negatively with anxious mood. To test this, we fitted and compared a series of hierarchical Bayesian computational models that systematically varied in their inclusion and specification of social PEs, expectations, and outcomes. Crucially, this included a model without social PEs, allowing us to directly evaluate the added explanatory value of social PEs relative to a plausible alternative. Our findings suggest that both happy and anxious mood are shaped by immediate social feedback, as well as by the history positive and negative social PEs. In exploratory analyses, we extended the best-fitting model to assess how social anxiety and depressive symptoms modulated these computational parameters. Our results showed that people with higher social anxiety symptoms exhibit a stronger influence of social feedback on their momentary mood and anxiety. More specifically, individuals with higher social anxiety symptoms show a bigger elation and drop of their mood and anxiety, respectively, in response to positive social feedback. Further, individuals with higher depressive symptoms showed a bigger effect of negative social PEs on their mood. This could suggest that individuals at risk for social anxiety and depression are more susceptible to social appraisals when reporting their momentary affect. These findings offer insight into how affective dynamics may become dysregulated in psychopathology and point to potential early markers of risk.
 
 ## Results
 
 ### Participants
 
-We analysed data from 185 participants aged 14–45 years, recruited from three different sources: an online platform (n = 97), the University College London community (n = 43), and from schools (n = 44).
+We recruited 722 participants aged 18–25 through Prolific ([www.prolific.com](http://www.prolific.com)) across 21 pilot studies. Data from these pilots were used to refine the experimantal task, inform the design of computational models based on preliminary mixed-effects model analyses, and conduct power calculations to estimate the required sample size.
 
-### Experimental setup 
+For this study, we analyzed data from 185 participants aged 14–45 years, recruited from three sources: Prolific (n = 97), the University College London community (n = 43), and secondary schools (n = 44).
 
-Participants first completed questionnaires assessing social anxiety and depressive symptoms. Depending on their age group, these included the Liebowitz Social Anxiety Scale – Self-Report (LSAS; @fresco2001), the Centre for Epidemiologic Studies Depression Scale (CES-D; @radloff1977), the LSAS for Children and Adolescents – Self-Report (LSAS-CA; @leigh2022), and the Revised Child Anxiety and Depression Scale (RCADS; @chorpita2000). They then completed an online task simulating socially evaluative interactions (see Fig.1). They were told that four different “virtual players” would rate them after they described images aloud while being video recorded. Each trial began with the presentation of the virtual player assigned to that trial, followed by the participant’s prediction of how well they expected to be rated. Participants then described the image for 15 seconds and received feedback from the virtual player on a scale from 0 to 100. Afterward, they reported their momentary mood and anxiety. The virtual players varied in their level of criticality, and feedback was manipulated to generate a range of social prediction errors (PEs), including negative (PE^−^), moderate positive (PE^+^), strong positive (PE^++^), and neutral (PE^N^), based on each player’s typical rating behaviour. Trial order, feedback, and stimuli were randomized.
+### Experimental setup
+
+Participants first completed questionnaires assessing social anxiety and depressive symptoms. Depending on their age group, these included the Liebowitz Social Anxiety Scale – Self-Report (LSAS; @fresco2001), the Centre for Epidemiologic Studies Depression Scale (CES-D; @radloff1977), the LSAS for Children and Adolescents – Self-Report (LSAS-CA; @leigh2022), and the Revised Child Anxiety and Depression Scale (RCADS; @chorpita2000). They then completed an online task simulating socially evaluative interactions (see @fig-experimental-setup). They were told that four different “virtual players” would rate them after they described images aloud while being video recorded. Each trial began with the presentation of the virtual player assigned to that trial, followed by the participant’s prediction of how well they expected to be rated. Participants then described the image for 15 seconds and received feedback from the virtual player on a scale from 0 to 100. Immediately after feedback, participants reported their momentary mood and anxiety. The virtual players varied in their level of criticality, and feedback was manipulated to generate a range of social prediction errors (PEs), including negative (PE^−^), moderate positive (PE^+^), strong positive (PE^++^), and neutral (PE^N^), based on each player’s typical rating behaviour. Trial order, feedback, and stimuli were randomized.
 
 ```{r experimental set up figure}
 #| label: fig-experimental-setup
@@ -152,7 +157,7 @@ where $\beta_{0i}$ represents the individual-specific baseline of mood or anxiet
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: "Reported and predicted mood and anxiety across trials for two participants. Each panel shows z-scored values across trials, with mood plotted in the left column and anxiety in the right column. Rows represent individual participants. Reported responses are shown in grey, predicted mood in blue, and predicted anxiety in red. Predicted values are derived from the posterior mean of a hierarchical Bayesian model."
+#| fig-cap: "Reported and predicted mood and anxiety across trials for two participants. Each panel shows z-scored values across trials, with mood plotted in the left column and anxiety in the right column. Rows represent individual participants. Reported responses are shown in grey, predicted mood in blue, and predicted anxiety in red. Predicted values are derived from the posterior mean of the winning hierarchical Bayesian model."
 #| fig-title: "Mood and anxiety model fits for two participants."
 #| fig-cap-location: bottom
 
@@ -163,13 +168,13 @@ include_graphics("predicted_vs_reported_affect.pdf")
 ### Group-Level Parameter Estimates
 
 **Social Feedback Effects (**$\beta_{3}$**)**\
-Social feedback had a strong effect on both mood and anxiety. For momentary mood, social feedback had a substantial positive effect (mean **(**$\beta_{3}$**)** = 0.22, 95% HDI \[0.19, 0.26\]), indicating that more positive social feedback was associated with increased mood. In contrast, for momentary anxiety, social feedback exerted a negative effect (mean **(**$\beta_{3}$**)** = -0.09, 95% HDI \[-0.11, -0.07\]), suggesting that more positive social feedback was associated with reduced anxiety.
+Social feedback had a strong effect on both mood and anxiety. For momentary mood, social feedback had a substantial positive effect (mean $\beta_{3}$ = 0.22, 95% HDI \[0.19, 0.26\]), indicating that more positive social feedback was associated with increased mood. In contrast, for momentary anxiety, social feedback exerted a negative effect (mean $\beta_{3}$ = -0.09, 95% HDI \[-0.11, -0.07\]), suggesting that more positive social feedback was associated with reduced anxiety.
 
 **Positive Prediction Error Effects (**$\beta_{1}$**)**\
-The effect of positive PEs varied across mood and anxiety models. For momentary mood, the effect was small and not substantial (mean **(**$\beta_{1}$**)** = 0.01, 95% HDI \[0.00, 0.03\]). However, for momentary anxiety, there was a small but substantial negative effect of positive PEs (mean **(**$\beta_{1}$**)** = -0.04, 95% HDI \[-0.06, -0.03\]), indicating that experiencing outcomes better than expected was linked to reduced anxiety.
+The effect of positive PEs varied across mood and anxiety models. For momentary mood, the effect was small and not substantial (mean $\beta_{1}$ = 0.01, 95% HDI \[0.00, 0.03\]). However, for momentary anxiety, there was a small but substantial negative effect of positive PEs (mean $\beta_{1}$ = -0.04, 95% HDI \[-0.06, -0.03\]), indicating that experiencing outcomes better than expected was linked to reduced anxiety.
 
 **Negative Prediction Error Effects (**$\beta_{2}$**)**\
-Negative PEs did not show a strong association with momentary mood (mean **(**$\beta_{2}$**)** = -0.01, 95% HDI \[-0.02, 0.01\]). For momentary anxiety, however, there was a small but substantial positive effect (mean **(**$\beta_{2}$**)** = 0.04, 95% HDI \[0.02, 0.06\]), suggesting that worse-than-expected outcomes were associated with increased anxiety.
+Negative PEs did not show a strong association with momentary mood (mean $\beta_{2}$ = -0.01, 95% HDI \[-0.02, 0.01\]). For momentary anxiety, however, there was a small but substantial positive effect (mean $\beta_{2}$ = 0.04, 95% HDI \[0.02, 0.06\]), suggesting that worse-than-expected outcomes were associated with increased anxiety.
 
 **Forgetting Factor (**$\gamma$**)**\
 The forgetting factor $\gamma$ determines how much influence past prediction errors (PEs) have on current affect, with values bounded between 0 and 1. A value of $\gamma = 0$ implies full recency, where only the most recent trial influences affect, while $\gamma = 1$ implies equal weighting of all past trials, regardless of their temporal distance. The group-level estimate of $\gamma$ was 0.93 for both mood (95% HDI \[0.91, 0.95\]) and anxiety (95% HDI \[0.92, 0.95\]), indicating that past trials have a fairly long-lasting impact on current affect.
@@ -178,25 +183,27 @@ These results partially support our hypothesis that social surprises, operationa
 
 ### Moderation of effects by social anxiety symptoms
 
-To assess whether social anxiety symptoms (SA), as measured by the LSAS, moderated any of the model parameters, we examined interaction terms from the hierarchical Bayesian models predicting momentary anxiety and mood. For both mood and anxiety, the interaction term for social feedback , $\beta_{3 \cdot SA}$ , showed the most robust effect. For anxiety, this interaction was negative (mean = –0.04, 95% HDI [–0.06, –0.02], see @param_distributions), suggesting that higher SA amplified the influence of social feedback on decreasing anxiety. In contrast, for mood, the interaction was positive (mean = 0.04, 95% HDI [0.00, 0.07], see @param_distributions), indicating that SA also strengthened the positive impact of social feedback on mood.
+To assess whether social anxiety symptoms (SA), as measured by the LSAS, moderated any of the model parameters, we examined interaction terms from the hierarchical Bayesian models predicting momentary anxiety and mood. For both mood and anxiety, the interaction term for social feedback , $\beta_{3 \cdot SA}$ , showed the most robust effect. For anxiety, this interaction was negative (mean = –0.04, 95% HDI [–0.06, –0.02], see @fig-param_distributions), suggesting that in individuals with elevated SA social feedback had a stronger negative effect on anxiety. In contrast, for mood, the interaction was positive (mean = 0.04, 95% HDI [0.00, 0.07], see @fig-param_distributions), indicating that SA also strengthened the positive impact of social feedback on mood.
 
 Other interaction terms between SA and the intercept ( $\beta_{0 \cdot SA}$) , positive PEs ($\beta_{1 \cdot SA}$), negative PEs ($\beta_{2 \cdot SA}$), and the forgetting factor ($\beta_{\gamma \cdot SA}$) had credible intervals that overlapped zero for both outcomes, suggesting inconclusive or negligible moderation effects. Similarly, the main effects of SA on momentary anxiety (mean = 0.22, 95% HDI \[–0.49, 0.92\]) and mood (mean = –0.16, 95% HDI \[–0.81, 0.56\]) were also uncertain.
 
-To complement the model-based findings, we computed the posterior distribution of Pearson correlations between each participant-level parameter estimates and SA scores. The parameter for social feedback ($\beta_3$) showed a strong negative correlation with SA in predicting anxiety (mean r = –0.29, 95% CI [–0.35, –0.23], Pr(r \< 0) = 100%; see @posterior_corr_distributions), and a moderate positive correlation in predicting mood (mean r = 0.16, 95% CI [0.11, 0.19], Pr(r \> 0) = 100%; see @posterior_corr_distributions). These results provide further support for a moderation of the influence of social feedback on momentart affect, by SA. Correlations for all other parameters were weaker and had posterior intervals that included zero.
+To complement the model-based findings, we computed the posterior distribution of Pearson correlations between each participant-level parameter estimates and SA scores. The parameter for social feedback ($\beta_3$) showed a strong negative correlation with SA in predicting anxiety (mean r = –0.29, 95% CI [–0.35, –0.23], Pr(r \< 0) = 100%; see @fig-posterior_corr_distributions), and a moderate positive correlation in predicting mood (mean r = 0.16, 95% CI [0.11, 0.19], Pr(r \> 0) = 100%; see @fig-posterior_corr_distributions). These results provide further support for a moderation of the influence of social feedback on momentart affect, by SA. Correlations for all other parameters were weaker and had posterior intervals that included zero.
 
 ### Moderation of effects by depression symptoms
 
-To assess whether depression symptoms (DEP), as measured by the RCADS in the student sample and the CES-D in all other samples (z-scored within each sample prior to modelling), moderated any of the model parameters, we examined interaction terms from the hierarchical Bayesian models predicting momentary anxiety and mood. For both mood and anxiety models, the interaction terms between DEP and the intercept ($\beta_{0 \cdot SA}$), positive PEs ($\beta_{1 \cdot SA}$), negative PEs ($\beta_{2 \cdot SA}$), social feedback ($\beta_{3 \cdot SA}$) and the forgetting factor ($\beta_{\gamma \cdot SA}$ )had credible intervals that overlapped zero, suggesting inconclusive or negligible moderation effects. Similarly, the main effects of DEP on momentary anxiety (mean = 0.17, 95% HDI \[–0.49, 0.87\]) and mood (mean = –0.10, 95% HDI \[–0.85, 0.53\]) were also uncertain.
+To assess whether depression symptoms (DEP), as measured by the RCADS in the student sample and the CES-D in all other samples (z-scored within each sample prior to modelling), moderated any of the model parameters, we examined interaction terms from the hierarchical Bayesian models predicting momentary anxiety and mood. For both mood and anxiety models, the interaction terms between DEP and the intercept ($\beta_{0 \cdot SA}$), positive PEs ($\beta_{1 \cdot SA}$), negative PEs ($\beta_{2 \cdot SA}$), social feedback ($\beta_{3 \cdot SA}$) and the forgetting factor ($\beta_{\gamma \cdot SA}$ ) had credible intervals that overlapped zero, suggesting inconclusive or negligible moderation effects. Similarly, the main effects of DEP on momentary anxiety (mean = 0.17, 95% HDI \[–0.49, 0.87\]) and mood (mean = –0.10, 95% HDI \[–0.85, 0.53\]) were also uncertain.
 
 We also computed the posterior distribution of Pearson correlations between each participant-level parameter estimates and DEP scores. According to this analysis, the parameter for social feedback ($\beta_2$ ) showed a moderate negative correlation with DEP in predicting mood (mean r = –0.18, 95% CI \[–0.35, –0.01\], Pr(r \< 0) = 97.9%). This suggest that individuals with higher DEP, exhibited a stronger negative effect of negative PEs on their mood. Correlations for all other parameters were weaker and had posterior intervals that included zero.
 
 ```{r parameter distributions by SA and DEP group}
-#| label: param_distributions
+#| label: fig-param_distributions
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Posterior distributions by SA and DEP groups of A) Social Feedback for mood , B) Social Feedback for anxiety and C) Negative PE for mood. "
 #| fig-cap-location: bottom
+#| fig-width: 12
+#| fig-height: 6
 
 asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_DEP_fit.rds")
 posterior_DEP_mood <- rstan::extract(asymmPE_simple_Outcome_mood_DEP_fit)
@@ -309,11 +316,11 @@ posterior_df_mood <- data.frame(
 df_A <- extract_param_by_group(posterior_SA_mood, "w1_mu", "beta_w1", SA_vals, sa_cutoff)
 
 plot_A <- ggplot(df_A, aes(x = value, fill = group, color = group)) +
-  geom_density(alpha = 0.8) +  # Full opacity for both groups
+  geom_density(alpha = 0.8) + 
   geom_vline(data = df_A %>% group_by(group) %>% summarise(m = mean(value)), 
              aes(xintercept = m, color = group), linetype = "dashed") +
-  scale_fill_manual(values = c("Low SA" = "#85C3D6", "High SA" = "#0072B2")) +  # Lighter blue for low SA
-  scale_color_manual(values = c("Low SA" = "#85C3D6", "High SA" = "#0072B2")) +  # Lighter blue for low SA
+  scale_fill_manual(values = c("Low SA" = "#85C3D6", "High SA" = "#0072B2")) +
+  scale_color_manual(values = c("Low SA" = "#85C3D6", "High SA" = "#0072B2")) +  
   labs(title = "A) Social Feedback (Mood)", x = expression(beta[3]), y = "Density") +
   theme_minimal(base_size = 14)
 
@@ -321,11 +328,11 @@ plot_A <- ggplot(df_A, aes(x = value, fill = group, color = group)) +
 df_B <- extract_param_by_group(posterior_SA_anx, "w1_mu", "beta_w1", SA_vals, sa_cutoff)
 
 plot_B <- ggplot(df_B, aes(x = value, fill = group, color = group)) +
-  geom_density(alpha = 0.8) +  # Full opacity for both groups
+  geom_density(alpha = 0.8) +  
   geom_vline(data = df_B %>% group_by(group) %>% summarise(m = mean(value)), 
              aes(xintercept = m, color = group), linetype = "dashed") +
-  scale_fill_manual(values = c("Low SA" = "#F2B7B6", "High SA" = "#C44E52")) +  # Lighter red for low SA
-  scale_color_manual(values = c("Low SA" = "#F2B7B6", "High SA" = "#C44E52")) +  # Lighter red for low SA
+  scale_fill_manual(values = c("Low SA" = "#F2B7B6", "High SA" = "#C44E52")) +
+  scale_color_manual(values = c("Low SA" = "#F2B7B6", "High SA" = "#C44E52")) + 
   labs(title = "B) Social Feedback (Anxiety)", x = expression(beta[3]), y = "Density") +
   theme_minimal(base_size = 14)
 
@@ -339,11 +346,11 @@ df_C <- data.frame(
 
 # Plot C: Negative PE for Mood
 plot_C <- ggplot(df_C, aes(x = value, fill = group, color = group)) +
-  geom_density(alpha = 0.8) +  # Full opacity for both groups
+  geom_density(alpha = 0.8) + 
   geom_vline(data = df_C %>% group_by(group) %>% summarise(m = mean(value)), 
              aes(xintercept = m, color = group), linetype = "dashed") +
-  scale_fill_manual(values = c("Low DEP" = "#85C3D6", "High DEP" = "#0072B2")) +  # Lighter blue for low DEP
-  scale_color_manual(values = c("Low DEP" = "#85C3D6", "High DEP" = "#0072B2")) +  # Lighter blue for low DEP
+  scale_fill_manual(values = c("Low DEP" = "#85C3D6", "High DEP" = "#0072B2")) +  
+  scale_color_manual(values = c("Low DEP" = "#85C3D6", "High DEP" = "#0072B2")) + 
   labs(title = "C) Negative PE (Mood)", x = expression(beta[2]), y = "Density") +
   theme_minimal(base_size = 14)
 
@@ -356,12 +363,15 @@ print(combined_plot)
 ```
 
 ```{r Posterior correlation distributions}
-#| label: posterior_corr_distributions
+#| label: fig-posterior_corr_distributions
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Posterior correlation distributions for A) Social Feedback and SA for anxiety, B) Social Feedback and SA for mood and C) Negative PE and DEP for mood. "
 #| fig-cap-location: bottom
+#| fig-width: 12
+#| fig-height: 6
+
 
 
 # Compute posterior samples of correlation for w_neg
@@ -421,8 +431,8 @@ fill_colors <- list(
 
 # --- Plot A: SA (anxiety) ---
 p_SA_anx_labeled <- ggplot(w1_SA_df_anx, aes(x = r)) +
-  geom_density(fill = "#C44E52", alpha = 0.8, color = NA) +
-  geom_vline(xintercept = mean_r_w1_anx, linetype = "dashed", color = "black", size = 0.6) +
+  geom_density(fill = "#C44E52", alpha = 0.7, color = "#C44E52") +
+  geom_vline(xintercept = mean_r_w1_anx, linetype = "dashed", color = "#C44E52", size = 0.6) +
   geom_vline(xintercept = hdi_w1_anx, linetype = "dotted", color = "gray30", size = 0.5) +
   annotate("text", x = mean_r_w1_anx, y = 10, label = paste0("r = ", round(mean_r_w1_anx, 2)),
            vjust = -0.5, hjust = -0.1, size = 4.5) +
@@ -432,7 +442,7 @@ p_SA_anx_labeled <- ggplot(w1_SA_df_anx, aes(x = r)) +
     x = "Correlation coefficient (r)",
     y = "Density"
   ) +
-  theme_classic(base_size = 12) +
+  theme_minimal(base_size = 12)+
   theme(
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.title = element_text(size = 12),
@@ -442,8 +452,9 @@ p_SA_anx_labeled <- ggplot(w1_SA_df_anx, aes(x = r)) +
 
 # --- Plot B: SA (mood) ---
 p_SA_mood_labeled <- ggplot(w1_SA_df_mood, aes(x = r)) +
-  geom_density(fill = "#0072B2", alpha = 0.8, color = NA) +
-  geom_vline(xintercept = mean_r_w1_mood, linetype = "dashed", color = "black", size = 0.6) +
+  geom_density(fill = "#0072B2", alpha = 0.7, color = "#0072B2") +
+  geom_vline(xintercept = mean_r_w1_mood, linetype = "dashed", color = "#0072B2", size = 0.6) +
+  geom_vline(xintercept = hdi_w1_mood, linetype = "dotted", color = "gray30", size = 0.5) +
   annotate("text", x = mean_r_w1_mood, y = 15, label = paste0("r = ", round(mean_r_w1_mood, 2)),
            vjust = -0.5, hjust = -0.1, size = 4.5) +
   labs(
@@ -452,7 +463,7 @@ p_SA_mood_labeled <- ggplot(w1_SA_df_mood, aes(x = r)) +
     x = "Correlation coefficient (r)",
     y = "Density"
   ) +
-  theme_classic(base_size = 12) +
+  theme_minimal(base_size = 12)+
   theme(
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.title = element_text(size = 12),
@@ -462,8 +473,8 @@ p_SA_mood_labeled <- ggplot(w1_SA_df_mood, aes(x = r)) +
 
 # --- Plot C: DEP (mood) ---
 p_DEP_labeled <- ggplot(w_neg_df, aes(x = r)) +
-  geom_density(fill = "#0072B2", alpha = 0.8, color = NA) +
-  geom_vline(xintercept = mean_r, linetype = "dashed", color = "black", size = 0.6) +
+  geom_density(fill = "#0072B2", alpha = 0.7, color = "#0072B2") +
+  geom_vline(xintercept = mean_r, linetype = "dashed", color = "#0072B2", size = 0.6) +
   geom_vline(xintercept = hdi_w_neg, linetype = "dotted", color = "gray30", size = 0.5) +
   annotate("text", x = mean_r , y = 3, label = paste0("r = ", round(mean_r, 2)),
            vjust = -0.5, hjust = -0.1, size = 4.5) +
@@ -473,7 +484,7 @@ p_DEP_labeled <- ggplot(w_neg_df, aes(x = r)) +
     x = "Correlation coefficient (r)",
     y = "Density"
   ) +
-  theme_classic(base_size = 12) +
+  theme_minimal(base_size = 12)+
   theme(
     plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
     axis.title = element_text(size = 12),
@@ -521,13 +532,31 @@ combined_plot
 
 ## Discussion
 
--   notes: Interaction effect for Social Feedback x SA can be interpreted as a susceptibility to PE and a target opportunity for treatment.
+In this study, we set out to examine how momentary mood and anxiety are influenced during social interactions. Building on clinical theory and computational models of reward-based mood dynamics, we developed a novel experimental paradigm to elicit and quantify social PEs in real time. We found that the best-fitting model for both momentary mood and anxiety included immediate social feedback and social surprises, suggesting that both types of social appraisals contribute to shaping affect. This finding provides at least partial support for the central hypothesis that social surprises play a meaningful role in momentary affect. However, our results reveal an asymmetry: momentary mood was more strongly and selectively driven by immediate social feedback, whereas anxiety was shaped by both social feedback and the cumulative impact of social prediction errors (see supplementary table 6), suggesting distinct computational mechanisms for happy and anxious affect.This pattern may suggest that, in the context of social interactions, mood is more influenced by the valence of social evaluations, while anxiety may be capturing how accurately we can predict these evaluations. These findings underscore the value of a computational approach in uncovering how distinct affective processes are differentially influenced by social experience. Furthermore, we found that individuals with elevated social anxiety symptoms were more sensitive to social feedback in both mood and anxiety, and that depressive symptoms moderated the influence of negative PEs on mood. Together, these findings advance our understanding of the computational underpinnings of momentary affect in social contexts and may help identify potential mechanisms by which mood and anxiety dynamics go awry in psychopathology.
+
+Our findings build on and extend influential computational models of mood that conceptualize affect as a function of recently experienced deviations from our expectations, or prediction errors [@rutledge2014]. One theoretical account proposes that mood acts as a momentum signal, integrating over sequences of PEs to track environmental trends and support adaptive behaviour in dynamic contexts [@eldar2016]. Unlike the model proposed by @rutledge2014, which includes terms for expected reward and a single undifferentiated PE signal, our model incorporates both outcome magnitude and asymmetric positive and negative PEs. Notably, our modelling approach aligns closely with that of @forbes2023, who also found that the best-fitting model of affect included asymmetric PEs and reward outcome magnitude. In their study, as in ours, the inclusion of an outcome term substantially reduced the effect of PEs on mood. However, a key contribution of our work is that we extended these models to momentary anxiety. In this way, we also provide experimental support for the notion that belief disconfirmation during social interactions modulates anxiety, as proposed in clinical theories of SAD [@clark1999].
+
+While PEs had a minimal effect on mood after accounting for outcomes, they remained substantial predictors of momentary anxiety, suggesting that anxiety may be particularly sensitive to violations of social expectations, above and beyond the valence of the feedback itself. In contrast, mood was more strongly driven by current social feedback than by PEs, and to a greater extent than anxiety. This divergence may reflect distinct functional roles of mood and anxiety, at least in the social domain. Mood may signal how rewarding the environment is, in this case, how well a social interaction is going, while anxiety may serve as a vigilance signal, tracking how predictable or uncertain the interaction feels. This interpretation is consistent with evolutionary theories that assign distinct adaptive functions to different affective states. According to these accounts, mood acts as a broad regulatory signal that reflects the overall favourability of the environment, guiding approach or withdrawal behavior, whereas anxiety is specialized for detecting and responding to uncertainty or potential threat, thereby promoting caution and increased vigilance [@nesse1990; @marks1994].
+
+Furthermore, the observed asymmetry may also reflect differences in the temporal dynamics of momentary mood and anxiety. Our modelling results suggest that anxiety integrates social prediction errors over longer timescales, as indicated by a forgetting factor close to 1, whereas mood is more immediately responsive to current social feedback. This pattern aligns with research on affective chronometry, which emphasizes that distinct emotional states unfold along different temporal profiles, including differences in rise time, duration, and recovery [@davidson1998; @davidson2015; @fan2019]. Supporting this, a recent ecological momentary assessment (EMA) study in university students by @villano2020 found that prediction errors about exam grades had longer-lasting effects on negative affect, including anxiety, than on positive affect such as happiness, further suggesting that anxious states may evolve more slowly and persist longer than momentary mood. Future research should directly investigate temporal dynamics of real-world momentary mood and anxiety, ideally by combining computational modeling with high-temporal-resolution sampling methods. Such studies also hold promise for identifying individual differences in affective dynamics and how these might relate to the onset and maintenance of mood and anxiety disorders.
+
+To the best of our knowledge, this is first study to show that individuals with high trait social anxiety show stronger effects of experimentally-manipulated social feedback on their momentary mood and anxiety. Our findings align with those of an EMA study by @doorley2021 that showed that highly socially anxious individuals experienced bigger drops in their anxiety levels following a highly positive social event, compared to individuals with low social anxiety. These results contribute to the broader literature on the sensitivity to social threats and rewards in social anxiety. As previously mention, anxiety can be seen from an evolutionary perspective, as a mechanism for tracking potential threat and individuals high in social anxiety might be more sensitive to changes in social threat, as indicated by the higher sensitivity to social feedback. Consistent with this, a substantial body of research has demonstrated heightened sensitivity to social threat in socially anxious individuals (e.g. @oconnor2014, @cremers2015). In contrast, findings on sensitivity to social rewards have been more mixed [@oconnor2014, @cremers2015, @beltzer2023]. It is possible that social anxiety symptoms differentially influence momentary affect in response to social rewards and the capacity to learn from those rewards. That is, while socially anxious individuals may show a drop in their anxiety and an increase in their mood in response to positive social interactions, other processes, such as heightened self-focused attention or post-event processing, may inhibit their ability to encode or generalize these experiences over time [@clark1995, @brozovich2008]. These findings also highlight a promising treatment opportunity: leveraging the therapeutic value of positive social surprises for the treatment of SAD. We provide experimental support for the idea that socially anxious individuals are affectively responsive to positive social feedback, indicating that interventions which amplify and consolidate these experiences—particularly by addressing maladaptive cognitive processes such as self-focused attention or post-event rumination—may enhance treatment outcomes.
+
+In contrast to much of the existing literature emphasizing reduced reward sensitivity in depression, we found that depressive symptoms were associated with heightened affective reactivity to negative prediction errors, specifically on mood. This finding diverges from that of @rutledge2017, that found no differences in the effect of momentary mood on neural or affective responses to RPEs. One key distinction is that our modelling approach allowed for asymmetric effects of positive and negative PEs, potentially uncovering individual differences that may have been obscured in their model which treat PEs as a single undifferentiated signal [@rutledge2014]. Although, in an EMA study by @villano2024, it was shown that depressive symptoms impaired emotional responses to positive, but not to negative PE. This discrepancy may reflect differences in the type of rewards used across studies; monetary rewards in @rutledge2017, exam grades in @villano2024, and social feedback in ours. As such, heightened reactivity to negative PEs in our study may reflect a domain-specific sensitivity to social-evaluative threat rather than a general enhancement of PE-driven mood dynamics in depression. Furthermore, these discrepancies, as well as the broader inconsistencies in the literature on reward learning in depression [@kieslich], may be a manifestation of the substantial heterogeneity within depressive symptomatology [@fried2017]. In other words, different symptoms may be associated with distinct abnormalities in how individuals learn from and emotionally respond to rewards and punishments, particularly in socially salient contexts. Future research could benefit from taking a symptom-specific approach, examining how features such as anhedonia, depressed mood, and self-criticism uniquely shape affective responses to different types of prediction errors.
+
+Our study has several strengths. First, our modeling approach was grounded in preliminary analyses conducted on pilot data and then validated in a larger, preregistered sample, enhancing the robustness and reproducibility of our findings. Second, we sampled across four distinct recruitment strategies, including online platforms, schools, and the local community, capturing a diverse participant pool across a broad age range (14–45 years). This heterogeneity strengthens the generalizability of our results. Third, we simultaneously modeled momentary mood and anxiety, allowing us to disentangle distinct computational mechanisms underlying different affective states. To our knowledge, this is the first study to extend computational models of mood to the social domain, and to explore how these dynamics relate to individual differences in social anxiety and depression. Finally, the experimental task was co-designed with a youth advisory group, ensuring clarity, engagement, and developmental appropriateness for adolescent participants.
+
+Nevertheless, several limitations warrant caution and highlight important directions for future research. Firstly, although the use of pre-determined social feedback allowed us to experimentally manipulate social prediction errors, this design may have limited the believability of the social interactions, particularly since feedback was not contingent on participants’ actual performance. Relatedly, while our model captured the effects of social prediction errors, the random trial structure prevented us from modeling how participants may have learned about or adapted to different social partners over time. Future research should explore how affective responses evolve during more naturalistic social interactions, ideally incorporating real-time belief updating and high-frequency mood sampling in daily life. Such work will be essential for testing the ecological validity of our findings and for identifying robust, computational markers of vulnerability to mood and anxiety disorders. Finally, while our sample spanned adolescence to adulthood, differences in age were confounded with recruitment method, limiting our ability to draw developmental inferences. Longitudinal and developmental studies will be essential to identify age effects on affective dynamics.
+
+In sum, this study provides a computationally grounded account of how social experiences shape momentary affect, offering a framework that captures both shared and distinct mechanisms underlying mood and anxiety. Beyond contributing to theoretical models, these findings open new avenues for identifying early markers of risk and can inform more personalized approaches to treatment or early intervention.
 
 ## **Methods**
 
 ### Participants
 
-We recruited 185 participants aged 14–45 years from three different sources: an online platform, UCL community, and schools. Based on our preregistered power analyses using pilot data, which included parametric simulations for detecting the effect of social prediction errors on mood and anxiety and bootstrapping for Bayesian model comparison, both conducted to ensure at least 80% power, our final sample of 185 participants exceeds the required sample sizes (n ≈ 30), indicating that the study is well powered.
+We recruited 722 participants aged 18–25 through Prolific ([www.prolific.com](http://www.prolific.com)) across 21 pilot studies. Data from these pilots were used to refine the experimantal task, inform the design of computational models based on preliminary mixed-effects model analyses, and conduct power calculations to estimate the required sample size.
+
+We recruited 185 participants aged 14–45 years from three different sources: an online platform, UCL community, and schools. Based on our preregistered power analyses using pilot data, which included parametric simulations for detecting the effect of social prediction errors on mood and anxiety and bootstrapping for Bayesian model comparison, both conducted to ensure at least 80% power, our final sample of 185 participants exceeds the required sample sizes (n ≈ 30), indicating that the study is well powered. For participant demographic information see @tbl-demographics-summary.
 
 #### Online Participants
 
@@ -542,14 +571,21 @@ We recruited 47 participants between the ages of 18-25 from the University Colle
 We recruited 49 participants between the ages of 14-25 through schools (via physical flyers or via school newsletters). Five participants were excluded due to poor engagement with the task, as evidenced by their video recordings. Schools were recruited either by direct contact or by advertising through the Anna Freud school network newsletter. For students under the age of 16, parental opt-out consent was required. Upon registration, participants were invited to book a testing session, which they were instructed to complete in a quiet and private space. At the time of the testing session, they received a link to the online task. Participants were compensated with a £10 Love2shop voucher for their time. As an additional incentive, schools were also offered talks on mental health, careers in psychology or related topics.
 
 ```{r summary demographics tables}
-#| label: tbls-demographics-summary
-#| tbl-cap: "Summary demographics table"
+#| label: tbl-demographics-summary
+#| tbl-cap: "Summary demographics table by Dataset Group"
 #| tbl-cap-location: top
 #| echo: false
 #| warning: false
 #| message: false
+#| tbl-width: 24
+#| tbl-height: 6
+library(dplyr)
+library(forcats)
+library(scales)
+library(flextable)
 
 df <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
+
 # --- STEP 1: Prepare and clean dataset ---
 df <- df %>%
   mutate(
@@ -560,20 +596,15 @@ df <- df %>%
       dataset == "local_com" ~ "Local Community aged 18–25",
       TRUE ~ "Other"
     ),
-    
-    # Flag gender identity differing from sex
     Gender_differs = ifelse(!is.na(Gender_other) & Gender_other != "", 1, 0),
-    
-    # Clean sex and ethnicity
     Sex = factor(Sex),
     Ethnicity_combined = case_when(
       !is.na(ethnicity_other) & ethnicity_other != ""  ~ paste0("Other: ", ethnicity_other),
       TRUE ~ as.character(Ethnicity)
     )
-    
   )
 
-# Set the order of dataset groups
+# Set dataset_group order
 df$dataset_group <- factor(df$dataset_group,
                            levels = c(
                              "Prolific participants aged 18–25",
@@ -582,8 +613,7 @@ df$dataset_group <- factor(df$dataset_group,
                              "School participants aged 14-18"
                            ))
 
-
-# Group low-frequency ethnicities into "Other"
+# Group low-frequency ethnicities
 df$Ethnicity_combined <- fct_lump(factor(df$Ethnicity_combined), n = 5)
 
 # Ensure diagnosis variables only counted if prior question was "Yes"
@@ -595,25 +625,22 @@ df <- df %>%
     ASD = ifelse(Mental_health_diagnosis == "Yes", ASD, NA)
   )
 
-# --- STEP 2: Main demographics table ---
-
+# --- STEP 2: Main demographics summary ---
 demographics_summary <- df %>%
   group_by(dataset_group) %>%
   summarise(
     N = n(),
     Age = paste0(round(mean(Age, na.rm = TRUE), 1), " (", round(sd(Age, na.rm = TRUE), 1), ")"),
-    
     Female = paste0(sum(Sex == "Female", na.rm = TRUE), " (", percent(mean(Sex == "Female", na.rm = TRUE), accuracy = 0.1), ")"),
     Male = paste0(sum(Sex == "Male", na.rm = TRUE), " (", percent(mean(Sex == "Male", na.rm = TRUE), accuracy = 0.1), ")"),
     Depression = paste0(sum(Depression == 1, na.rm = TRUE), " (", percent(sum(Depression == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")"),
-    Anxiety = paste0(sum(Anxiety == 1, na.rm = TRUE), " (", percent(sum(Anxiety == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")")) %>%
+    Anxiety = paste0(sum(Anxiety == 1, na.rm = TRUE), " (", percent(sum(Anxiety == 1, na.rm = TRUE) / n(), accuracy = 0.1), ")")
+  ) %>%
   ungroup()
 
-# Display demographics table
-demographics_summary %>%
-  gt() %>%
-  tab_header(title = "Demographic Characteristics by Dataset Group") %>%
-  cols_label(
+# --- STEP 3: Create flextable ---
+ft <- flextable(demographics_summary) %>%
+  set_header_labels(
     dataset_group = "Dataset Group",
     N = "N",
     Age = "Age (Mean ± SD)",
@@ -621,7 +648,11 @@ demographics_summary %>%
     Male = "Male (Sex)",
     Depression = "Depression",
     Anxiety = "Anxiety"
-  ) 
+  ) %>%
+  autofit() %>%
+  bold(part = "header")
+
+ft
 
 ```
 
@@ -635,7 +666,7 @@ After viewing the virtual player, participants were asked to report their expect
 
 To induce a variety of social PEs, we manipulated the feedback with the aim of generating two positive (PE^+^), two bigger positive (PE^++^), four negative (PE^−^) and four neutral PEs (PE^N^; indicating no PE) per virtual player. These were based on the virtual player’s histogram mean. To do this, we used the mean of the virtual players’ histograms (29, 37, 63, 71). PE^+^ feedback was generated by adding a randomly sampled value (from a normal distribution with mean = 12, SD = 3, range = 12–20) to the histogram mean. PE^++^ feedback was generated by further adding 10 ±1 to the PE+ value. PE^−^ feedback was generated by subtracting a similarly sampled value from the histogram mean. PE^N^ feedback was set as either the exact histogram mean or one point above or below it. The order of trials with each virtual player, the feedback received, the mood and anxiety rating prompts, and the picture stimuli were all randomized across participants and trials.
 
-This task was developed in collaboration with members of a Young People Advisory Group (YPAG), who provided feedback on multiple pilots. Their input helped refine the phrasing of task instructions and questions to ensure accessibility for young people. Additionally, they evaluated the believability of the virtual players across several iterations of the task. Evidence from piloting suggests the task is socially salient and believable, as indicated by: (1) higher overall anxiety ratings among individuals with elevated social anxiety symptoms, and (2) higher anxiety ratings in pilots that included a video recording component compared to those without it (see Supplement).
+This task was developed in collaboration with members of a Young People Advisory Group (YPAG), who provided feedback on multiple pilots. Their input helped refine the phrasing of task instructions and questions to ensure accessibility for young people. Additionally, they evaluated the believability of the virtual players across several iterations of the task. Evidence from piloting suggests the task is socially salient and believable, as indicated by: (1) higher overall anxiety ratings among individuals with elevated social anxiety symptoms, and (2) higher anxiety ratings in pilots that included a video recording component compared to those without it. A preview version of the questionnaires and task can be accessed [here](The online questionnaires and experimental task were created and hosted on Gorilla Experiment Builder (www.gorilla.sc). The experiment took approximately 50 minutes to complete. Participants first provided informed consent as approved by UCL’s Research Ethics Committee. Participants then completed a series of questionnaires. First, they completed a survey about their demographics, mental health diagnoses and psychotropic medication use.  Then, participants completed the Mini-Social Phobia Inventory (Mini-SPIN; Connor et al. (2001)), the Generalized Anxiety Disorder 7-item Scale (GAD-7; Spitzer et al. (2006)), and the Affective Reactivity Index (ARI; Stringaris et al. (2012)). School participants additionally completed the Lebowitz Social Anxiety Scale for Children and Adolescents – Self-Report (LSAS-CA; Leigh & Clark (2022)) and the Revised Child Anxiety and Depression Scale (RCADS; Chorpita et al. (2000)). Online and UCL community participants completed the adult version of the Lebowitz Social Anxiety Scale – Self-Report (LSAS; Fresco et al. (2001)), the Centre for Epidemiologic Studies Depression Scale (CES-D; Radloff (1977)), the Adult ADHD Self-Report Scale (ASRS; Kessler et al. (2005)), the Drug Use Disorders Identification Test (DUDIT; Berman et al. (2002)), the Alcohol Use Disorders Identification Test (AUDIT; Saunders et al. (1993)), and the Body Image Questionnaire (BIQ; Cash & Szymanski (1995)). In the present study, we report analyses only from the Mini-SPIN and CES-D and the low mood RCADS subscale.).
 
 ### Computational Modelling
 
@@ -684,14 +715,32 @@ Model estimation was performed via Hamiltonian Monte Carlo, using four independe
 The hierarchical structure of the models relied on partial pooling, where individual-level parameters were assumed to be drawn from group-level normal distributions whose means and standard deviations were estimated from the data. This allowed for individual variation while also leveraging population-level structure. For example, individual parameters were specified as follows:
 
 $$
-\begin{align}\beta_{0i} &= \mu_{\beta_0} + \epsilon_{\beta_{0i}}  \\\beta_{1i} &= \mu_{\beta_1} + \epsilon_{\beta_{1i}}  \\&\vdots \notag \\\beta_{ni} &= \mu_{\beta_n} + \epsilon_{\beta_{ni}} \\\gamma_i &= \Phi(\mu_{\gamma} + \epsilon_{\gamma_i})  \\\sigma_i &= \exp(\mu_{\sigma} + \epsilon_{\sigma_i}) \end{align}
+\beta_{0i} = \mu_{\beta_0} + \epsilon_{\beta_{0i}}
 $$
 
-where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations. Parameters bounded to specific intervals were sampled in an unconstrained latent space and transformed accordingly. Specifically, the forgetting factor γ, which is bounded between 0 and 1, was transformed using a probit link function to ensure it remained within this interval. Standard deviation parameters were constrained to be positive through exponential transformations. Weakly informative priors were applied to all group-level parameters.
+$$
+\beta_{1i} = \mu_{\beta_1} + \epsilon_{\beta_{1i}}
+$$
+
+$$
+\vdots
+$$
+
+$$
+\beta_{ni} = \mu_{\beta_n} + \epsilon_{\beta_{ni}}
+$$
+
+$$
+\gamma_i = \Phi(\mu_{\gamma} + \epsilon_{\gamma_i})
+$$
+
+$$
+\sigma_i = \exp(\mu_{\sigma} + \epsilon_{\sigma_i})
+$$where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations. Parameters bounded to specific intervals were sampled in an unconstrained latent space and transformed accordingly. Specifically, the forgetting factor γ, which is bounded between 0 and 1, was transformed using a probit link function to ensure it remained within this interval. Standard deviation parameters were constrained to be positive through exponential transformations. Weakly informative priors were applied to all group-level parameters.
 
 #### Summary of Fitted Models
 
-For our first aim, we fit and compared eight different computational models for mood and anxiety, respectively. The models differed in their inclusion and specification of social appraisals, expectations, PEs and Outcomes. Notably, Models 7 and 8 incorporated asymmetric effects for positive and negative PEs. Models 1 and 2 were modified versions of the standard model proposed by @rutledge2014 and the primacy model by @keren2021, respectively, adapted to fit our task-specific data.
+For our first aim, we fit and compared eight different computational models for mood and anxiety, respectively (see @tbl-models-fitted). The models differed in their inclusion and specification of social appraisals, expectations, PEs and Outcomes. Notably, Models 7 and 8 incorporated asymmetric effects for positive and negative PEs. Models 1 and 2 were modified versions of the standard model proposed by @rutledge2014 and the primacy model by @keren2021, respectively, adapted to fit our task-specific data.
 
 ```{r models fitted summary table}
 #| label: tbl-models-fitted
@@ -700,6 +749,8 @@ For our first aim, we fit and compared eight different computational models for 
 #| echo: false
 #| warning: false
 #| message: false
+#| tbl-width: 12
+#| tbl-height: 6
 
 # Create the data frame
 model_table <- data.frame(
@@ -736,8 +787,11 @@ model_table <- data.frame(
   )
 )
 
-models_table <- flextable(model_table)
-models_table <- add_footer_lines(models_table, "Note. E = reported expectation; PE = social prediction error; O = Outcome. ")
+models_table <- flextable(model_table)%>%
+  bold(part="header")%>%
+  autofit()%>%
+  add_footer_lines("Note. E = reported expectation; PE = social prediction error; O = Outcome. ") %>%
+  align(align= "center", part = "all")
 
 models_table
 ```
@@ -746,7 +800,7 @@ models_table
 
 #### Model Comparison and Evaluation
 
-To evaluate and compare the performance of computational models, we employed a combination of information-theoretic and predictive accuracy metrics. Specifically, we used the loo package in R to calculate the Leave-One-Out Information Criterion (LOOIC) and the Widely Applicable Information Criterion (WAIC) to assess out-of-sample predictive fit while accounting for model complexity. Both criteria estimate the expected log predictive density for new data and are particularly well-suited for Bayesian models, with lower values indicating better fit. In addition to these criteria, we computed Mean Squared Error (MSE) and Mean Absolute Error (MAE) as measures of predictive accuracy, reflecting the average squared and absolute deviations between predicted and observed values, respectively. Finally, we included the coefficient of determination (R²) as an indicator of explained variance, providing an interpretable summary of model fit. Together, these complementary metrics allowed for a comprehensive assessment of model performance across both explanatory and predictive dimensions. Posterior predictive checks were conducted on the winning model to verify that the fitted model is compatible with our observed data.
+To evaluate and compare the performance of computational models, we employed a combination of information-theoretic and predictive accuracy metrics. Specifically, we used the loo package in R to compute the Leave-One-Out Information Criterion (LOOIC) and the Widely Applicable Information Criterion (WAIC), both of which estimate out-of-sample predictive fit by approximating leave-one-out cross-validation while accounting for model complexity. Both criteria estimate the expected log predictive density for new data and are particularly well-suited for Bayesian models, with lower values indicating better fit. In addition to these criteria, we computed Mean Squared Error (MSE) and Mean Absolute Error (MAE) as measures of predictive accuracy, reflecting the average squared and absolute deviations between predicted and observed values, respectively. Finally, we included the coefficient of determination (R²) as an indicator of explained variance, providing an interpretable summary of model fit. Together, these complementary metrics allowed for a comprehensive assessment of model performance across both explanatory and predictive dimensions. Posterior predictive checks were conducted on the winning model to verify that the fitted model is compatible with our observed data.
 
 The 95% Bayesian Highest Density Interval (HDI) was calculated for the mean of each group-level parameter. A social appraisal parameter was deemed to have a meaningful influence if its 95% HDI did not cross zero, suggesting a statistically credible effect. 
 
@@ -762,34 +816,4 @@ $$
 
 where $\epsilon_{\theta i} \sim \mathcal{N}(0, \sigma_{\theta}^2)$ are individual-level deviations.
 
-to be added:
-
--   (in methods) Paragraph on transparency (will create gorilla links where people can preview experiment ;e.g. <https://app.gorilla.sc/openmaterials/1080493> (will need to publish)
-
 ## References
-
-```{r}
-library(dplyr)
-
-data_summary <- data %>%
-  group_by(SA_status_LSAS) %>%
-  summarise(mean_Response_pred = mean(Response_pred, na.rm = TRUE))
-
-library(dplyr)
-
-
-per_person_means <- data %>%
-  group_by(Random_ID, Social_Anxiety) %>%
-  summarise(mean_Response_pred = mean(Response_pred, na.rm = TRUE), .groups = "drop")
-
-library(ggplot2)
-
-ggplot(per_person_means, aes(x = Social_Anxiety, y = mean_Response_pred)) +
-  geom_violin(fill = "lightblue", alpha = 0.6) +
-  geom_boxplot(width = 0.1, outlier.shape = NA, color = "darkblue") +
-  labs(title = "Per-Person Mean Response_pred by SA_status_LSAS",
-       x = "SA_status_LSAS Group",
-       y = "Mean Response_pred") +
-  theme_minimal()
-
-```
