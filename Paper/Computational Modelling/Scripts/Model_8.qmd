@@ -1,0 +1,362 @@
+---
+title: "Model_7_asymmetric_PE_simple_outcome_rstan"
+format: html
+editor: visual
+---
+
+## Model 8
+
+In this model, anxiety/mood on trial $t$ is calculated by adding the intercept $\beta_0$, a weigha weighted cumulative postive PE, a weighted cumulative negative PE and the outcome on trial $t$.
+
+The term $\gamma^{(t - j)}$ decreases as $j$ becomes smaller relative to $t$. This means that PE and expectations closer to the current trial $t$ have larger weights, while PE and expectations further in the past have smaller weights. The exponential function ensures that PE and expectations further back in time are **"discounted" exponentially**. This is a type of **recency** **model**.
+
+$$
+A_{it} = \beta_{0i} +\beta_{1i}\cdot  \sum_{j=1}^{t} \gamma_i^{t - j} \cdot PE_{pos,j} + \beta_{2i}\cdot \sum_{j=1}^{t} \gamma_i^{t - j} \cdot PE_{neg,j}  + \beta_{3i}\cdot O_t\
+$$
+
+$$
+M_{it} = \beta_{0i} +\beta_{1i}\cdot  \sum_{j=1}^{t} \gamma_i^{t - j} \cdot PE_{pos,j} + \beta_{2i}\cdot \sum_{j=1}^{t} \gamma_i^{t - j} \cdot PE_{neg,j}  + \beta_{3i}\cdot O_t\
+$$
+
+```{r}
+
+########################################## For Anxiety ########################################
+library(rstan)
+library(dplyr)
+library(ggplot2)
+library(here)
+library(tidyr)
+library(loo)
+library(matrixStats)
+
+data <- read.csv(here("Data","Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv"))
+
+# Scale all relevant variables
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE),
+  Response_Ax = matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE),
+  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+)
+
+
+
+# Stan Model
+asymmPE_simple_Outcome_anx <- "data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1, upper=T> Tsubj[N]; 
+  array[N, T] real Response_fdbk;
+  array[N, T] real Response_Ax;
+  array[N, T] real Response_PosPE;
+  array[N, T] real Response_NegPE;
+}
+parameters {
+  real intercept;
+  real w1_mu;
+  real w_pos_mu;
+  real w_neg_mu;
+  real gam_mu;
+  real sig_mu;
+
+  real<lower=0> sigma_w0;
+  vector<lower=0>[5] sigma;
+
+  vector[N] w0_pr;
+  vector[N] w1_pr;
+  vector[N] w_pos_pr;
+  vector[N] w_neg_pr;
+  vector[N] gam_pr;
+  vector[N] sig_pr;
+}
+transformed parameters {
+  vector[N] w0;
+  vector[N] w1;
+  vector[N] w_pos;
+  vector[N] w_neg;
+  vector<lower=0, upper=1>[N] gam;
+  vector<lower=0>[N] sig;
+
+  w0 = intercept + sigma_w0 * w0_pr;
+  w1 = w1_mu + sigma[1] * w1_pr;
+  w_pos = w_pos_mu + sigma[2] * w_pos_pr;
+  w_neg = w_neg_mu + sigma[3] * w_neg_pr;
+
+  for (i in 1:N) {
+    gam[i] = Phi_approx(gam_mu + sigma[4] * gam_pr[i]);
+  }
+  sig = exp(sig_mu + sigma[5] * sig_pr);
+}
+model {
+  intercept ~ normal(0, 0.5);
+  w1_mu ~ normal(0, 0.5);
+  w_pos_mu ~ normal(0, 0.5);
+  w_neg_mu ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
+
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
+
+  w0_pr ~ normal(0, 1);
+  w1_pr ~ normal(0, 1);
+  w_pos_pr ~ normal(0, 1);
+  w_neg_pr ~ normal(0, 1);
+  gam_pr ~ normal(0, 1);
+  sig_pr ~ normal(0, 1);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+
+    for (t in 1:Tsubj[i]) {
+      Response_Ax[i, t] ~ normal(
+        w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum,
+        sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+generated quantities {
+  real mu_w0;
+  real mu_w1;
+  real mu_w_pos;
+  real mu_w_neg;
+  real<lower=0, upper=1> mu_gam;
+  real<lower=0> mu_sig;
+
+  real log_lik[N];
+  real y_pred[N, T];
+
+  mu_w0 = intercept;
+  mu_w1 = w1_mu;
+  mu_w_pos = w_pos_mu;
+  mu_w_neg = w_neg_mu;
+  mu_gam = Phi_approx(gam_mu);
+  mu_sig = exp(sig_mu);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+    log_lik[i] = 0;
+
+    for (t in 1:Tsubj[i]) {
+      real mu = w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum;
+      log_lik[i] += normal_lpdf(Response_Ax[i, t] | mu, sig[i]);
+      y_pred[i, t] = normal_rng(mu, sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+"
+
+```
+
+```{r}
+
+# Compile and Fit the Model
+asymmPE_simple_Outcome_anx_fit <- stan(model_code = asymmPE_simple_Outcome_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+  max_treedepth = 10))
+
+options(max.print = 99999)  # Set a higher limit
+
+# Print results
+print(asymmPE_simple_Outcome_anx_fit)
+
+saveRDS(asymmPE_simple_Outcome_anx_fit, "asymmPE_simple_Outcome_anx_fit.rds")
+```
+
+```{r}
+########################################## For Mood ########################################
+library(rstan)
+library(dplyr)
+library(ggplot2)
+library(here)
+library(tidyr)
+library(loo)
+library(matrixStats)
+
+data <- read.csv(here("Data","Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv"))
+  
+
+# Scale all relevant variables
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_H <- scale(data$Response_H)[, 1]
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+  
+N <- length(unique(data$Random_ID))  # Number of participants
+T <- 48  # Trials per participant
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE),
+  Response_H = matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE),
+  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+)
+
+
+
+# Stan Model
+asymmPE_simple_Outcome_mood <- "data {
+  int<lower=1> N;
+  int<lower=1> T;
+  int<lower=1, upper=T> Tsubj[N]; 
+  array[N, T] real Response_fdbk;
+  array[N, T] real Response_H;
+  array[N, T] real Response_PosPE;
+  array[N, T] real Response_NegPE;
+}
+parameters {
+  real intercept;
+  real w1_mu;
+  real w_pos_mu;
+  real w_neg_mu;
+  real gam_mu;
+  real sig_mu;
+
+  real<lower=0> sigma_w0;
+  vector<lower=0>[5] sigma;
+
+  vector[N] w0_pr;
+  vector[N] w1_pr;
+  vector[N] w_pos_pr;
+  vector[N] w_neg_pr;
+  vector[N] gam_pr;
+  vector[N] sig_pr;
+}
+transformed parameters {
+  vector[N] w0;
+  vector[N] w1;
+  vector[N] w_pos;
+  vector[N] w_neg;
+  vector<lower=0, upper=1>[N] gam;
+  vector<lower=0>[N] sig;
+
+  w0 = intercept + sigma_w0 * w0_pr;
+  w1 = w1_mu + sigma[1] * w1_pr;
+  w_pos = w_pos_mu + sigma[2] * w_pos_pr;
+  w_neg = w_neg_mu + sigma[3] * w_neg_pr;
+
+  for (i in 1:N) {
+    gam[i] = Phi_approx(gam_mu + sigma[4] * gam_pr[i]);
+  }
+  sig = exp(sig_mu + sigma[5] * sig_pr);
+}
+model {
+  intercept ~ normal(0, 0.5);
+  w1_mu ~ normal(0, 0.5);
+  w_pos_mu ~ normal(0, 0.5);
+  w_neg_mu ~ normal(0, 0.5);
+  gam_mu ~ normal(0, 0.5);
+  sig_mu ~ normal(0, 0.5);
+
+  sigma_w0 ~ normal(0, 1);
+  sigma ~ normal(0, 0.1);
+
+  w0_pr ~ normal(0, 1);
+  w1_pr ~ normal(0, 1);
+  w_pos_pr ~ normal(0, 1);
+  w_neg_pr ~ normal(0, 1);
+  gam_pr ~ normal(0, 1);
+  sig_pr ~ normal(0, 1);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+
+    for (t in 1:Tsubj[i]) {
+      Response_H[i, t] ~ normal(
+        w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum,
+        sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+generated quantities {
+  real mu_w0;
+  real mu_w1;
+  real mu_w_pos;
+  real mu_w_neg;
+  real<lower=0, upper=1> mu_gam;
+  real<lower=0> mu_sig;
+
+  real log_lik[N];
+  real y_pred[N, T];
+
+  mu_w0 = intercept;
+  mu_w1 = w1_mu;
+  mu_w_pos = w_pos_mu;
+  mu_w_neg = w_neg_mu;
+  mu_gam = Phi_approx(gam_mu);
+  mu_sig = exp(sig_mu);
+
+  for (i in 1:N) {
+    real pospe_sum = 0;
+    real negpe_sum = 0;
+    log_lik[i] = 0;
+
+    for (t in 1:Tsubj[i]) {
+      real mu = w0[i] + w1[i] * Response_fdbk[i, t] + w_pos[i] * pospe_sum + w_neg[i] * negpe_sum;
+      log_lik[i] += normal_lpdf(Response_H[i, t] | mu, sig[i]);
+      y_pred[i, t] = normal_rng(mu, sig[i]);
+
+      pospe_sum += Response_PosPE[i, t];
+      negpe_sum += Response_NegPE[i, t];
+
+      pospe_sum *= gam[i];
+      negpe_sum *= gam[i];
+    }
+  }
+}
+"
+```
+
+```{r}
+
+# Compile and Fit the Model
+asymmPE_simple_Outcome_mood_fit <- stan(model_code = asymmPE_simple_Outcome_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+  max_treedepth = 10))
+
+options(max.print = 9999)  # Set a higher limit
+
+# Print results
+print(asymmPE_simple_Outcome_mood_fit)
+
+saveRDS(asymmPE_simple_Outcome_mood_fit, "asymmPE_simple_Outcome_mood_fit.rds")
+```
