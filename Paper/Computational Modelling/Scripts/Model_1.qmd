@@ -1,5 +1,5 @@
 ---
-title: "Recency model - model 14"
+title: "Model 1 - Recency Model"
 format: html
 editor: visual
 ---
@@ -52,7 +52,7 @@ stan_data <- list(
 
 
 # Stan Model
-recency_anx <- "
+model_1_anx <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -176,14 +176,14 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-recency_anx_fit <- stan(model_code = recency_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_1_anx_fit <- stan(model_code = model_1_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 # Print results
-print(recency_anx_fit)
+print(model_1_anx_fit)
 
 # Save the model output as an .rds file
-saveRDS(recency_anx_fit, file = "recency_anx_fit_test.rds")
+saveRDS(model_1_anx_fit, file = "model_1_anx_fit.rds")
 ```
 
 ```{r}
@@ -220,7 +220,7 @@ stan_data <- list(
 
 
 # Stan Model
-recency_mood <- "
+model_1_mood <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -346,14 +346,14 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-recency_mood_fit <- stan(model_code = recency_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_1_mood_fit <- stan(model_code = model_1_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 options(max.print = 9999)  # Set a higher limit
 
 # Print results
-print(recency_mood_fit)
+print(model_1_mood_fit)
 
 # Save the model output as an .rds file
-saveRDS(recency_mood_fit, file = "recency_mood_fit.rds")
+saveRDS(model_1_mood_fit, file = "model_1_mood_fit.rds")
 ```

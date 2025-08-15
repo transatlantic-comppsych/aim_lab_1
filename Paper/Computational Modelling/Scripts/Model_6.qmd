@@ -1,5 +1,5 @@
 ---
-title: "weighted expectation + Outcome - model 27"
+title: "Model 6"
 format: html
 editor: visual
 ---
@@ -46,7 +46,7 @@ stan_data <- list(
 
 
 # Stan Model
-weighted_exp_PE_anx <- "
+model_6_anx <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -164,15 +164,15 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-weighted_exp_PE_anx_fit <- stan(model_code = weighted_exp_PE_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_6_anx_fit <- stan(model_code = model_6_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 # Print results
-print(weighted_exp_PE_anx_fit)
+print(model_6_anx_fit)
 
 
 # Save the model output as an .rds file
-saveRDS(weighted_exp_PE_anx_fit, file = "weighted_exp_PE_anx_fit.rds")
+saveRDS(model_6_anx_fit, file = "model_6_anx_fit.rds")
 ```
 
 ```{r}
@@ -203,7 +203,7 @@ stan_data <- list(
 
 
 # Stan Model
-weighted_exp_PE_mood <- "
+model_6_mood <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -321,15 +321,15 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-weighted_exp_PE_mood_fit <- stan(model_code = weighted_exp_PE_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_6_mood_fit <- stan(model_code = model_6_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 options(max.print = 9999)  # Set a higher limit
 
 # Print results
-print(weighted_exp_PE_mood_fit)
+print(model_6_mood)
 
 
 # Save the model output as an .rds file
-saveRDS(weighted_exp_PE_mood_fit, file = "weighted_exp_PE_mood_fit.rds")
+saveRDS(model_6_mood, file = "model_6_mood.rds")
 ```

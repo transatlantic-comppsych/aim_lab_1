@@ -205,16 +205,16 @@ We also computed the posterior distribution of Pearson correlations between each
 #| fig-width: 12
 #| fig-height: 6
 
-asymmPE_simple_Outcome_mood_DEP_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_DEP_fit.rds")
-posterior_DEP_mood <- rstan::extract(asymmPE_simple_Outcome_mood_DEP_fit)
+model_8_mood_DEP_fit<- readRDS("model_8_mood_DEP_fit.rds")
+posterior_DEP_mood <- rstan::extract(model_8_mood_DEP_fit)
 
-asymmPE_simple_Outcome_anx_SA_LSAS_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_SA_LSAS_fit.rds")
-posterior_SA_anx<- rstan::extract(asymmPE_simple_Outcome_anx_SA_LSAS_fit)
+model_8_anx_SA_fit<- readRDS("model_8_anx_SA_fit.rds")
+posterior_SA_anx<- rstan::extract(model_8_anx_SA_fit)
 
-asymmPE_simple_Outcome_mood_SA_LSAS_fit<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_SA_LSAS_fit.rds")
-posterior_SA_mood <- rstan::extract(asymmPE_simple_Outcome_mood_SA_LSAS_fit)
+model_8_mood_SA_fit<- readRDS("model_8_mood_SA_fit.rds")
+posterior_SA_mood <- rstan::extract(model_8_mood_SA_fit)
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "merged_data_demographics.csv"))
 
 # Ensure data is sorted by Random_ID and trial within each participant
 data <- data[order(data$Random_ID), ]
@@ -584,7 +584,8 @@ library(forcats)
 library(scales)
 library(flextable)
 
-df <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
+
+df <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "merged_data_demographics.csv")
 
 # --- STEP 1: Prepare and clean dataset ---
 df <- df %>%

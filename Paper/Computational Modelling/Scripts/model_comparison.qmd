@@ -1,0 +1,320 @@
+---
+title: "Model Comparison Script"
+format: html
+editor: visual
+---
+
+## Anxiety models
+
+```{r}
+library(rstan)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+data <- read.csv(here("Data","Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv"))
+
+# Add necessary columns to the dataframe
+data$E_t <- NA
+
+# Loop over each participant
+for (id in unique(data$Random_ID)) {
+  # Extract the subset of data for the current participant
+  subset_data <- data %>% filter(Random_ID == id)
+  
+  # Initialize values for each participant
+  subset_data$E_t <- numeric(nrow(subset_data))
+  # Loop over each trial for the current participant
+  for (t in 1:nrow(subset_data)) {
+    if (t == 1) {
+      # Initialize first trial values
+      E_t <- 0
+    } else {
+      # Calculate E_t and Implicit_PE
+      E_t <- mean(subset_data$Response_fdbk[1:(t - 1)])
+    }
+    
+    # Update subset data for the current trial
+    subset_data$E_t[t] <- E_t
+  }
+  
+  # Merge subset data back into the main data
+  data[data$Random_ID == id, c("E_t")] <-
+    subset_data[, c("E_t")]
+}
+
+
+# Scale all relevant variables
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+data$Response_H <- scale(data$Response_H)[, 1]
+data$Response_pred <- scale(data$Response_pred)[, 1]
+data$Response_mean_outcome <- scale(data$E_t)[, 1]
+
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+data$Response_SubjPE <- scale(data$Response_SubjPE)[, 1]
+
+N <- length(unique(data$Random_ID))
+T <- 48
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_Ax = matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE),
+  Response_H = matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE),
+  Response_SubjPE = matrix(data$Response_SubjPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_pred = matrix(data$Response_pred, nrow = N, ncol = T, byrow = TRUE),
+  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE), 
+  Response_mean_outcome = matrix(data$E_t, nrow = N, ncol = T, byrow = TRUE), 
+  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+)
+
+
+
+model_1_anx_fit <- readRDS("model_1_anx_fit.rds")
+model_2_anx_fit <- readRDS("model_2_anx_fit.rds")
+model_3_anx_fit <- readRDS("model_3_anx_fit.rds")
+model_4_anx_fit <- readRDS("model_4_anx_fit.rds")
+model_5_anx_fit <- readRDS("model_5_anx_fit.rds")
+model_6_anx_fit <- readRDS("model_6_anx_fit.rds")
+model_7_anx_fit <- readRDS("model_7_anx_fit.rds")
+model_8_anx_fit <- readRDS("model_8_anx_fit.rds")
+```
+
+```{r}
+library(rstan)
+library(loo)
+library(dplyr)
+library(tidyr)
+library(matrixStats)
+
+# Assuming stan_data$Response_H contains the actual response values
+models <- list(
+  model_1_anx_fit, model_2_anx_fit,
+  model_3_anx_fit, model_4_anx_fit, model_5_anx_fit,
+  model_6_anx_fit, model_7_anx_fit, model_8_anx_fit
+)
+
+model_names <- c(
+ "model 1", "model 2", 
+  "model 3", "model 4", 
+  "model 5", "model 6", "model 7", "model 8"
+)
+
+# Initialize dataframe to store results
+metrics <- data.frame(
+  Model = model_names, 
+  MAE = rep(NA, length(model_names)), 
+  MSE = rep(NA, length(model_names)), 
+  LOOIC = rep(NA, length(model_names)), 
+  WAIC = rep(NA, length(model_names)), 
+  R2 = rep(NA, length(model_names))
+)
+
+# Loop through models and compute metrics
+for (i in seq_along(models)) {
+  fit <- models[[i]]
+
+  # Extract posterior samples
+  posterior_samples <- rstan::extract(fit)
+  
+  # Extract predicted values from posterior samples
+  y_pred <- posterior_samples$y_pred  # Dimensions: [S, N]
+  
+  # Compute mean predicted values (posterior mean)
+  y_pred_mean <-  apply(y_pred, c(2,3), mean) # Averaging across posterior samples
+  
+  # Compute MAE and MSE
+  mae <- mean(abs(y_pred_mean - stan_data$Response_Ax))
+  mse <- mean((y_pred_mean - stan_data$Response_Ax)^2)
+  
+  # Compute R²
+  ss_total <- sum((stan_data$Response_Ax - mean(stan_data$Response_Ax))^2)
+  ss_residual <- sum((stan_data$Response_Ax - y_pred_mean)^2)
+  r2 <- 1 - (ss_residual / ss_total)
+
+  # Extract log-likelihood per participant
+  log_lik_matrix <- rstan::extract(fit, pars = "log_lik")$log_lik  # [S, N]
+  
+  # Compute LOO-CV and WAIC
+  loo_result <- loo(log_lik_matrix)
+  waic_result <- waic(log_lik_matrix)
+  
+  # Store results in the dataframe
+  metrics[i, ] <- c(model_names[i], mae, mse, loo_result$estimates["looic", "Estimate"], waic_result$estimates["waic", "Estimate"], r2)
+}
+
+# Print the performance metrics
+print(metrics)
+
+metrics <- as.data.frame(metrics)
+
+write.csv(metrics, "model_comp_results_anx.csv")
+
+```
+
+## Mood models
+
+```{r}
+library(rstan)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+data <- read.csv(here("Data","Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv"))
+
+# Add necessary columns to the dataframe
+data$E_t <- NA
+
+# Loop over each participant
+for (id in unique(data$Random_ID)) {
+  # Extract the subset of data for the current participant
+  subset_data <- data %>% filter(Random_ID == id)
+  
+  # Initialize values for each participant
+  subset_data$E_t <- numeric(nrow(subset_data))
+  # Loop over each trial for the current participant
+  for (t in 1:nrow(subset_data)) {
+    if (t == 1) {
+      # Initialize first trial values
+      E_t <- 0
+    } else {
+      # Calculate E_t and Implicit_PE
+      E_t <- mean(subset_data$Response_fdbk[1:(t - 1)])
+    }
+    
+    # Update subset data for the current trial
+    subset_data$E_t[t] <- E_t
+  }
+  
+  # Merge subset data back into the main data
+  data[data$Random_ID == id, c("E_t")] <-
+    subset_data[, c("E_t")]
+}
+
+
+# Scale all relevant variables
+data$Response_SubjPE_scaled <- scale(data$Response_SubjPE)[, 1]
+data$Response_fdbk <- scale(data$Response_fdbk)[, 1]
+data$Response_Ax <- scale(data$Response_Ax)[, 1]
+data$Response_H <- scale(data$Response_H)[, 1]
+data$Response_pred <- scale(data$Response_pred)[, 1]
+data$Response_mean_outcome <- scale(data$E_t)[, 1]
+
+
+# Recalculate positive and negative PEs using original (unscaled) sign
+data$Response_PosPE <- ifelse(data$Response_SubjPE > 0, data$Response_SubjPE_scaled, 0)
+data$Response_NegPE <- ifelse(data$Response_SubjPE < 0, data$Response_SubjPE_scaled, 0)
+
+data$Response_SubjPE <- scale(data$Response_SubjPE)[, 1]
+
+N <- length(unique(data$Random_ID))
+T <- 48
+
+stan_data <- list(
+  N = N,
+  T = T,
+  Tsubj = rep(48, N),
+  Response_Ax = matrix(data$Response_Ax, nrow = N, ncol = T, byrow = TRUE),
+  Response_H = matrix(data$Response_H, nrow = N, ncol = T, byrow = TRUE),
+  Response_SubjPE = matrix(data$Response_SubjPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_pred = matrix(data$Response_pred, nrow = N, ncol = T, byrow = TRUE),
+  Response_fdbk = matrix(data$Response_fdbk, nrow = N, ncol = T, byrow = TRUE), 
+  Response_mean_outcome = matrix(data$E_t, nrow = N, ncol = T, byrow = TRUE), 
+  Response_PosPE = matrix(data$Response_PosPE, nrow = N, ncol = T, byrow = TRUE),
+  Response_NegPE = matrix(data$Response_NegPE, nrow = N, ncol = T, byrow = TRUE)
+)
+
+
+
+model_1_mood_fit <- readRDS("model_1_mood_fit.rds")
+model_2_mood_fit <- readRDS("model_2_mood_fit.rds")
+model_3_mood_fit <- readRDS("model_3_mood_fit.rds")
+model_4_mood_fit <- readRDS("model_4_mood_fit.rds")
+model_5_mood_fit <- readRDS("model_5_mood_fit.rds")
+model_6_mood_fit <- readRDS("model_6_mood_fit.rds")
+model_7_mood_fit <- readRDS("model_7_mood_fit.rds")
+model_8_mood_fit <- readRDS("model_8_mood_fit.rds")
+
+```
+
+```{r}
+library(rstan)
+library(loo)
+library(dplyr)
+library(tidyr)
+library(matrixStats)
+
+# Assuming stan_data$Response_H contains the actual response values
+models <- list(
+  model_1_mood_fit, model_2_mood_fit,
+  model_3_mood_fit, model_4_mood_fit,
+  model_5_mood_fit, model_6_mood_fit, model_7_mood_fit, model_8_mood_fit
+)
+
+
+model_names <- c(
+  "model 1", "model 2",
+  "model 3", "model 4",
+  "model 5", "model 6",
+"model 7", "model 8"
+)
+
+
+# Initialize dataframe to store results
+metrics <- data.frame(
+  Model = model_names, 
+  MAE = rep(NA, length(model_names)), 
+  MSE = rep(NA, length(model_names)), 
+  LOOIC = rep(NA, length(model_names)), 
+  WAIC = rep(NA, length(model_names)), 
+  R2 = rep(NA, length(model_names))
+)
+
+# Loop through models and compute metrics
+for (i in seq_along(models)) {
+  fit <- models[[i]]
+
+  # Extract posterior samples
+  posterior_samples <- rstan::extract(fit)
+  
+  # Extract predicted values from posterior samples
+  y_pred <- posterior_samples$y_pred  # Dimensions: [S, N]
+  
+  # Compute mean predicted values (posterior mean)
+  y_pred_mean <-  apply(y_pred, c(2,3), mean) # Averaging across posterior samples
+  
+  # Compute MAE and MSE
+  mae <- mean(abs(y_pred_mean - stan_data$Response_H))
+  mse <- mean((y_pred_mean - stan_data$Response_H)^2)
+  
+  # Compute R²
+  ss_total <- sum((stan_data$Response_H - mean(stan_data$Response_H))^2)
+  ss_residual <- sum((stan_data$Response_H - y_pred_mean)^2)
+  r2 <- 1 - (ss_residual / ss_total)
+
+  # Extract log-likelihood per participant
+  log_lik_matrix <- rstan::extract(fit, pars = "log_lik")$log_lik  # [S, N]
+  
+  # Compute LOO-CV and WAIC
+  loo_result <- loo(log_lik_matrix)
+  waic_result <- waic(log_lik_matrix)
+  
+  # Store results in the dataframe
+  metrics[i, ] <- c(model_names[i], mae, mse, loo_result$estimates["looic", "Estimate"], waic_result$estimates["waic", "Estimate"], r2)
+}
+
+# Print the performance metrics
+print(metrics)
+
+
+metrics <- as.data.frame(metrics)
+write.csv(metrics, "model_comp_results_mood.csv")
+```

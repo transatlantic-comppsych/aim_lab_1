@@ -29,6 +29,9 @@ library("kableExtra")
 library("bayesplot")
 library("purrr") 
 library("posterior")
+library("here")
+library("stringr")
+library("ggplot2")
 ```
 
 ## Experimental Task
@@ -101,7 +104,7 @@ The final version of the task was informed by several pilot studies and a meta-a
 #| warning: false
 #| message: false
 
-df <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/merged_data_demographics.csv")
+df <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "merged_data_demographics.csv"))
 
 # --- STEP 1: Prepare and clean dataset ---
 
@@ -217,7 +220,7 @@ ethnicity_wide <- df %>%
 #| warning: false
 #| message: false
 
-mood_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_mood.csv")
+mood_models_results <- read.csv(here("Computational Modelling", "Model_output","model_comp_results_mood.csv"))
 
 mood_models_results <- mood_models_results[,-1]
 
@@ -254,7 +257,7 @@ mood_models_table
 #| warning: false
 #| message: false
 
-anx_models_results <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/full_scale_data_model_comp_results_anx.csv")
+anx_models_results <- read.csv(here("Computational Modelling", "Model_output","model_comp_results_anx.csv"))
 
 anx_models_results <- anx_models_results[,-1]
 
@@ -717,7 +720,6 @@ results$w1    <- check_coverage(posterior[, grep("^w1\\[", names(posterior))],  
 results$w_pos <- check_coverage(posterior[, grep("^w_pos\\[", names(posterior))], true_params$w_pos, "w_pos")
 results$w_neg <- check_coverage(posterior[, grep("^w_neg\\[", names(posterior))], true_params$w_neg, "w_neg")
 results$gam   <- check_coverage(posterior[, grep("^gam\\[", names(posterior))],   true_params$gam,   "gam")
-#results$sig   <- check_coverage(posterior[, grep("^sig\\[", names(posterior))],   true_params$sig,   "sig")
 
 # Extract plots
 plots <- map(results, "plot")
@@ -743,7 +745,7 @@ wrap_plots(plots, ncol = 2)
 
 # Load model
 
-model_8_mood <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_fit.rds")
+model_8_mood <- readRDS("model_8_mood_fit.rds")
 
 # Summary
 
@@ -839,7 +841,7 @@ table_mood
 #| warning: false
 #| message: false
 
-model_8_anx<- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_fit.rds")
+model_8_anx<- readRDS("model_8_anx_fit.rds")
 
 # Summary
 
@@ -935,10 +937,10 @@ We conducted exploratory Bayesian comparisons between the winning model (model 8
 #| echo: false
 #| warning: false
 #| message: false
-model_8_mood <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_mood_fit.rds")
+model_8_mood <- readRDS("model_8_mood_fit.rds")
 
 
-model_8_anx <- readRDS("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/R code/Computational modelling/Full_scale_data_comp_modelling_results/asymmPE_simple_Outcome_anx_fit.rds")
+model_8_anx <- readRDS("model_8_anx_fit.rds")
 
 
 post_anx_fdbk <- as_draws_df(model_8_anx)$w1_mu
@@ -1101,7 +1103,8 @@ ggplot(plot_data_subset, aes(x = Trial)) +
 #| fig-title: "Anxiety model fits for 16 participants."
 #| fig-cap-location: bottom
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
+                 
 data$Response_Ax <- scale(data$Response_Ax)[, 1]
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
@@ -1178,7 +1181,8 @@ We conducted posterior predictive checks (PPCs) to evaluate the fit of Model 8 t
 #| warning: false
 #| message: false
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
+                 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
 
@@ -1228,7 +1232,7 @@ ppc_plot
 #| warning: false
 #| message: false
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
 
@@ -1281,7 +1285,7 @@ ppc_plot
 #| echo: false
 #| warning: false
 #| message: false
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 
 
 # Recode and group the Dataset variable
@@ -1443,11 +1447,8 @@ ggplot(data_clean, aes(x = Depression_score, fill = Depression_Category)) +
 #| message: false
 
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
-library(dplyr)
-library(ggplot2)
-library(stringr)  # for str_detect; optional if you use grepl instead
-
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
+                 
 # --- Compute participant-level averages ---
 participant_avgs <- data %>%
   group_by(Random_ID, SA_status_LSAS, Depression_Threshold) %>%
@@ -1699,7 +1700,7 @@ To assess the relationship between each model parameter and the SA scores, we co
 #| warning: false
 #| message: false
 # Load Data
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 
 # Ensure data is sorted by Random_ID and trial within each participant
 data <- data[order(data$Random_ID), ]
@@ -1800,7 +1801,7 @@ table_mood
 #| warning: false
 #| message: false
 # Load Data
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 
 # Ensure data is sorted by Random_ID and trial within each participant
 data <- data[order(data$Random_ID), ]
@@ -1904,7 +1905,8 @@ We performed PPCs to assess the fit of the modified winning model incorporating 
 #| warning: false
 #| message: false
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
+                 
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
 
@@ -2406,7 +2408,7 @@ We performed PPCs to assess the fit of the modified winning model incorporating 
 #| warning: false
 #| message: false
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
 
@@ -2458,7 +2460,7 @@ ppc_plot
 #| warning: false
 #| message: false
 
-data <- read.csv("/Users/elenabagdades/Library/CloudStorage/OneDrive-UniversityCollegeLondon/Desktop/GitHub/aim_lab_1/Surprise_task_data_analysis/surprise_task_merged_data.csv")
+data <- read.csv(here("Data", "Extracted_data","Merged Data - all groups", "surprise_task_merged_data.csv")
 N <- length(unique(data$Random_ID))  # Number of participants
 T <- 48  # Trials per participant
 

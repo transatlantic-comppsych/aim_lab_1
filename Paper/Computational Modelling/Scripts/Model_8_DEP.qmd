@@ -19,8 +19,6 @@ M_{it} = \beta_{0i} +\beta_{1i}\cdot  \sum_{j=1}^{t} \gamma_i^{t - j} \cdot PE_{
 $$
 
 ```{r}
-rm(list = ls())
-
 ########################################## For Anxiety ########################################
 library(rstan)
 library(dplyr)
@@ -79,7 +77,7 @@ stan_data <- list(
 
 
 # Stan Model
-asymmPE_simple_Outcome_anx_DEP <- "data {
+model_8_DEP_anx <- "data {
   int<lower=1> N;
   int<lower=1> T;
   int<lower=1, upper=T> Tsubj[N]; 
@@ -220,15 +218,15 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-asymmPE_simple_Outcome_anx_DEP_fit <- stan(model_code = asymmPE_simple_Outcome_anx_DEP, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_8_DEP_anx_fit <- stan(model_code = model_8_DEP_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 options(max.print = 9999)  # Set a higher limit
 
 # Print results
-print(asymmPE_simple_Outcome_anx_DEP_fit)
+print(model_8_DEP_anx_fit)
 
-saveRDS(asymmPE_simple_Outcome_anx_DEP_fit, "asymmPE_simple_Outcome_anx_DEP_fit.rds")
+saveRDS(model_8_DEP_anx_fit, "model_8_DEP_anx_fit.rds")
 ```
 
 ```{r}
@@ -288,7 +286,7 @@ stan_data <- list(
 
 
 # Stan Model
-asymmPE_simple_Outcome_mood_DEP <- "data {
+model_8_DEP_mood <- "data {
   int<lower=1> N;
   int<lower=1> T;
   int<lower=1, upper=T> Tsubj[N]; 
@@ -429,13 +427,13 @@ generated quantities {
 ```{r}
 
 # Compile and Fit the Model
-asymmPE_simple_Outcome_mood_DEP_fit <- stan(model_code = asymmPE_simple_Outcome_mood_DEP, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_8_DEP_mood_fit <- stan(model_code = model_8_DEP_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 options(max.print = 9999)  # Set a higher limit
 
 # Print results
-print(asymmPE_simple_Outcome_mood_DEP_fit)
+print(model_8_DEP_mood_fit)
 
-saveRDS(asymmPE_simple_Outcome_mood_DEP_fit, "asymmPE_simple_Outcome_mood_DEP_fit.rds")
+saveRDS(model_8_DEP_mood_fit, "model_8_DEP_mood_fit.rds")
 ```

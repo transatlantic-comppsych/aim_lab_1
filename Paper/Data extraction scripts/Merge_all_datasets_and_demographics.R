@@ -25,7 +25,7 @@ data_pilot_21_lsas$SA_status_LSAS <- ifelse(data_pilot_21_lsas$LSAS_Total > 29, 
 cols_to_sum_anxiety <- seq(30, 122, by = 4)
 cols_to_sum_avoidance <- seq(32, 124, by = 4)
 data_pilot_21_lsas$LSAS_Anxiety_score <- rowSums(data_pilot_21_lsas[, cols_to_sum_anxiety], na.rm = TRUE)
-data_pilot_21_lsas$LSAS_Avoidance_score <- rowSums(data_pilot_21_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
+data_pilot_21_lsas$LSAS_Avoidance _score <- rowSums(data_pilot_21_lsas[, cols_to_sum_avoidance], na.rm = TRUE)
 
 data_pilot21 <- merge(
   data_pilot21, 
@@ -337,7 +337,7 @@ merged_task_data_clean <- merged_data %>%
 # Merge task and demographics datasets
 merged_data_w_demographics <- inner_join(merged_demo, merged_task_data_clean, by = "Random_ID")
 
-#Assign RCADS depression thresholds and categorise participants according to age and gender
+#Assign RCADS depression thresholds and categorise participants according to age and gender (https://www.corc.uk.net/media/1228/rcads_interpretationaid.pdf)
 get_depression_category <- function(score, sex, age) {
   thresholds <- list(
     "14_15" = list("Male" = c(normal = 13, raised = 15), "Female" = c(normal = 12, raised = 14)),

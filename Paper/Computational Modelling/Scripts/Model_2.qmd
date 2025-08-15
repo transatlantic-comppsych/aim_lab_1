@@ -1,5 +1,5 @@
 ---
-title: "Primacy Model - Model 15"
+title: "Model 2 - Primacy Model"
 format: html
 editor: visual
 ---
@@ -80,7 +80,7 @@ stan_data <- list(
 
 
 # Stan Model
-primacy_anx <- "
+model_2_anx <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -208,15 +208,15 @@ data {
 
 ```{r}
 # Compile and Fit the Model
-primacy_anx_fit <- stan(model_code = primacy_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_2_anx_fit <- stan(model_code = model_2_anx, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 # Print results
-print(primacy_anx_fit)
+print(model_2_anx_fit)
 
 
 # Save the model output as an .rds file
-saveRDS(primacy_anx_fit, file = "primacy_anx_fit.rds")
+saveRDS(model_2_anx_fit, file = "model_2_anx_fit.rds")
 ```
 
 ```{r}
@@ -277,7 +277,7 @@ stan_data <- list(
 
 
 # Stan Model
-primacy_mood <- "
+model_2_mood <- "
 data {
   int<lower=1> N; // Number of Participants
   int<lower=1> T; // Trials per subject
@@ -405,12 +405,12 @@ data {
 
 ```{r}
 # Compile and Fit the Model
-primacy_mood_fit <- stan(model_code = primacy_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
+model_2_mood_fit <- stan(model_code = model_2_mood, data = stan_data, iter = 4000, warmup = 2000, chains = 4, seed = 123, cores = 4, control = list(adapt_delta = 0.95,
   max_treedepth = 10))
 
 # Print results
-print(primacy_mood_fit)
+print(model_2_mood_fit)
 
 # Save the model output as an .rds file
-saveRDS(primacy_mood_fit, file = "primacy_mood_fit.rds")
+saveRDS(model_2_mood_fit, file = "model_2_mood_fit.rds")
 ```
